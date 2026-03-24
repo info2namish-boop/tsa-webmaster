@@ -1,0 +1,2314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Apex Resource Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&family=Lobster&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+  :root {
+    --navy:   #1d4e89;
+    --sky:    #00b2ca;
+    --mint:   #7dcfb6;
+    --peach:  #fbd1a2;
+    --coral:  #f79256;
+    --white:  #ffffff;
+    --offwhite: #f8fbff;
+    --text:   #1a2a3a;
+    --muted:  #5a7a99;
+    --shadow: 0 8px 40px rgba(29,78,137,0.10);
+    --shadow-lg: 0 16px 64px rgba(29,78,137,0.16);
+    --radius-sm: 12px;
+    --radius-md: 20px;
+    --radius-lg: 32px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Lato', sans-serif; background: var(--offwhite); color: var(--text); overflow-x: hidden; }
+
+  /*  BG  */
+  #bg-canvas { position: fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; opacity:.3; }
+
+  /*  NAVBAR */
+  nav {
+    position: fixed; top:0; left:0; right:0; z-index:1000;
+    background: rgba(255,255,255,0.9); backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(0,178,202,0.12);
+    padding: 0 28px; height: 66px;
+    display: flex; align-items: center; justify-content: space-between;
+    transition: box-shadow .3s;
+  }
+  nav.scrolled { box-shadow: 0 4px 32px rgba(29,78,137,.1); }
+  .nav-logo { display:flex; align-items:center; gap:10px; cursor:pointer; }
+  .nav-logo-bubble {
+    width:38px; height:38px; border-radius:50%;
+    background: linear-gradient(135deg, var(--sky), var(--navy));
+    display:flex; align-items:center; justify-content:center;
+    color:white; font-weight:900; font-size:15px; flex-shrink:0;
+  }
+  .nav-logo-text { font-weight:800; font-size:17px; color:var(--navy); line-height:1.1; }
+  .nav-logo-sub { font-size:10px; font-weight:600; color:var(--sky); letter-spacing:.3px; }
+  .nav-links { display:flex; align-items:center; gap:2px; list-style:none; }
+  .nav-links li button {
+    font-family:'Lato',sans-serif; font-weight:700; font-size:13px;
+    color:var(--muted); padding:7px 14px; border-radius:24px;
+    border:none; background:none; cursor:pointer; transition:all .2s; white-space:nowrap;
+  }
+  .nav-links li button:hover, .nav-links li button.active {
+    color:var(--navy); background:rgba(0,178,202,.1);
+  }
+
+  /* Page System  */
+  .page { display:none; min-height:100vh; padding-top:66px; position:relative; z-index:1; }
+  .page.active { display:block; }
+
+  /* Transition Anim. */
+  .page-transition {
+    position:fixed; top:0; left:0; right:0; bottom:0;
+    background:linear-gradient(135deg,var(--navy),var(--sky));
+    z-index:9999; display:flex; align-items:center; justify-content:center;
+    pointer-events:none; opacity:0; transform:scaleX(0); transform-origin:left;
+    transition:opacity .1s, transform .35s cubic-bezier(.77,0,.175,1);
+  }
+  .page-transition.in { opacity:1; transform:scaleX(1); }
+  .page-transition.out { opacity:1; transform:scaleX(0); transform-origin:right; }
+  .pt-logo { color:white; font-family:'Lobster',serif; font-size:1.8rem; font-weight:900; opacity:0; transition:opacity .2s .15s; }
+  .page-transition.in .pt-logo { opacity:1; }
+
+  /* Buttons */
+  .btn-primary {
+    font-family:'Lato',sans-serif; font-weight:800; font-size:14px;
+    padding:13px 28px; border-radius:48px; border:none;
+    background:linear-gradient(135deg,var(--sky),var(--navy));
+    color:white; cursor:pointer; transition:all .3s;
+    box-shadow:0 6px 24px rgba(0,178,202,.3);
+    text-decoration:none; display:inline-flex; align-items:center; gap:8px;
+  }
+  .btn-primary:hover { transform:translateY(-2px); box-shadow:0 10px 32px rgba(0,178,202,.4); }
+  .btn-secondary {
+    font-family:'Lato',sans-serif; font-weight:700; font-size:14px;
+    padding:13px 28px; border-radius:48px; border:2px solid rgba(29,78,137,.2);
+    background:white; color:var(--navy); cursor:pointer; transition:all .3s;
+    text-decoration:none; display:inline-flex; align-items:center; gap:8px;
+  }
+  .btn-secondary:hover { border-color:var(--sky); color:var(--sky); transform:translateY(-2px); }
+
+  /* Section Helpers */
+  .section { padding:88px 48px; }
+  .section-label { font-size:11px; font-weight:800; letter-spacing:2px; text-transform:uppercase; color:var(--sky); margin-bottom:10px; }
+  .section-title { font-family:'Lobster',serif; font-size:clamp(1.9rem,3vw,2.8rem); font-weight:900; color:var(--navy); line-height:1.15; margin-bottom:14px; }
+  .section-sub { font-size:15px; color:var(--muted); font-weight:500; max-width:500px; line-height:1.75; }
+  .divider { height:1px; background:linear-gradient(90deg,transparent,rgba(0,178,202,.2),transparent); margin:0 48px; }
+
+  /* HERO */
+  .hero {
+    min-height:calc(100vh - 66px); display:flex; align-items:center;
+    padding:80px 48px; position:relative; overflow:hidden;
+  }
+  .hero-content { max-width:560px; position:relative; z-index:2; }
+  .hero h1 { font-family:'Lobster',serif; font-size:clamp(2.8rem,5vw,4.8rem); font-weight:900; line-height:1.05; color:var(--navy); margin-bottom:8px; }
+  .hero h1 em { font-style:italic; color:var(--sky); }
+  .hero-subtitle { font-size:15px; font-weight:700; color:var(--coral); letter-spacing:.4px; margin-bottom:18px; font-style:italic; }
+  .hero p { font-size:17px; line-height:1.75; color:var(--muted); margin-bottom:34px; font-weight:500; }
+  .hero-cta { display:flex; gap:12px; flex-wrap:wrap; }
+  .hero-stats { position:absolute; bottom:40px; left:48px; display:flex; gap:40px; z-index:2; }
+  .stat-num { font-family:'Lobster',serif; font-size:2.2rem; font-weight:900; color:var(--navy); line-height:1; }
+  .stat-num span { color:var(--sky); }
+  .stat-label { font-size:11px; font-weight:600; color:var(--muted); margin-top:3px; }
+
+  /* Hero blobs */
+  .hero-visual { position:absolute; right:0; top:0; bottom:0; width:50%; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+  .hero-blob-wrap { position:relative; width:500px; height:500px; }
+  .hero-blob { position:absolute; border-radius:60% 40% 70% 30%/50% 60% 40% 50%; animation:morph 8s ease-in-out infinite; }
+  .hb1 { width:400px;height:400px;top:50px;left:50px;background:linear-gradient(135deg,rgba(0,178,202,.2),rgba(125,207,182,.2));animation-delay:0s; }
+  .hb2 { width:260px;height:260px;top:20px;right:30px;background:linear-gradient(135deg,rgba(251,209,162,.5),rgba(247,146,86,.3));animation-delay:-3s;border-radius:70% 30% 50% 50%/40% 60% 40% 60%; }
+  .hb3 { width:180px;height:180px;bottom:40px;left:70px;background:linear-gradient(135deg,rgba(29,78,137,.15),rgba(0,178,202,.15));animation-delay:-5s;border-radius:40% 60% 60% 40%/60% 30% 70% 40%; }
+  @keyframes morph { 0%,100%{border-radius:60% 40% 70% 30%/50% 60% 40% 50%} 25%{border-radius:30% 70% 40% 60%/70% 40% 60% 30%} 50%{border-radius:50% 50% 30% 70%/40% 70% 30% 60%} 75%{border-radius:70% 30% 60% 40%/30% 50% 70% 50%} }
+  .float-cards { position:absolute; width:100%; height:100%; top:0; left:0; }
+  .float-card { position:absolute; background:white; border-radius:var(--radius-md); padding:12px 16px; box-shadow:var(--shadow); display:flex; align-items:center; gap:8px; font-weight:700; font-size:12px; color:var(--navy); white-space:nowrap; animation:floatUp 6s ease-in-out infinite; }
+  .float-card:nth-child(1){top:18%;left:8%;animation-delay:0s}
+  .float-card:nth-child(2){top:36%;right:6%;animation-delay:-2s}
+  .float-card:nth-child(3){top:60%;left:18%;animation-delay:-4s}
+  .float-card:nth-child(4){top:76%;right:14%;animation-delay:-1s}
+  .fc-icon { width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0; }
+  @keyframes floatUp { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+
+  /* Highlights(spotlights) */
+  .spotlight-header { display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:48px; flex-wrap:wrap; gap:16px; }
+  .spotlight-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:24px; }
+  @media(max-width:900px){ .spotlight-grid{grid-template-columns:1fr} .hero-visual{display:none} .hero{padding:60px 24px} }
+  .spotlight-card { background:white; border-radius:var(--radius-lg); overflow:hidden; box-shadow:var(--shadow); transition:transform .35s,box-shadow .35s; cursor:pointer; }
+  .spotlight-card:hover { transform:translateY(-8px); box-shadow:var(--shadow-lg); }
+  .sc-img-wrap { overflow:hidden; position:relative; height:210px; }
+  .sc-img-wrap img { width:100%; height:100%; object-fit:cover; display:block; transition:transform .5s; }
+  .spotlight-card:hover .sc-img-wrap img { transform:scale(1.05); }
+  .sc-cat-badge { position:absolute; top:12px; left:12px; padding:4px 12px; border-radius:20px; font-size:11px; font-weight:800; background:white; color:#555555; }
+  .sc-body { padding:20px 22px 24px; }
+  .sc-title { font-weight:800; font-size:17px; color:var(--navy); margin-bottom:7px; line-height:1.3; }
+  .sc-desc { font-size:13px; color:var(--muted); line-height:1.7; margin-bottom:12px; font-weight:500; }
+  .sc-addr { display:flex; align-items:flex-start; gap:5px; font-size:11px; color:var(--sky); font-weight:700; }
+  .chip { display:inline-flex; align-items:center; gap:4px; padding:4px 11px; border-radius:20px; font-size:11px; font-weight:800; }
+
+  /*  Abt. */
+  .about-grid { display:grid; grid-template-columns:1fr 1fr; gap:72px; align-items:center; }
+  .about-img-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .about-img-grid img { width:100%; aspect-ratio:3/2; object-fit:cover; border-radius:var(--radius-md); display:block; transition:transform .4s; }
+  .about-img-grid img:nth-child(1){border-radius:var(--radius-lg) var(--radius-md) var(--radius-md) var(--radius-md);margin-top:22px}
+  .about-img-grid img:nth-child(2){margin-top:-22px;border-radius:var(--radius-md) var(--radius-lg) var(--radius-md) var(--radius-md)}
+  .about-img-grid img:hover { transform:scale(1.03); }
+  .feature-chips { display:flex; flex-wrap:wrap; gap:10px; margin-top:24px; }
+  .feature-chip { display:flex; align-items:center; gap:7px; padding:9px 16px; background:white; border-radius:var(--radius-sm); font-size:12px; font-weight:700; color:var(--navy); box-shadow:0 2px 10px rgba(29,78,137,.07); cursor:pointer; transition:all .2s; border:2px solid transparent; }
+  .feature-chip:hover { border-color:var(--sky); color:var(--sky); transform:translateY(-2px); }
+  .feature-chip span { font-size:16px; }
+
+  /* Resource Card Img. (no copyright btw, self-made w. CSS) */
+  .card-img-banner {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 6px;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .card-img-banner::before {
+    content: '';
+    position: absolute;
+    top: -30%; right: -20%;
+    width: 70%; height: 140%;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+  }
+  .card-img-banner::after {
+    content: '';
+    position: absolute;
+    bottom: -40%; left: -15%;
+    width: 60%; height: 130%;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.08);
+  }
+  .card-img-banner-icon {
+    font-size: 2.6rem;
+    position: relative;
+    z-index: 1;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.2));
+  }
+  .card-img-banner-label {
+    font-family: 'Lato', sans-serif;
+    font-weight: 800;
+    font-size: 13px;
+    color: rgba(255,255,255,0.9);
+    text-align: center;
+    position: relative;
+    z-index: 1;
+    max-width: 80%;
+    line-height: 1.3;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+
+  /* Resource Hub Toggle view */
+  .hub-view-toggle {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    background: rgba(29,78,137,0.06);
+    border-radius: 48px;
+    padding: 5px;
+    width: fit-content;
+  }
+  .view-tab {
+    font-family: 'Lato', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 8px 22px;
+    border-radius: 40px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .view-tab.active {
+    background: white;
+    color: var(--navy);
+    box-shadow: 0 2px 12px rgba(29,78,137,0.12);
+  }
+  .view-tab:hover:not(.active) { color: var(--navy); }
+
+  .hub-list-view { display: block; }
+  .hub-map-view  { display: none; }
+  .hub-map-view.active { display: block; }
+  .hub-list-view.hidden { display: none; }
+
+  #map-fullpage {
+    width: 100%;
+    height: calc(100vh - 260px);
+    min-height: 500px;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    border: 2px solid rgba(0,178,202,0.1);
+  }
+  .hub-header { background:linear-gradient(135deg,var(--navy) 0%,#2a6db5 100%); padding:56px 48px 38px; color:white; position:relative; overflow:hidden; }
+  .hub-header::before { content:''; position:absolute; width:380px;height:380px;border-radius:50%;background:rgba(255,255,255,.04);top:-100px;right:-80px; }
+  .hub-header h2 { font-family:'Lobster',serif; font-size:2.8rem; font-weight:900; margin-bottom:10px; position:relative; z-index:1; }
+  .hub-header p { font-size:15px; opacity:.8; font-weight:500; position:relative; z-index:1; }
+  .search-wrap { margin-top:28px; position:relative; z-index:1; max-width:620px; }
+  .search-bar { width:100%; padding:15px 18px 15px 50px; border-radius:48px; border:none; font-family:'Lato',sans-serif; font-size:14px; font-weight:600; background:rgba(255,255,255,.95); color:var(--text); box-shadow:0 8px 40px rgba(0,0,0,.15); outline:none; transition:box-shadow .2s; }
+  .search-bar:focus { box-shadow:0 8px 40px rgba(0,178,202,.35); }
+  .search-icon { position:absolute; left:16px; top:50%; transform:translateY(-50%); font-size:18px; color:var(--muted); pointer-events:none; }
+  .hub-body { padding:36px 48px; }
+  .hub-filters { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:28px; align-items:center; }
+  .filter-label { font-size:11px; font-weight:800; color:var(--muted); letter-spacing:.5px; text-transform:uppercase; margin-right:2px; }
+  .filter-chip { padding:6px 16px; border-radius:24px; border:2px solid transparent; background:white; color:var(--muted); font-family:'Lato',sans-serif; font-weight:700; font-size:12px; cursor:pointer; transition:all .2s; box-shadow:0 2px 8px rgba(29,78,137,.06); }
+  .filter-chip:hover { border-color:var(--sky); color:var(--sky); }
+  .filter-chip.active { background:var(--sky); color:white; border-color:var(--sky); }
+  .count-badge { background:white; color:var(--sky); font-size:11px; font-weight:800; padding:1px 8px; border-radius:16px; margin-left:6px; }
+  .hub-layout { display:grid; grid-template-columns:1fr 400px; gap:28px; align-items:start; }
+  @media(max-width:1100px){.hub-layout{grid-template-columns:1fr}}
+  .resource-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:20px; }
+  .resource-card { background:white; border-radius:var(--radius-md); overflow:hidden; box-shadow:0 4px 20px rgba(29,78,137,.07); transition:transform .3s,box-shadow .3s; cursor:pointer; border:2px solid transparent; }
+  .resource-card:hover { transform:translateY(-4px); box-shadow:0 12px 40px rgba(29,78,137,.12); border-color:rgba(0,178,202,.2); }
+  .rc-img-wrap { overflow:hidden; height:170px; position:relative; }
+  .rc-img { width:100%; height:100%; object-fit:cover; display:block; transition:transform .4s; }
+  .resource-card:hover .rc-img { transform:scale(1.05); }
+  .rc-body { padding:16px 18px 18px; }
+  .rc-cat { margin-bottom:8px; }
+  .rc-title { font-weight:800; font-size:15px; color:var(--navy); margin-bottom:6px; line-height:1.35; }
+  .rc-desc { font-size:12px; color:var(--muted); line-height:1.65; margin-bottom:10px; font-weight:500; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+  .rc-addr { display:flex; align-items:center; gap:4px; font-size:11px; color:var(--sky); font-weight:700; }
+  .rc-actions { display:flex; align-items:center; justify-content:flex-end; margin-top:12px; padding-top:12px; border-top:1px solid rgba(29,78,137,.07); }
+  .rc-more-btn { font-family:'Lato',sans-serif; font-weight:700; font-size:11px; color:var(--sky); background:rgba(0,178,202,.08); border:none; padding:5px 12px; border-radius:18px; cursor:pointer; transition:all .2s; }
+  .rc-more-btn:hover { background:rgba(0,178,202,.18); }
+  .new-badge { background:var(--coral); color:white; font-size:9px; font-weight:800; padding:2px 7px; border-radius:10px; margin-left:6px; vertical-align:middle; letter-spacing:.5px; }
+
+  /* Map */
+  .map-panel { position:sticky; top:82px; }
+  .map-wrap { border-radius:var(--radius-md); overflow:hidden; box-shadow:var(--shadow); border:2px solid rgba(0,178,202,.1); }
+  #map { height:500px; width:100%; }
+  .map-footer { background:white; padding:12px 16px; display:flex; align-items:center; justify-content:space-between; }
+  .map-footer span { font-size:11px; font-weight:700; color:var(--muted); }
+  .map-expand-btn { font-family:'Lato',sans-serif; font-weight:700; font-size:11px; padding:5px 13px; border-radius:18px; border:2px solid rgba(0,178,202,.25); background:white; color:var(--sky); cursor:pointer; transition:all .2s; }
+  .map-expand-btn:hover { background:rgba(0,178,202,.08); border-color:var(--sky); }
+
+  /* Fullscreen map */
+  .map-fs-overlay { display:none; position:fixed; top:0;left:0;right:0;bottom:0; background:rgba(10,30,60,.6); backdrop-filter:blur(6px); z-index:3000; align-items:center; justify-content:center; padding:20px; }
+  .map-fs-overlay.open { display:flex; }
+  .map-fs-inner { background:white; border-radius:var(--radius-lg); overflow:hidden; width:100%; max-width:1100px; max-height:88vh; display:flex; flex-direction:column; box-shadow:0 32px 100px rgba(0,0,0,.3); animation:modalIn .3s cubic-bezier(.34,1.56,.64,1); }
+  .map-fs-header { padding:14px 20px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(29,78,137,.08); flex-shrink:0; }
+  .map-fs-header h3 { font-weight:800; font-size:15px; color:var(--navy); }
+  #map-fs { flex:1; min-height:500px; width:100%; }
+  .no-results { grid-column:1/-1; text-align:center; padding:60px 20px; color:var(--muted); }
+  .no-results h3 { font-size:1.3rem; font-weight:800; color:var(--navy); margin-bottom:8px; }
+
+  /* Modal(popup) */
+  .modal-overlay { display:none; position:fixed; top:0;left:0;right:0;bottom:0; background:rgba(10,30,60,.5); backdrop-filter:blur(8px); z-index:2000; align-items:center; justify-content:center; padding:20px; }
+  .modal-overlay.open { display:flex; }
+  .modal { background:white; border-radius:var(--radius-lg); max-width:620px; width:100%; max-height:85vh; overflow-y:auto; box-shadow:0 32px 100px rgba(0,0,0,.2); animation:modalIn .3s cubic-bezier(.34,1.56,.64,1); scrollbar-width:thin; }
+  @keyframes modalIn { from{transform:scale(.9) translateY(20px);opacity:0} to{transform:scale(1) translateY(0);opacity:1} }
+  .modal-img { width:100%; height:250px; object-fit:cover; display:block; }
+  .modal-img-wrap { position:relative; }
+  .modal-close { position:absolute; top:14px; right:14px; width:34px; height:34px; background:rgba(255,255,255,.9); border:none; border-radius:50%; font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .2s; }
+  .modal-close:hover { background:white; transform:scale(1.1); }
+  .modal-body { padding:26px 30px; }
+  .modal-title { font-family:'Lobster',serif; font-size:1.7rem; font-weight:900; color:var(--navy); margin:10px 0 12px; line-height:1.2; }
+  .modal-desc { font-size:14px; color:var(--muted); line-height:1.8; margin-bottom:20px; font-weight:500; }
+  .modal-info { background:var(--offwhite); border-radius:var(--radius-sm); padding:14px 18px; margin-bottom:20px; }
+  .modal-info-row { display:flex; gap:8px; font-size:12px; font-weight:700; color:var(--navy); margin-bottom:7px; align-items:flex-start; }
+  .modal-info-row:last-child { margin-bottom:0; }
+  .mii { color:var(--sky); flex-shrink:0; margin-top:1px; }
+
+  /* ── SURVEY ── */
+  .survey-page { max-width:780px; margin:0 auto; padding:72px 48px; }
+  .survey-card { background:white; border-radius:var(--radius-lg); padding:44px; box-shadow:var(--shadow-lg); }
+  .survey-step { display:none; }
+  .survey-step.active { display:block; }
+  .survey-progress { display:flex; gap:7px; margin-bottom:36px; }
+  .progress-dot { flex:1; height:4px; border-radius:2px; background:rgba(29,78,137,.1); transition:background .3s; }
+  .progress-dot.done { background:var(--sky); }
+  .progress-dot.current { background:linear-gradient(90deg,var(--sky),var(--mint)); }
+  .survey-q { font-family:'Lobster',serif; font-size:1.5rem; font-weight:700; color:var(--navy); margin-bottom:8px; line-height:1.3; }
+  .survey-sub { font-size:13px; color:var(--muted); font-weight:500; margin-bottom:26px; line-height:1.6; }
+  .survey-options { display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:10px; margin-bottom:32px; }
+  .survey-opt { display:flex; align-items:center; gap:10px; padding:14px 16px; border-radius:var(--radius-md); border:2px solid rgba(29,78,137,.1); cursor:pointer; transition:all .2s; background:white; font-family:'Lato',sans-serif; font-size:13px; font-weight:700; color:var(--text); text-align:left; }
+  .survey-opt:hover { border-color:var(--sky); background:rgba(0,178,202,.05); color:var(--sky); }
+  .survey-opt.selected { border-color:var(--sky); background:rgba(0,178,202,.1); color:var(--navy); }
+  .survey-opt-icon { font-size:20px; flex-shrink:0; }
+  .survey-nav { display:flex; justify-content:space-between; align-items:center; }
+  .survey-step-label { font-size:11px; font-weight:700; color:var(--muted); }
+  .results-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:14px; margin-top:20px; }
+  .result-card { background:var(--offwhite); border-radius:var(--radius-md); overflow:hidden; border:2px solid rgba(0,178,202,.1); transition:all .25s; cursor:pointer; }
+  .result-card:hover { transform:translateY(-3px); box-shadow:var(--shadow); border-color:var(--sky); }
+  .result-card img { width:100%; height:120px; object-fit:cover; display:block; }
+  .result-card-body { padding:12px 14px; }
+  .result-card-title { font-weight:800; font-size:13px; color:var(--navy); margin-bottom:4px; }
+  .result-card-cat { font-size:11px; font-weight:700; color:var(--sky); }
+
+  /* ── SUBMIT FORM ── */
+  .submit-page { max-width:700px; margin:0 auto; padding:72px 48px; }
+  .form-card { background:white; border-radius:var(--radius-lg); padding:44px; box-shadow:var(--shadow-lg); }
+  .form-group { margin-bottom:22px; }
+  .form-label { display:block; font-weight:700; font-size:12px; color:var(--navy); margin-bottom:7px; letter-spacing:.3px; }
+  .form-label span { color:var(--coral); }
+  .form-input,.form-select,.form-textarea { width:100%; padding:13px 16px; border-radius:var(--radius-sm); border:2px solid rgba(29,78,137,.12); font-family:'Lato',sans-serif; font-size:13px; font-weight:600; color:var(--text); background:var(--offwhite); outline:none; transition:border-color .2s,box-shadow .2s; }
+  .form-input:focus,.form-select:focus,.form-textarea:focus { border-color:var(--sky); box-shadow:0 0 0 4px rgba(0,178,202,.1); background:white; }
+  .form-textarea { resize:vertical; min-height:110px; }
+  .form-select { cursor:pointer; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235a7a99' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 14px center; padding-right:36px; }
+  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .form-success { display:none; background:rgba(125,207,182,.15); border:2px solid var(--mint); border-radius:var(--radius-md); padding:22px 26px; margin-top:18px; text-align:center; }
+  .form-success h3 { font-weight:800; color:#2a8a6a; margin-bottom:6px; font-size:17px; }
+  .form-success p { font-size:13px; color:#3a9a7a; font-weight:600; }
+
+  /* ── REFERENCE PAGE ── */
+  .ref-header { background:linear-gradient(135deg,#2a3a2a 0%,#1a4a2a 100%); padding:56px 48px 38px; color:white; position:relative; overflow:hidden; }
+  .ref-header::before { content:''; position:absolute; width:300px;height:300px;border-radius:50%;background:rgba(125,207,182,.1);top:-60px;right:-60px; }
+  .ref-header h2 { font-family:'Lobster',serif; font-size:2.6rem; font-weight:900; margin-bottom:10px; position:relative; z-index:1; }
+  .ref-header p { font-size:14px; opacity:.8; font-weight:500; position:relative; z-index:1; }
+  .ref-body { padding:48px; max-width:1000px; }
+  .ref-section { margin-bottom:52px; }
+  .ref-section h3 { font-family:'Lobster',serif; font-size:1.5rem; font-weight:900; color:var(--navy); margin-bottom:6px; }
+  .ref-section .ref-intro { font-size:13px; color:var(--muted); font-weight:500; margin-bottom:20px; line-height:1.7; }
+  .ref-table { width:100%; border-collapse:collapse; background:white; border-radius:var(--radius-md); overflow:hidden; box-shadow:var(--shadow); }
+  .ref-table th { background:var(--navy); color:white; font-size:11px; font-weight:800; letter-spacing:.5px; text-transform:uppercase; padding:12px 16px; text-align:left; }
+  .ref-table td { padding:12px 16px; font-size:12px; font-weight:600; color:var(--text); border-bottom:1px solid rgba(29,78,137,.07); vertical-align:top; line-height:1.6; }
+  .ref-table tr:last-child td { border-bottom:none; }
+  .ref-table tr:hover td { background:rgba(0,178,202,.04); }
+  .ref-table a { color:var(--sky); text-decoration:none; font-weight:700; }
+  .ref-table a:hover { text-decoration:underline; }
+  .ref-download-card { background:white; border-radius:var(--radius-md); padding:22px 26px; box-shadow:var(--shadow); display:flex; align-items:center; gap:20px; border:2px solid rgba(0,178,202,.12); transition:all .2s; }
+  .ref-download-card:hover { border-color:var(--sky); transform:translateY(-2px); }
+  .ref-dl-icon { width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0; }
+  .ref-dl-title { font-weight:800; font-size:15px; color:var(--navy); margin-bottom:3px; }
+  .ref-dl-sub { font-size:12px; color:var(--muted); font-weight:500; }
+  .ref-dl-btn { margin-left:auto; flex-shrink:0; }
+
+  /* ── FOOTER ── */
+  footer { background:var(--navy); color:rgba(255,255,255,.7); padding:56px 48px 36px; position:relative; z-index:1; }
+  .footer-grid { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:44px; margin-bottom:44px; }
+  @media(max-width:900px){.footer-grid{grid-template-columns:1fr 1fr}}
+  .footer-brand h3 { font-family:'Lobster',serif; font-size:1.4rem; font-weight:900; color:white; margin-bottom:10px; }
+  .footer-brand p { font-size:13px; line-height:1.7; font-weight:500; max-width:220px; }
+  .footer-brand em { color:var(--sky); font-style:italic; font-size:12px; display:block; margin-top:6px; }
+  .footer-col h4 { font-weight:800; font-size:11px; letter-spacing:1px; text-transform:uppercase; color:rgba(255,255,255,.45); margin-bottom:14px; }
+  .footer-col ul { list-style:none; }
+  .footer-col ul li { margin-bottom:7px; }
+  .footer-col ul li a { color:rgba(255,255,255,.7); text-decoration:none; font-size:13px; font-weight:600; transition:color .2s; cursor:pointer; }
+  .footer-col ul li a:hover { color:var(--sky); }
+  .footer-bottom { border-top:1px solid rgba(255,255,255,.1); padding-top:22px; display:flex; justify-content:space-between; align-items:center; font-size:12px; font-weight:600; flex-wrap:wrap; gap:8px; }
+  .footer-bottom a { color:var(--sky); text-decoration:none; }
+
+  /* ── FORM ENGAGEMENT + HOURS PICKERS ── */
+  .engage-opts {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-top: 4px;
+  }
+  @media(max-width:600px){ .engage-opts { grid-template-columns: repeat(2,1fr); } }
+  .engage-opt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    padding: 12px 8px;
+    border-radius: var(--radius-md);
+    border: 2px solid rgba(29,78,137,.12);
+    background: var(--offwhite);
+    cursor: pointer;
+    transition: all .2s;
+    font-family: 'Lato', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.3;
+  }
+  .engage-opt:hover { border-color: var(--sky); color: var(--sky); background: rgba(0,178,202,.05); }
+  .engage-opt.selected { border-color: var(--sky); background: rgba(0,178,202,.1); color: var(--navy); }
+  .engage-opt .eo-icon { font-size: 1.4rem; }
+
+  .days-picker {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+  .day-btn {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border: 2px solid rgba(29,78,137,.12);
+    background: var(--offwhite);
+    font-family: 'Lato', sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all .2s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .day-btn:hover { border-color: var(--sky); color: var(--sky); }
+  .day-btn.selected { background: var(--sky); border-color: var(--sky); color: white; }
+
+  .hours-range {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 10px;
+    align-items: center;
+    margin-top: 10px;
+  }
+  .hours-range .range-sep {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--muted);
+    text-align: center;
+  }
+  .hours-special {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+  .hours-special label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .hours-special input[type=checkbox] { accent-color: var(--sky); width:14px; height:14px; cursor:pointer; }
+  .admin-bar {
+    display: none;
+    background: linear-gradient(135deg, #c0392b, #e74c3c);
+    color: white;
+    padding: 10px 32px;
+    font-family: 'Lato', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    top: 66px;
+    z-index: 900;
+    box-shadow: 0 4px 16px rgba(231,76,60,.3);
+  }
+  .admin-bar.active { display: flex; }
+  .admin-bar-dot { width:8px;height:8px;background:white;border-radius:50%;animation:pulse 1.5s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.8)} }
+  .admin-exit-btn {
+    margin-left: auto;
+    font-family: 'Lato', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 2px solid rgba(255,255,255,.5);
+    background: transparent;
+    color: white;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .admin-exit-btn:hover { background: rgba(255,255,255,.15); }
+
+  .admin-login-modal {
+    background: white;
+    border-radius: var(--radius-lg);
+    max-width: 400px;
+    width: 100%;
+    padding: 40px 36px;
+    box-shadow: 0 32px 100px rgba(0,0,0,.25);
+    animation: modalIn .3s cubic-bezier(.34,1.56,.64,1);
+    text-align: center;
+  }
+  .admin-login-modal .al-icon { font-size: 3rem; margin-bottom: 14px; }
+  .admin-login-modal h3 { font-family:'Lobster',serif; font-size:1.6rem; font-weight:900; color:var(--navy); margin-bottom:8px; }
+  .admin-login-modal p { font-size:13px; color:var(--muted); font-weight:500; margin-bottom:24px; line-height:1.6; }
+  .admin-input-wrap { position:relative; margin-bottom:16px; }
+  .admin-input-wrap input { width:100%; padding:13px 44px 13px 16px; border-radius:var(--radius-sm); border:2px solid rgba(29,78,137,.15); font-family:'Lato',sans-serif; font-size:14px; font-weight:600; color:var(--text); outline:none; transition:border-color .2s; }
+  .admin-input-wrap input:focus { border-color:var(--sky); }
+  .admin-input-wrap .pw-toggle { position:absolute; right:14px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; font-size:16px; color:var(--muted); }
+  .admin-error { font-size:12px; font-weight:700; color:#e74c3c; margin-bottom:14px; display:none; }
+  .admin-error.show { display:block; }
+
+  /* Delete confirm */
+  .delete-confirm-modal {
+    background: white;
+    border-radius: var(--radius-lg);
+    max-width: 400px;
+    width: 100%;
+    padding: 36px 32px;
+    box-shadow: 0 32px 100px rgba(0,0,0,.25);
+    animation: modalIn .3s cubic-bezier(.34,1.56,.64,1);
+    text-align: center;
+  }
+  .delete-confirm-modal h3 { font-family:'Lobster',serif; font-size:1.4rem; font-weight:900; color:#c0392b; margin-bottom:10px; }
+  .delete-confirm-modal p { font-size:13px; color:var(--muted); font-weight:500; margin-bottom:24px; line-height:1.65; }
+  .delete-confirm-btns { display:flex; gap:10px; justify-content:center; }
+
+  /* Admin resource card overlay */
+  .resource-card.admin-mode { border-color: rgba(231,76,60,.2); }
+  .rc-delete-btn {
+    display: none;
+    font-family: 'Lato', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: #e74c3c;
+    background: rgba(231,76,60,.08);
+    border: none;
+    padding: 5px 12px;
+    border-radius: 18px;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .rc-delete-btn:hover { background: rgba(231,76,60,.18); }
+  .admin-mode-active .rc-delete-btn { display: inline-flex; align-items: center; gap: 4px; }
+  .reveal { opacity:0; transform:translateY(28px); transition:opacity .65s ease,transform .65s ease; }
+  .reveal.visible { opacity:1; transform:translateY(0); }
+  .reveal.exit { opacity:0; transform:translateY(-16px); }
+  .reveal-left { opacity:0; transform:translateX(-28px); transition:opacity .65s ease,transform .65s ease; }
+  .reveal-left.visible { opacity:1; transform:translateX(0); }
+  .reveal-scale { opacity:0; transform:scale(.93); transition:opacity .55s ease,transform .55s ease; }
+  .reveal-scale.visible { opacity:1; transform:scale(1); }
+
+  /* ── TOAST ── */
+  .toast { position:fixed; bottom:26px; left:50%; transform:translateX(-50%); background:var(--navy); color:white; padding:11px 22px; border-radius:48px; font-family:'Lato',sans-serif; font-weight:700; font-size:13px; z-index:9999; box-shadow:var(--shadow); transition:all .3s; white-space:nowrap; pointer-events:none; }
+
+  /* ── MISC ── */
+  ::-webkit-scrollbar { width:5px; }
+  ::-webkit-scrollbar-thumb { background:rgba(0,178,202,.3); border-radius:3px; }
+  @media(max-width:768px) {
+    .section,.hub-body,.ref-body,.submit-page,.survey-page{padding-left:20px;padding-right:20px}
+    .hub-header,.ref-header{padding-left:20px;padding-right:20px}
+    .form-card,.survey-card{padding:24px 20px}
+    .form-row{grid-template-columns:1fr}
+    .about-grid{grid-template-columns:1fr;gap:36px}
+    .hero-stats{flex-direction:column;gap:14px;bottom:20px;left:20px}
+    footer{padding:44px 20px 28px}
+    .footer-grid{grid-template-columns:1fr}
+    nav{padding:0 14px}
+  }
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+
+<div class="page-transition" id="pt"><div class="pt-logo">The Apex Resource Hub</div></div>
+
+<!-- ═══ NAV ═══ -->
+<nav id="main-nav">
+  <div class="nav-logo" onclick="goTo('home')">
+    <div class="nav-logo-bubble">A</div>
+    <div>
+      <div class="nav-logo-text">The Apex Resource Hub</div>
+      <div class="nav-logo-sub">Find what you need at the peak of good living.</div>
+    </div>
+  </div>
+  <ul class="nav-links">
+    <li><button onclick="goTo('home')" id="nav-home" class="active">Home</button></li>
+    <li><button onclick="goTo('hub')" id="nav-hub">Resource Hub</button></li>
+    <li><button onclick="goTo('survey')" id="nav-survey">Find My Match</button></li>
+    <li><button onclick="goTo('submit')" id="nav-submit">Add a Resource</button></li>
+    <li><button onclick="goTo('reference')" id="nav-reference">References</button></li>
+  </ul>
+  <button id="admin-nav-btn" onclick="openAdminLogin()" style="font-family:'Lato',sans-serif;font-weight:700;font-size:12px;padding:7px 16px;border-radius:24px;border:2px solid rgba(231,76,60,.25);background:transparent;color:#c0392b;cursor:pointer;transition:all .2s;white-space:nowrap" onmouseover="this.style.background='rgba(231,76,60,.08)'" onmouseout="this.style.background='transparent'">🔒 Admin</button>
+</nav>
+
+<!-- ═══ ADMIN BAR ═══ -->
+<div class="admin-bar" id="admin-bar">
+  <div class="admin-bar-dot"></div>
+  <span>Admin Mode Active — click any resource card or open "More Info" to delete it</span>
+  <button class="admin-exit-btn" onclick="exitAdmin()">✕ Exit Admin</button>
+</div>
+
+<!-- ═══ ADMIN LOGIN MODAL ═══ -->
+<div class="modal-overlay" id="admin-login-overlay" onclick="closeAdminLoginOuter(event)">
+  <div class="admin-login-modal">
+    <div class="al-icon">🔐</div>
+    <h3>Admin Access</h3>
+    <p>Enter the admin password to manage and delete resources from the hub.</p>
+    <div class="admin-input-wrap">
+      <input type="password" id="admin-pw-input" placeholder="Enter password…" onkeydown="if(event.key==='Enter')attemptAdminLogin()">
+      <button class="pw-toggle" onclick="toggleAdminPw()" title="Show/hide">👁</button>
+    </div>
+    <div class="admin-error" id="admin-error">Incorrect password. Try again.</div>
+    <button class="btn-primary" style="width:100%;justify-content:center" onclick="attemptAdminLogin()">🔓 Enter Admin Mode</button>
+    <button class="btn-secondary" style="width:100%;justify-content:center;margin-top:10px" onclick="closeAdminLogin()">Cancel</button>
+  </div>
+</div>
+
+<!-- ═══ DELETE CONFIRM MODAL ═══ -->
+<div class="modal-overlay" id="delete-confirm-overlay" onclick="closeDeleteConfirmOuter(event)">
+  <div class="delete-confirm-modal">
+    <div style="font-size:2.5rem;margin-bottom:12px">🗑</div>
+    <h3>Delete Resource?</h3>
+    <p id="delete-confirm-text">This will permanently remove this resource from the hub. This cannot be undone.</p>
+    <div class="delete-confirm-btns">
+      <button class="btn-secondary" onclick="closeDeleteConfirm()">Cancel</button>
+      <button class="btn-primary" id="delete-confirm-btn" style="background:linear-gradient(135deg,#e74c3c,#c0392b);box-shadow:0 6px 20px rgba(231,76,60,.3)">Yes, Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ RESOURCE MODAL ═══ -->
+<div class="modal-overlay" id="resource-modal" onclick="closeModalOuter(event)">
+  <div class="modal">
+    <div style="position:relative">
+      <div id="m-img-wrap"><!-- filled by JS --></div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="m-cat"></div>
+      <h2 class="modal-title" id="m-title"></h2>
+      <p class="modal-desc" id="m-desc"></p>
+      <div class="modal-info">
+        <div class="modal-info-row"><span class="mii">📍</span><span id="m-addr"></span></div>
+        <div class="modal-info-row"><span class="mii">📞</span><span id="m-phone"></span></div>
+        <div class="modal-info-row"><span class="mii">🌐</span><span id="m-web"></span></div>
+        <div class="modal-info-row"><span class="mii">🕐</span><span id="m-hours"></span></div>
+        <div class="modal-info-row" id="m-engage-row"><span class="mii">💡</span><span id="m-engage" style="display:none;background:rgba(0,178,202,.1);color:var(--sky);padding:2px 10px;border-radius:20px;font-size:11px;font-weight:800"></span></div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <button class="btn-secondary" onclick="closeModal()">Close</button>
+        <button id="m-delete-btn" class="btn-primary" style="display:none;background:linear-gradient(135deg,#e74c3c,#c0392b);box-shadow:0 6px 20px rgba(231,76,60,.3)">🗑 Delete Resource</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FULLSCREEN MAP ═══ -->
+<div class="map-fs-overlay" id="map-fs-overlay" onclick="closeFSMap(event)">
+  <div class="map-fs-inner">
+    <div class="map-fs-header">
+      <h3>🗺️ Apex Community Resources — Full Map</h3>
+      <button class="btn-secondary" style="padding:7px 16px;font-size:12px" onclick="closeFSMap()">✕ Close</button>
+    </div>
+    <div id="map-fs"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ HOME PAGE ═══════════════════════ -->
+<div class="page active" id="page-home">
+
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Connect with<br><em>Your</em> Community</h1>
+      <p class="hero-subtitle">Find what you need at the peak of good living</p>
+      <p>Discover nonprofits, support services, events, and programs serving every resident of Apex — all in one place.</p>
+      <div class="hero-cta">
+        <button class="btn-primary" onclick="goTo('hub')">Explore Resources</button>
+        <button class="btn-secondary" onclick="goTo('survey')">🔍 Find My Match</button>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-blob-wrap">
+        <div class="hero-blob hb1"></div>
+        <div class="hero-blob hb2"></div>
+        <div class="hero-blob hb3"></div>
+        <div class="float-cards">
+          <div class="float-card"><div class="fc-icon" style="background:rgba(0,178,202,.12)">⚽</div>Recreation</div>
+          <div class="float-card"><div class="fc-icon" style="background:rgba(247,146,86,.12)">🎉</div>Community Events</div>
+          <div class="float-card"><div class="fc-icon" style="background:rgba(125,207,182,.2)">👵</div>Senior Services</div>
+          <div class="float-card"><div class="fc-icon" style="background:rgba(251,209,162,.3)">📚</div>Education Programs</div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-item reveal"><div class="stat-num">20<span>+</span></div><div class="stat-label">Community Resources</div></div>
+      <div class="stat-item reveal" style="transition-delay:.1s"><div class="stat-num">11<span>+</span></div><div class="stat-label">Categories</div></div>
+      <div class="stat-item reveal" style="transition-delay:.2s"><div class="stat-num">All in <span>1</span></div><div class="stat-label">Community: Apex NC ❤️</div></div>
+    </div>
+  </section>
+
+  <!-- SPOTLIGHT -->
+  <section class="section" style="background:linear-gradient(180deg,var(--offwhite),rgba(0,178,202,.04))">
+    <div class="spotlight-header">
+      <div>
+        <div class="section-label reveal">Featured Resources</div>
+        <h2 class="section-title reveal" style="transition-delay:.1s">Spotlight on<br>Apex's Finest</h2>
+        <p class="section-sub reveal" style="transition-delay:.15s">These organizations make Apex a better place - every single day. Definitely worth checking out!:</p>
+      </div>
+      <button class="btn-secondary reveal" onclick="goTo('hub')" style="transition-delay:.2s">View All →</button>
+    </div>
+    <div class="spotlight-grid" id="spotlight-grid"></div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ABOUT -->
+  <section class="section">
+    <div class="about-grid">
+      <div>
+        <div class="section-label reveal-left">About The Apex Resource Hub</div>
+        <h2 class="section-title reveal-left" style="transition-delay:.1s">One Hub for the<br>Whole Community</h2>
+        <p class="section-sub reveal-left" style="transition-delay:.15s">The Apex Resource Hub was designed to be a free directory helping all Apex residents — from young families to seniors — discover local nonprofits, events, and support services quickly and easily.</p>
+        <div class="feature-chips">
+          <div class="feature-chip reveal-left" style="transition-delay:.2s" onclick="goTo('hub')">Search &amp; Filter</div>
+          <div class="feature-chip reveal-left" style="transition-delay:.25s" onclick="goTo('hub')">Interactive Map</div>
+          <div class="feature-chip reveal-left" style="transition-delay:.3s" onclick="goTo('survey')">Personalized Match</div>
+          <div class="feature-chip reveal-left" style="transition-delay:.35s" onclick="goTo('submit')">Submit a Resource</div>
+          <div class="feature-chip reveal-left" style="transition-delay:.4s" onclick="goTo('reference')">Reference Page</div>
+        </div>
+      </div>
+      <div class="about-img-grid reveal-scale" style="transition-delay:.1s">
+        <div style="width:100%;aspect-ratio:3/2;border-radius:var(--radius-lg) var(--radius-md) var(--radius-md) var(--radius-md);margin-top:22px;background:linear-gradient(135deg,#1a6a40,#27ae60);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px">
+          <div style="font-size:2.8rem">🌳</div>
+          <div style="font-size:12px;font-weight:800;color:rgba(255,255,255,.9)">Apex Community Park</div>
+        </div>
+        <div style="width:100%;aspect-ratio:3/2;border-radius:var(--radius-md) var(--radius-lg) var(--radius-md) var(--radius-md);margin-top:-22px;background:linear-gradient(135deg,#1d4e89,#00b2ca);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px">
+          <div style="font-size:2.8rem">🤝</div>
+          <div style="font-size:12px;font-weight:800;color:rgba(255,255,255,.9)">Volunteers in Action</div>
+        </div>
+        <div style="width:100%;aspect-ratio:3/2;border-radius:var(--radius-md);background:linear-gradient(135deg,#8a6020,#f79256);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px">
+          <div style="font-size:2.8rem">🎨</div>
+          <div style="font-size:12px;font-weight:800;color:rgba(255,255,255,.9)">Arts &amp; Culture</div>
+        </div>
+        <div style="width:100%;aspect-ratio:3/2;border-radius:var(--radius-md);background:linear-gradient(135deg,#007a8e,#7dcfb6);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px">
+          <div style="font-size:2.8rem">❤️</div>
+          <div style="font-size:12px;font-weight:800;color:rgba(255,255,255,.9)">Community &amp; Families</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CATEGORY QUICK NAV -->
+  <section class="section" style="background:linear-gradient(180deg,transparent,rgba(29,78,137,.04))">
+    <div style="text-align:center;margin-bottom:44px">
+      <div class="section-label reveal">Browse by Category</div>
+      <h2 class="section-title reveal" style="transition-delay:.1s;text-align:center">What are you<br>looking for?</h2>
+    </div>
+    <div id="cat-quick-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;max-width:980px;margin:0 auto"></div>
+  </section>
+
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <h3>The Apex Resource Hub</h3>
+        <em>"Find what you need at the peak of good living."</em>
+        <p style="margin-top:10px">Your community resource hub for Apex, North Carolina — connecting neighbors with nonprofits, programs, and events.</p>
+      </div>
+      <div class="footer-col"><h4>Navigate</h4><ul>
+        <li><a onclick="goTo('home')">Home</a></li>
+        <li><a onclick="goTo('hub')">Resource Hub</a></li>
+        <li><a onclick="goTo('survey')">Find My Match</a></li>
+        <li><a onclick="goTo('submit')">Add a Resource</a></li>
+        <li><a onclick="goTo('reference')">References</a></li>
+      </ul></div>
+      <div class="footer-col"><h4>Categories</h4><ul>
+        <li><a onclick="goTo('hub');filterBy('Food & Hunger')">Food &amp; Hunger</a></li>
+        <li><a onclick="goTo('hub');filterBy('Housing')">Housing</a></li>
+        <li><a onclick="goTo('hub');filterBy('Health')">Health</a></li>
+        <li><a onclick="goTo('hub');filterBy('Education')">Education</a></li>
+        <li><a onclick="goTo('hub');filterBy('Arts & Culture')">Arts &amp; Culture</a></li>
+      </ul></div>
+      <div class="footer-col"><h4>Contact</h4><ul>
+        <li><a href="#">(919) 356-9069</a></li>
+        <li><a onclick="goTo('reference')">Reference Page</a></li>
+      </ul></div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 The Apex Resource Hub — Apex, NC</span>
+      <span>Built for the community, by the community.</span>
+    </div>
+  </footer>
+</div>
+
+<!--  RESOURCE HUB PAGE -->
+<div class="page" id="page-hub">
+  <div class="hub-header">
+    <h2>Resource Hub</h2>
+    <p>Every community resource available to Apex, NC residents — searchable and filterable.</p>
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input class="search-bar" type="text" id="search-input" placeholder="Search resources, services, locations…" oninput="filterResources()">
+    </div>
+  </div>
+  <div class="hub-body">
+    <!-- View Toggle -->
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:8px">
+      <div class="hub-view-toggle">
+        <button class="view-tab active" id="tab-list" onclick="switchHubView('list')">📋 List View</button>
+        <button class="view-tab" id="tab-map" onclick="switchHubView('map')">🗺️ Map View</button>
+      </div>
+      <div id="hub-result-count" style="font-size:13px;font-weight:700;color:var(--muted)"></div>
+    </div>
+
+    <!-- Filters (shown in list view) -->
+    <div class="hub-filters" id="hub-filters">
+      <span class="filter-label">Filter:</span>
+      <button class="filter-chip active" data-cat="All" onclick="setFilter(this)">All <span class="count-badge" id="filter-count">0</span></button>
+      <button class="filter-chip" data-cat="Food & Hunger" onclick="setFilter(this)">🥫 Food &amp; Hunger</button>
+      <button class="filter-chip" data-cat="Housing" onclick="setFilter(this)">🏠 Housing</button>
+      <button class="filter-chip" data-cat="Health" onclick="setFilter(this)">❤️ Health</button>
+      <button class="filter-chip" data-cat="Education" onclick="setFilter(this)">📚 Education</button>
+      <button class="filter-chip" data-cat="Arts & Culture" onclick="setFilter(this)">🎨 Arts &amp; Culture</button>
+      <button class="filter-chip" data-cat="Youth" onclick="setFilter(this)">🌟 Youth</button>
+      <button class="filter-chip" data-cat="Seniors" onclick="setFilter(this)">👵 Seniors</button>
+      <button class="filter-chip" data-cat="Environment" onclick="setFilter(this)">🌿 Environment</button>
+      <button class="filter-chip" data-cat="Immigration" onclick="setFilter(this)">🌎 Immigration</button>
+      <button class="filter-chip" data-cat="Recreation" onclick="setFilter(this)">⚽ Recreation</button>
+      <button class="filter-chip" data-cat="Volunteer" onclick="setFilter(this)">🤝 Volunteer</button>
+    </div>
+
+    <!-- LIST VIEW -->
+    <div class="hub-list-view" id="hub-list-view">
+      <div class="resource-grid" id="resource-grid"></div>
+    </div>
+
+    <!-- MAP VIEW -->
+    <div class="hub-map-view" id="hub-map-view">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+        <span style="font-size:13px;font-weight:700;color:var(--muted)">📍 Click any pin to see details</span>
+        <button class="map-expand-btn" onclick="openFSMap()" style="margin-left:auto">⛶ Fullscreen</button>
+      </div>
+      <div id="map-fullpage"></div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:14px" id="map-legend-cats"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ SURVEY PAGE ═══════════════════════ -->
+<div class="page" id="page-survey">
+  <div class="survey-page">
+    <div class="section-label reveal" style="text-align:center">Personalized Recommendations</div>
+    <h2 class="section-title reveal" style="text-align:center;transition-delay:.1s">Find Your Perfect Match</h2>
+    <p class="section-sub reveal" style="text-align:center;margin:0 auto 36px;transition-delay:.15s">Answer a few questions and we'll recommend the best resources for you.</p>
+    <div class="survey-card reveal-scale" style="transition-delay:.2s">
+      <div class="survey-progress" id="survey-progress">
+        <div class="progress-dot current"></div><div class="progress-dot"></div>
+        <div class="progress-dot"></div><div class="progress-dot"></div>
+      </div>
+      <!-- Step 1 -->
+      <div class="survey-step active" id="step-1">
+        <div class="survey-q">Who are you looking for resources for?</div>
+        <div class="survey-sub">This helps personalize your recommendations.</div>
+        <div class="survey-options">
+          <button class="survey-opt" data-val="myself" onclick="selectOpt(this,'who')"><span class="survey-opt-icon">🙋</span>Myself</button>
+          <button class="survey-opt" data-val="family" onclick="selectOpt(this,'who')"><span class="survey-opt-icon">👨‍👩‍👧</span>My Family</button>
+          <button class="survey-opt" data-val="child" onclick="selectOpt(this,'who')"><span class="survey-opt-icon">👦</span>A Child</button>
+          <button class="survey-opt" data-val="senior" onclick="selectOpt(this,'who')"><span class="survey-opt-icon">👵</span>A Senior</button>
+          <button class="survey-opt" data-val="immigrant" onclick="selectOpt(this,'who')"><span class="survey-opt-icon">🌎</span>An Immigrant</button>
+          <button class="survey-opt" data-val="volunteer" onclick="selectOpt(this,'who')"><span class="survey-opt-icon">🤝</span>To Volunteer</button>
+        </div>
+        <div class="survey-nav"><span class="survey-step-label">Step 1 of 4</span><button class="btn-primary" onclick="nextStep(1)">Next →</button></div>
+      </div>
+      <!-- Step 2 -->
+      <div class="survey-step" id="step-2">
+        <div class="survey-q">What are your most pressing needs?</div>
+        <div class="survey-sub">Select all that apply.</div>
+        <div class="survey-options">
+          <button class="survey-opt" data-val="Food & Hunger" onclick="selectOpt(this,'need',true)"><span class="survey-opt-icon">🥫</span>Food &amp; Groceries</button>
+          <button class="survey-opt" data-val="Housing" onclick="selectOpt(this,'need',true)"><span class="survey-opt-icon">🏠</span>Housing Help</button>
+          <button class="survey-opt" data-val="Health" onclick="selectOpt(this,'need',true)"><span class="survey-opt-icon">❤️</span>Health Services</button>
+          <button class="survey-opt" data-val="Education" onclick="selectOpt(this,'need',true)"><span class="survey-opt-icon">📚</span>Education</button>
+          <button class="survey-opt" data-val="Arts & Culture" onclick="selectOpt(this,'need',true)"><span class="survey-opt-icon">🎨</span>Arts &amp; Culture</button>
+          <button class="survey-opt" data-val="Recreation" onclick="selectOpt(this,'need',true)"><span class="survey-opt-icon">⚽</span>Recreation</button>
+          <button class="survey-opt" data-val="Youth" onclick="selectOpt(this,'need',true)"><span class="survey-opt-icon">🌟</span>Youth Programs</button>
+          <button class="survey-opt" data-val="Seniors" onclick="selectOpt(this,'need',true)"><span class="survey-opt-icon">👵</span>Senior Services</button>
+          <button class="survey-opt" data-val="Environment" onclick="selectOpt(this,'need',true)"><span class="survey-opt-icon">🌿</span>Environment</button>
+          <button class="survey-opt" data-val="Immigration" onclick="selectOpt(this,'need',true)"><span class="survey-opt-icon">🌎</span>Immigration Help</button>
+          <button class="survey-opt" data-val="Volunteer" onclick="selectOpt(this,'need',true)"><span class="survey-opt-icon">🤝</span>Volunteering</button>
+        </div>
+        <div class="survey-nav"><button class="btn-secondary" onclick="prevStep(2)">← Back</button><span class="survey-step-label">Step 2 of 4</span><button class="btn-primary" onclick="nextStep(2)">Next →</button></div>
+      </div>
+      <!-- Step 3 -->
+      <div class="survey-step" id="step-3">
+        <div class="survey-q">How do you prefer to engage?</div>
+        <div class="survey-sub">Choose what feels right for you.</div>
+        <div class="survey-options">
+          <button class="survey-opt" data-val="in-person" onclick="selectOpt(this,'engage')"><span class="survey-opt-icon">🏃</span>In-Person</button>
+          <button class="survey-opt" data-val="online" onclick="selectOpt(this,'engage')"><span class="survey-opt-icon">💻</span>Online</button>
+          <button class="survey-opt" data-val="both" onclick="selectOpt(this,'engage')"><span class="survey-opt-icon">🔄</span>Both Are Fine</button>
+          <button class="survey-opt" data-val="walkIn" onclick="selectOpt(this,'engage')"><span class="survey-opt-icon">🚶</span>Walk-In Services</button>
+        </div>
+        <div class="survey-nav"><button class="btn-secondary" onclick="prevStep(3)">← Back</button><span class="survey-step-label">Step 3 of 4</span><button class="btn-primary" onclick="nextStep(3)">Next →</button></div>
+      </div>
+      <!-- Step 4 -->
+      <div class="survey-step" id="step-4">
+        <div class="survey-q">When are you typically available?</div>
+        <div class="survey-sub">So we can match events to your schedule.</div>
+        <div class="survey-options">
+          <button class="survey-opt" data-val="weekday-morning" onclick="selectOpt(this,'time')"><span class="survey-opt-icon">☀️</span>Weekday Mornings</button>
+          <button class="survey-opt" data-val="weekday-evening" onclick="selectOpt(this,'time')"><span class="survey-opt-icon">🌆</span>Weekday Evenings</button>
+          <button class="survey-opt" data-val="weekend" onclick="selectOpt(this,'time')"><span class="survey-opt-icon">🎉</span>Weekends</button>
+          <button class="survey-opt" data-val="anytime" onclick="selectOpt(this,'time')"><span class="survey-opt-icon">⏰</span>Flexible</button>
+        </div>
+        <div class="survey-nav"><button class="btn-secondary" onclick="prevStep(4)">← Back</button><span class="survey-step-label">Step 4 of 4</span><button class="btn-primary" onclick="showResults()">Show Results</button></div>
+      </div>
+      <!-- Results -->
+      <div class="survey-step" id="step-results">
+        <div style="text-align:center;margin-bottom:26px">
+          <div style="font-size:2.8rem;margin-bottom:8px">✨</div>
+          <div class="survey-q" style="margin-bottom:6px">Your Personalized Picks</div>
+          <p class="survey-sub" style="margin:0 auto">Based on your responses, here are the resources we think will help most.</p>
+        </div>
+        <div class="results-grid" id="results-grid"></div>
+        <div style="text-align:center;margin-top:28px">
+          <button class="btn-secondary" onclick="resetSurvey()" style="margin-right:10px">↺ Start Over</button>
+          <button class="btn-primary" onclick="goTo('hub')">View All Resources →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ SUBMIT / ADD RESOURCE PAGE ═══════════════════════ -->
+<div class="page" id="page-submit">
+  <div class="submit-page">
+    <div style="text-align:center;margin-bottom:44px">
+      <div class="section-label reveal">Community Contribution</div>
+      <h2 class="section-title reveal" style="transition-delay:.1s">Know a Resource<br>We're Missing?</h2>
+      <p class="section-sub reveal" style="margin:0 auto;transition-delay:.15s">Submit any local organization, service, or event that benefits Apex residents and it will be added to the hub.</p>
+    </div>
+    <div class="form-card reveal-scale" style="transition-delay:.2s">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Organization Name <span>*</span></label>
+          <input class="form-input" type="text" id="f-name" placeholder="e.g. Apex Food Bank">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Category <span>*</span></label>
+          <select class="form-select" id="f-cat">
+            <option value="">Select a category…</option>
+            <option>Food & Hunger</option><option>Housing</option><option>Health</option>
+            <option>Education</option><option>Arts & Culture</option><option>Youth</option>
+            <option>Seniors</option><option>Environment</option><option>Immigration</option>
+            <option>Recreation</option><option>Volunteer</option><option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Street Address <span>*</span></label>
+        <input class="form-input" type="text" id="f-addr"
+          placeholder="e.g. 1600 Olive Chapel Rd, Apex, NC 27502"
+          oninput="validateAddress(this)">
+        <div id="f-addr-hint" style="margin-top:6px;font-size:12px;font-weight:600;display:none"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Phone Number</label>
+          <input class="form-input" type="tel" id="f-phone" placeholder="(919) 000-0000">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Website URL</label>
+          <input class="form-input" type="url" id="f-web" placeholder="https://example.org">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Engagement Type <span>*</span></label>
+        <div class="engage-opts" id="f-engage-opts">
+          <button type="button" class="engage-opt" data-val="in-person" onclick="selectEngage(this)">
+            <span class="eo-icon">🏃</span>In-Person
+          </button>
+          <button type="button" class="engage-opt" data-val="online" onclick="selectEngage(this)">
+            <span class="eo-icon">💻</span>Online
+          </button>
+          <button type="button" class="engage-opt" data-val="both" onclick="selectEngage(this)">
+            <span class="eo-icon">🔄</span>Both Are Fine
+          </button>
+          <button type="button" class="engage-opt" data-val="walkIn" onclick="selectEngage(this)">
+            <span class="eo-icon">🚶</span>Walk-In Services
+          </button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Hours of Operation</label>
+        <div class="days-picker" id="f-days-picker">
+          <button type="button" class="day-btn" data-day="Mon" onclick="toggleDay(this)">Mon</button>
+          <button type="button" class="day-btn" data-day="Tue" onclick="toggleDay(this)">Tue</button>
+          <button type="button" class="day-btn" data-day="Wed" onclick="toggleDay(this)">Wed</button>
+          <button type="button" class="day-btn" data-day="Thu" onclick="toggleDay(this)">Thu</button>
+          <button type="button" class="day-btn" data-day="Fri" onclick="toggleDay(this)">Fri</button>
+          <button type="button" class="day-btn" data-day="Sat" onclick="toggleDay(this)">Sat</button>
+          <button type="button" class="day-btn" data-day="Sun" onclick="toggleDay(this)">Sun</button>
+        </div>
+        <div class="hours-range" id="f-hours-range">
+          <select class="form-select" id="f-open-time">
+            <option value="">Open time…</option>
+          </select>
+          <div class="range-sep">to</div>
+          <select class="form-select" id="f-close-time">
+            <option value="">Close time…</option>
+          </select>
+        </div>
+        <div class="hours-special">
+          <label><input type="checkbox" id="f-hours-varies"> Hours vary by season</label>
+          <label><input type="checkbox" id="f-hours-appt"> By appointment only</label>
+          <label><input type="checkbox" id="f-hours-24"> Open 24/7</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Short Description <span>*</span></label>
+        <textarea class="form-textarea" id="f-desc" placeholder="Describe what this organization does and who it serves (2–4 sentences)…"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Your Name <span>*</span></label>
+          <input class="form-input" type="text" id="f-submitter" placeholder="Full name">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Your Email <span>*</span></label>
+          <input class="form-input" type="email" id="f-email" placeholder="you@example.com">
+        </div>
+      </div>
+      <button id="f-submit-btn" class="btn-primary" style="width:100%;justify-content:center;font-size:15px;padding:15px" onclick="submitForm()">Submit Resource</button>
+      <div class="form-success" id="form-success">
+        <h3>Thank You!</h3>
+        <p>Your submission has been saved and added to the Resource Hub! You can see it there now.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ REFERENCE PAGE ═══════════════════════ -->
+<div class="page" id="page-reference">
+  <div class="ref-header">
+    <h2>Reference Page</h2>
+    <p>All sources of information, images, and tools used in the creation of The Apex Resource Hub.</p>
+  </div>
+  <div class="ref-body">
+
+    <!-- REQUIRED DOCUMENTS -->
+    <div class="ref-section">
+      <h3>Required TSA Documents</h3>
+      <p class="ref-intro">The following documents are required by TSA Webmaster event rules. Click to view each PDF.</p>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div class="ref-download-card">
+          <div class="ref-dl-icon" style="background:rgba(0,178,202,.12)">📋</div>
+          <div>
+            <div class="ref-dl-title">Student Copyright Checklist</div>
+            <div class="ref-dl-sub">Completed TSA Student Copyright Checklist — PDF format, as required by event rules.</div>
+          </div>
+          <a class="btn-primary ref-dl-btn" href="https://drive.google.com/file/d/1Rri5WIGnYZ2D4wmdgLN8a5LsysCQASh3/preview" target="_blank" style="font-size:12px;padding:9px 18px">⬇ View PDF</a>
+        </div>
+        <div class="ref-download-card">
+          <div class="ref-dl-icon" style="background:rgba(125,207,182,.2)">📝</div>
+          <div>
+            <div class="ref-dl-title">Work Log</div>
+            <div class="ref-dl-sub">Detailed work log documenting all development sessions, tasks, and time spent — PDF format.</div>
+          </div>
+          <a class="btn-primary ref-dl-btn" href="https://drive.google.com/file/d/1_Gq9kKRoKyiBN3951vz9J4ky1vlKFUWh/view?usp=sharing" target="_blank" style="font-size:12px;padding:9px 18px">⬇ View PDF</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- WEBSITE & CONTENT SOURCES -->
+    <div class="ref-section">
+      <h3>Website &amp; Content Sources</h3>
+      <p class="ref-intro">All written information about community organizations was sourced from official websites and public records.</p>
+      <table class="ref-table">
+        <thead><tr><th>#</th><th>Organization / Source</th><th>URL</th><th>Date Accessed</th><th>Used For</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Town of Apex — Official Website</td><td><a href="https://www.apexnc.org" target="_blank">apexnc.org</a></td><td>March 2026</td><td>General community info, events, park details, nonprofit funding program</td></tr>
+          <tr><td>2</td><td>Town of Apex — Non-Profit Partnership Funding</td><td><a href="https://www.apexnc.org/1093/Funding-for-Non-Profit-Agencies" target="_blank">apexnc.org/1093</a></td><td>March 2026</td><td>Nonprofit program descriptions (Camp G.R.A.C.E., Give the Gift of Swim)</td></tr>
+          <tr><td>3</td><td>Town of Apex — Volunteering</td><td><a href="https://www.apexnc.org/419/Volunteering" target="_blank">apexnc.org/419</a></td><td>March 2026</td><td>Volunteering opportunities, Think Apex Day, Connecting Community</td></tr>
+          <tr><td>4</td><td>Town of Apex — Housing Services</td><td><a href="https://www.apexnc.org/1633/Housing-Services" target="_blank">apexnc.org/1633</a></td><td>March 2026</td><td>Affordable housing and housing assistance programs</td></tr>
+          <tr><td>5</td><td>Think Apex Day — Apex Economic Development</td><td><a href="https://apexeconomicdevelopment.org/1554/Think-Apex-Day" target="_blank">apexeconomicdevelopment.org</a></td><td>March 2026</td><td>Think Apex Day event details and locations</td></tr>
+          <tr><td>6</td><td>Apex UMC — With Missions</td><td><a href="https://apexumc.org/serve/missions/" target="_blank">apexumc.org</a></td><td>March 2026</td><td>NeighborUp (Western Wake Crisis Ministry), Apex Immigration Services descriptions</td></tr>
+          <tr><td>7</td><td>White Oak Foundation</td><td><a href="https://www.wofnc.org" target="_blank">wofnc.org</a></td><td>March 2026</td><td>White Oak Foundation description and mission</td></tr>
+          <tr><td>8</td><td>Habitat for Humanity of Wake County</td><td><a href="https://habitatwake.org" target="_blank">habitatwake.org</a></td><td>March 2026</td><td>ReStore and Habitat for Humanity program information</td></tr>
+          <tr><td>9</td><td>Note in the Pocket</td><td><a href="https://noteinthepocket.org" target="_blank">noteinthepocket.org</a></td><td>March 2026</td><td>Organization description and mission</td></tr>
+          <tr><td>10</td><td>Meals on Wheels of Wake County</td><td><a href="https://meals-on-wheelswake.org" target="_blank">meals-on-wheelswake.org</a></td><td>March 2026</td><td>Program description and volunteer information</td></tr>
+          <tr><td>11</td><td>American Red Cross — Triangle Area</td><td><a href="https://www.redcross.org" target="_blank">redcross.org</a></td><td>March 2026</td><td>Blood drive and disaster relief program info</td></tr>
+          <tr><td>12</td><td>Apex Immigration Services</td><td><a href="https://www.apeximm.org" target="_blank">apeximm.org</a></td><td>March 2026</td><td>Organization description and services</td></tr>
+          <tr><td>13</td><td>NeighborUp (formerly Western Wake Crisis Ministry)</td><td><a href="https://neighborup.org" target="_blank">neighborup.org</a></td><td>March 2026</td><td>Food and financial assistance program info</td></tr>
+          <tr><td>14</td><td>Halle Cultural Arts Center</td><td><a href="https://www.apexnc.org/halle" target="_blank">apexnc.org/halle</a></td><td>March 2026</td><td>Arts programs and venue details</td></tr>
+          <tr><td>15</td><td>OpenStreetMap</td><td><a href="https://www.openstreetmap.org" target="_blank">openstreetmap.org</a></td><td>March 2026</td><td>Map tile layer used in the interactive resource map (Leaflet.js)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- TOOLS & TECHNOLOGIES -->
+    <div class="ref-section">
+      <h3>Tools &amp; Technologies</h3>
+      <p class="ref-intro">The following open-source libraries and tools were used to build this website. All are free and open-source.</p>
+      <table class="ref-table">
+        <thead><tr><th>Tool / Library</th><th>Version</th><th>Source</th><th>License</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td>Leaflet.js</td><td>1.9.4</td><td><a href="https://leafletjs.com" target="_blank">leafletjs.com</a></td><td>BSD 2-Clause (Free)</td><td>Interactive map with resource pins</td></tr>
+          <tr><td>OpenStreetMap Tiles</td><td>—</td><td><a href="https://openstreetmap.org" target="_blank">openstreetmap.org</a></td><td>ODbL (Free)</td><td>Map tile imagery</td></tr>
+          <tr><td>Google Fonts — Lato</td><td>—</td><td><a href="https://fonts.google.com/specimen/Lato" target="_blank">fonts.google.com</a></td><td>SIL Open Font License (Free)</td><td>Body and UI typography</td></tr>
+          <tr><td>Google Fonts — Lobster</td><td>—</td><td><a href="https://fonts.google.com/specimen/Lobster" target="_blank">fonts.google.com</a></td><td>SIL Open Font License (Free)</td><td>Heading typography</td></tr>
+          <tr><td>HTML5 / CSS3 / JavaScript</td><td>—</td><td>W3C Standard</td><td>Open Standard</td><td>Core website structure, styling, and interactivity</td></tr>
+          <tr><td>REST API (Express.js)</td><td>—</td><td>server.js (included)</td><td>MIT (Free)</td><td>Backend API for storing and retrieving community-submitted resources shared across all users</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- WORK LOG -->
+
+    <!-- EXTERNAL SOURCES (community-submitted) -->
+    <div class="ref-section">
+      <h3>External Sources</h3>
+      <p class="ref-intro">The following resources were submitted by members of the Apex community through the <strong>Add a Resource</strong> form on this website. All submissions are community-sourced and have not been independently verified by our team. Information is presented as provided by the submitter.</p>
+      <div id="external-sources-container">
+        <!-- filled dynamically by JS -->
+      </div>
+    </div>
+
+  </div><!-- /ref-body -->
+</div><!-- /page-reference -->
+
+<!-- ═══════════════════════ JAVASCRIPT ═══════════════════════ -->
+<!-- Leaflet loaded here (bottom of body) so DOM exists and CDN has time to resolve -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ══════════ CATEGORIES ══════════
+const CATS = {
+  'Food & Hunger':  { icon:'🥫', bg:'rgba(125,207,182,.15)', color:'#2a8a6a', hex:'#7dcfb6' },
+  'Housing':        { icon:'🏠', bg:'rgba(29,78,137,.12)',  color:'#1d4e89', hex:'#1d4e89' },
+  'Health':         { icon:'❤️', bg:'rgba(247,146,86,.15)', color:'#b05020', hex:'#f79256' },
+  'Education':      { icon:'📚', bg:'rgba(0,178,202,.12)',  color:'#007a8e', hex:'#00b2ca' },
+  'Arts & Culture': { icon:'🎨', bg:'rgba(251,209,162,.3)', color:'#8a6020', hex:'#fbd1a2' },
+  'Youth':          { icon:'🌟', bg:'rgba(247,146,86,.12)', color:'#b05010', hex:'#f79256' },
+  'Seniors':        { icon:'👵', bg:'rgba(212,165,213,.2)', color:'#7a3a8a', hex:'#d4a5d5' },
+  'Environment':    { icon:'🌿', bg:'rgba(39,174,96,.12)',  color:'#1a6a40', hex:'#27ae60' },
+  'Immigration':    { icon:'🌎', bg:'rgba(52,152,219,.12)', color:'#1a5f8a', hex:'#3498db' },
+  'Recreation':     { icon:'⚽', bg:'rgba(0,178,202,.12)',  color:'#007a8e', hex:'#00b2ca' },
+  'Volunteer':      { icon:'🤝', bg:'rgba(125,207,182,.15)', color:'#2a8a6a', hex:'#7dcfb6' },
+};
+
+// Gradient backgrounds for card banners — pure CSS, zero network needed
+const CAT_BG = {
+  'Food & Hunger':  'linear-gradient(135deg,#2a8a6a,#7dcfb6)',
+  'Housing':        'linear-gradient(135deg,#1d4e89,#2a6db5)',
+  'Health':         'linear-gradient(135deg,#c0622b,#f79256)',
+  'Education':      'linear-gradient(135deg,#007a8e,#00b2ca)',
+  'Arts & Culture': 'linear-gradient(135deg,#8a6020,#fbd1a2)',
+  'Youth':          'linear-gradient(135deg,#b05010,#f79256)',
+  'Seniors':        'linear-gradient(135deg,#7a3a8a,#d4a5d5)',
+  'Environment':    'linear-gradient(135deg,#1a6a40,#27ae60)',
+  'Immigration':    'linear-gradient(135deg,#1a5f8a,#3498db)',
+  'Recreation':     'linear-gradient(135deg,#006a7e,#00b2ca)',
+  'Volunteer':      'linear-gradient(135deg,#2a8a6a,#7dcfb6)',
+};
+
+// ══════════ RESOURCE DATA ══════════
+const BASE_RESOURCES = [
+  { id:1, spotlight:true,
+    name:"NeighborUp (Western Wake Crisis Ministry)",
+    category:"Food & Hunger",
+    desc:"NeighborUp provides financial and food assistance to Apex, Holly Springs, Fuquay-Varina, Cary and surrounding residents. Walk-ins welcome. Information, advocacy, and referral services also available.",
+    address:"1600 Olive Chapel Rd, Suite 408, Apex, NC 27502",
+    phone:"(919) 362-6282", website:"neighborup.org",
+    hours:"Mon–Fri 9am–12pm, 1pm–4pm",
+    img:"https://picsum.photos/seed/foodpantry1/600/400",
+    lat:35.7281, lng:-78.8632, engageType:"walkIn", availDays:["Mon","Tue","Wed","Thu","Fri"], openTime:"09:00", closeTime:"16:00" },
+  { id:2, spotlight:true,
+    name:"Halle Cultural Arts Center",
+    category:"Arts & Culture",
+    desc:"Apex's premier arts venue hosting live performances, art galleries, community exhibits, and creative programs for all ages. The Halle brings culture and creativity to the heart of downtown Apex.",
+    address:"237 N Salem St, Apex, NC 27502",
+    phone:"(919) 249-3703", website:"apexnc.org/halle",
+    hours:"Tue–Sat 10am–5pm, Sun 1pm–5pm",
+    img:"https://picsum.photos/seed/artstheater/600/400",
+    lat:35.7321, lng:-78.8502, engageType:"in-person", availDays:["Tue","Wed","Thu","Fri","Sat","Sun"], openTime:"10:00", closeTime:"17:00" },
+  { id:3, spotlight:true,
+    name:"Apex Community Park",
+    category:"Recreation",
+    desc:"A 162-acre community park featuring athletic fields, trails, a lake, playgrounds, and picnic shelters. Host to countless community events including Peakfest and summer concerts.",
+    address:"2200 Laura Duncan Rd, Apex, NC 27502",
+    phone:"(919) 249-3300", website:"apexnc.org/parks",
+    hours:"Daily dawn–dusk",
+    img:"https://picsum.photos/seed/apexpark1/600/400",
+    lat:35.7204, lng:-78.8419, engageType:"in-person", availDays:["Mon","Tue","Wed","Thu","Fri","Sat","Sun"], openTime:"07:00", closeTime:"21:00" },
+  { id:4,
+    name:"White Oak Foundation",
+    category:"Housing",
+    desc:"Dedicated to preventing foreclosures, promoting education, ensuring food security, providing scholarships, and offering crisis assistance to families across the community.",
+    address:"1624 White Oak Church Rd, Apex, NC 27502",
+    phone:"(919) 888-2100", website:"wofnc.org",
+    hours:"Mon–Fri 9am–5pm",
+    img:"https://picsum.photos/seed/housinghelp/600/400",
+    lat:35.7095, lng:-78.8705, engageType:"walkIn", availDays:["Mon","Tue","Wed","Thu","Fri"], openTime:"09:00", closeTime:"17:00" },
+  { id:5,
+    name:"Apex Immigration Services",
+    category:"Immigration",
+    desc:"Helping immigrants and refugees build better lives by providing low-cost immigration legal services, immigrant rights information, and a comprehensive referral network.",
+    address:"203 E Moore St, Apex, NC 27502",
+    phone:"(919) 367-9014", website:"apeximm.org",
+    hours:"Mon–Thu 9am–4pm",
+    img:"https://picsum.photos/seed/community1/600/400",
+    lat:35.7315, lng:-78.8480, engageType:"in-person", availDays:["Mon","Tue","Wed","Thu"], openTime:"09:00", closeTime:"16:00" },
+  { id:6,
+    name:"Habitat for Humanity ReStore",
+    category:"Housing",
+    desc:"Sells donated furniture, appliances, and building materials at a fraction of retail cost. Proceeds support Habitat's mission of building affordable housing in Wake County.",
+    address:"826 E Williams St, Apex, NC 27502",
+    phone:"(919) 803-4040", website:"habitatwake.org",
+    hours:"Mon–Sat 10am–5pm",
+    img:"https://picsum.photos/seed/habitat1/600/400",
+    lat:35.7284, lng:-78.8439, engageType:"in-person", availDays:["Mon","Tue","Wed","Thu","Fri","Sat"], openTime:"10:00", closeTime:"17:00" },
+  { id:7,
+    name:"Meals on Wheels of Wake County",
+    category:"Seniors",
+    desc:"Delivers nutritious noon-time meals every weekday to elderly, homebound, and disabled Wake County residents. Volunteers always welcome.",
+    address:"Wake County Service Area (Apex pickup available)",
+    phone:"(919) 833-1999", website:"meals-on-wheelswake.org",
+    hours:"Mon–Fri delivery 10:30am–1:30pm",
+    img:"https://picsum.photos/seed/mealswheels/600/400",
+    lat:35.7300, lng:-78.8580, engageType:"in-person", availDays:["Mon","Tue","Wed","Thu","Fri"], openTime:"10:30", closeTime:"13:30" },
+  { id:8,
+    name:"Camp G.R.A.C.E.",
+    category:"Youth",
+    desc:"A developmentally appropriate summer day camp for children with autism, providing a safe, nurturing environment where campers learn, play, and thrive with specialized support.",
+    address:"Apex, NC 27502",
+    phone:"(919) 249-3300", website:"apexnc.org/campgrace",
+    hours:"Summer sessions (June–August)",
+    img:"https://picsum.photos/seed/youthcamp/600/400",
+    lat:35.7265, lng:-78.8560, engageType:"in-person", availDays:["Mon","Tue","Wed","Thu","Fri"], openTime:"08:00", closeTime:"17:00" },
+  { id:9,
+    name:"American Red Cross — Triangle",
+    category:"Health",
+    desc:"Provides disaster relief, emergency blood supply, and health and safety training. Blood drives held regularly at locations throughout Apex and Wake County.",
+    address:"Multiple Apex & Triangle locations",
+    phone:"(919) 231-1602", website:"redcross.org",
+    hours:"Blood drives vary; 24/7 disaster hotline",
+    img:"https://picsum.photos/seed/redcross1/600/400",
+    lat:35.7330, lng:-78.8510, engageType:"both", availDays:["Mon","Tue","Wed","Thu","Fri","Sat"], openTime:"08:00", closeTime:"17:00" },
+  { id:10,
+    name:"Note in the Pocket",
+    category:"Education",
+    desc:"Provides new clothing to children in need across North Carolina, ensuring every child feels confident and ready to learn — removing a key barrier to thriving in school.",
+    address:"Wake County Service Area",
+    phone:"(919) 371-1882", website:"noteinthepocket.org",
+    hours:"Mon–Fri 9am–5pm",
+    img:"https://picsum.photos/seed/education1/600/400",
+    lat:35.7250, lng:-78.8600, engageType:"both", availDays:["Mon","Tue","Wed","Thu","Fri"], openTime:"09:00", closeTime:"17:00" },
+  { id:11,
+    name:"Apex Youth Council",
+    category:"Youth",
+    desc:"A student-run organization for local middle and high schoolers that enhances the community through leadership, service, and event planning. Applications open each August.",
+    address:"Apex, NC 27502",
+    phone:"(919) 249-3300", website:"apexnc.org/youthcouncil",
+    hours:"Meets monthly; programs vary",
+    img:"https://picsum.photos/seed/youthcouncil/600/400",
+    lat:35.7305, lng:-78.8495, engageType:"both", availDays:["Mon","Tue","Wed","Thu","Fri","Sat"], openTime:"09:00", closeTime:"18:00" },
+  { id:12,
+    name:"Connecting Community",
+    category:"Volunteer",
+    desc:"Hosts engaging events connecting underserved community members with local agencies and resources. Volunteers help at multiple events throughout the year.",
+    address:"Apex, NC (multiple event locations)",
+    phone:"(919) 249-3300", website:"apexnc.org/volunteering",
+    hours:"Events throughout the year",
+    img:"https://picsum.photos/seed/volunteers1/600/400",
+    lat:35.7275, lng:-78.8555, engageType:"in-person", availDays:["Mon","Tue","Wed","Thu","Fri","Sat"], openTime:"09:00", closeTime:"17:00" },
+  { id:13,
+    name:"EarthFest Apex",
+    category:"Environment",
+    desc:"Annual Earth Day celebration featuring environmental education, live music, food, and family activities. Promotes sustainability and conservation in the Apex community.",
+    address:"Apex Community Park, 2200 Laura Duncan Rd",
+    phone:"(919) 249-3300", website:"apexnc.org/earthfest",
+    hours:"Annual event (April)",
+    img:"https://picsum.photos/seed/earthfest1/600/400",
+    lat:35.7204, lng:-78.8419, engageType:"in-person", availDays:["Mon","Tue","Wed","Thu","Fri","Sat","Sun"], openTime:"07:00", closeTime:"21:00" },
+  { id:14,
+    name:"Olde Fashioned 4th of July",
+    category:"Recreation",
+    desc:"Apex's beloved Independence Day celebration with live entertainment, food vendors, family activities, and a fireworks show over Apex Community Park. A town tradition since the 1980s.",
+    address:"Apex Community Park, 2200 Laura Duncan Rd",
+    phone:"(919) 249-3300", website:"apexnc.org/4thofjuly",
+    hours:"Annual event (July 4th)",
+    img:"https://picsum.photos/seed/fireworks1/600/400",
+    lat:35.7204, lng:-78.8419, engageType:"in-person", availDays:["Mon","Tue","Wed","Thu","Fri","Sat","Sun"], openTime:"07:00", closeTime:"21:00" },
+  { id:15,
+    name:"Guardian Angel Thrift Store",
+    category:"Food & Hunger",
+    desc:"A nonprofit thrift store raising funds to support local families. Accepts gently used donations and offers affordable clothing, household items, and furniture.",
+    address:"Apex, NC 27502",
+    phone:"(919) 303-1000", website:"guardianangelnc.org",
+    hours:"Mon–Sat 10am–6pm",
+    img:"https://picsum.photos/seed/thriftstore/600/400",
+    lat:35.7268, lng:-78.8590, engageType:"in-person", availDays:["Mon","Tue","Wed","Thu","Fri","Sat"], openTime:"10:00", closeTime:"18:00" },
+  { id:16,
+    name:"Give the Gift of Swim",
+    category:"Youth",
+    desc:"Provides free or reduced-cost swim lessons to underserved children in Apex, building life-saving aquatic skills and breaking down financial barriers.",
+    address:"Apex Area Aquatic Centers",
+    phone:"(919) 249-3300", website:"apexnc.org/swim",
+    hours:"Summer sessions; apply in spring",
+    img:"https://picsum.photos/seed/swimming1/600/400",
+    lat:35.7260, lng:-78.8480, engageType:"in-person", availDays:["Mon","Tue","Wed","Thu","Fri"], openTime:"09:00", closeTime:"17:00" },
+  { id:17,
+    name:"Apex Turkey Trot 5K",
+    category:"Recreation",
+    desc:"Annual Thanksgiving morning run/walk through scenic Apex streets benefiting local charities. Open to all ages and fitness levels — a beloved community tradition.",
+    address:"Downtown Apex, NC 27502",
+    phone:"(919) 249-3300", website:"apexnc.org/turkeytrot",
+    hours:"Annual event (Thanksgiving morning)",
+    img:"https://picsum.photos/seed/running5k/600/400",
+    lat:35.7320, lng:-78.8500, engageType:"in-person", availDays:["Thu"], openTime:"07:00", closeTime:"12:00" },
+  { id:18,
+    name:"Peakfest",
+    category:"Arts & Culture",
+    desc:"Apex's signature downtown street festival celebrating the Piedmont region with live music, local art, food vendors, and family activities each spring in historic downtown Apex.",
+    address:"Downtown Apex, Salem St, Apex, NC 27502",
+    phone:"(919) 249-3300", website:"apexnc.org/peakfest",
+    hours:"Annual (Spring Saturday, 9am–5pm)",
+    img:"https://picsum.photos/seed/peakfest1/600/400",
+    lat:35.7325, lng:-78.8495, engageType:"in-person", availDays:["Sat"], openTime:"09:00", closeTime:"17:00" },
+  { id:19,
+    name:"Apex Senior Center",
+    category:"Seniors",
+    desc:"Offers fitness classes, social programs, day trips, health screenings, and enrichment for adults 55+. A welcoming hub for older adults to connect and stay active.",
+    address:"68 Hunter St, Apex, NC 27502",
+    phone:"(919) 249-3494", website:"apexnc.org/seniors",
+    hours:"Mon–Fri 8am–5pm",
+    img:"https://picsum.photos/seed/seniorctr/600/400",
+    lat:35.7335, lng:-78.8485, engageType:"in-person", availDays:["Mon","Tue","Wed","Thu","Fri"], openTime:"08:00", closeTime:"17:00" },
+  { id:20,
+    name:"Think Apex Day",
+    category:"Volunteer",
+    desc:"Annual community service day (last Saturday in April) where Apex residents volunteer together at parks, nonprofits, and neighborhoods. Everyone welcome — individual or group sign-ups.",
+    address:"Multiple Apex locations",
+    phone:"(919) 249-1122", website:"apexnc.org/thinkapex",
+    hours:"Annual (Last Saturday in April, 9am–2pm)",
+    img:"https://picsum.photos/seed/thinkapex/600/400",
+    lat:35.7290, lng:-78.8520, engageType:"in-person", availDays:["Sat"], openTime:"09:00", closeTime:"14:00" },
+];
+
+// ══════════ STATE ══════════
+let currentFilter = 'All';
+let searchQuery = '';
+let currentPage = 'home';
+let map = null, mapMarkers = [];
+let mapFS = null;
+let surveyAnswers = { who:null, need:[], engage:null, time:null };
+let currentStep = 1;
+
+// ══════════ BACKEND API ══════════
+// Submitted resources are kept in memory and synced with the server.
+// Falls back to localStorage if the API is unreachable (e.g. opening file:// locally).
+const API = '/api/resources';
+let submittedResources = []; // in-memory cache — shared across all users via the server
+
+async function fetchFromAPI() {
+  try {
+    const res = await fetch(API);
+    if (!res.ok) throw new Error('API error');
+    submittedResources = await res.json();
+  } catch {
+    // API not available (local file:// or server down) — fall back to localStorage
+    try { submittedResources = JSON.parse(localStorage.getItem('apex-submissions') || '[]'); } catch { submittedResources = []; }
+  }
+}
+
+async function postToAPI(resource) {
+  try {
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(resource)
+    });
+    if (!res.ok) throw new Error('API error');
+    const saved = await res.json();
+    submittedResources.push(saved);
+    return saved;
+  } catch {
+    // Fallback: save to localStorage
+    submittedResources.push(resource);
+    localStorage.setItem('apex-submissions', JSON.stringify(submittedResources));
+    return resource;
+  }
+}
+
+async function deleteFromAPI(id) {
+  try {
+    const res = await fetch(`${API}/${id}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error('API error');
+  } catch {
+    // Fallback: remove from localStorage
+    localStorage.setItem('apex-submissions', JSON.stringify(submittedResources));
+  }
+  submittedResources = submittedResources.filter(r => r.id !== id);
+}
+
+// Synchronous helpers used throughout the existing code
+function loadSubmitted() { return submittedResources; }
+function saveSubmitted(arr) { submittedResources = arr; } // kept for compatibility
+function getAllResources() {
+  const submitted = loadSubmitted();
+  return [...BASE_RESOURCES, ...submitted];
+}
+
+// ══════════ BACKGROUND CANVAS ══════════
+(function() {
+  const canvas = document.getElementById('bg-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H;
+  const blobs = [];
+  function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+  function mkBlob(i) { return { x:Math.random()*W, y:Math.random()*H, r:100+Math.random()*180, vx:(Math.random()-.5)*.4, vy:(Math.random()-.5)*.4, hue:[195,172,158,35,20][i%5], alpha:.05+Math.random()*.05 }; }
+  resize(); for(let i=0;i<6;i++) blobs.push(mkBlob(i));
+  window.addEventListener('resize', resize);
+  function draw() {
+    ctx.clearRect(0,0,W,H);
+    blobs.forEach(b=>{
+      b.x+=b.vx; b.y+=b.vy;
+      if(b.x<-b.r) b.x=W+b.r; if(b.x>W+b.r) b.x=-b.r;
+      if(b.y<-b.r) b.y=H+b.r; if(b.y>H+b.r) b.y=-b.r;
+      const g=ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,b.r);
+      g.addColorStop(0,`hsla(${b.hue},80%,65%,${b.alpha})`);
+      g.addColorStop(1,`hsla(${b.hue},80%,65%,0)`);
+      ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ══════════ NAVIGATION ══════════
+function goTo(page, noTransition) {
+  if(page === currentPage) return;
+  const pt = document.getElementById('pt');
+  if(!noTransition) {
+    pt.classList.add('in');
+    setTimeout(()=>{ switchPage(page); pt.classList.remove('in'); pt.classList.add('out'); setTimeout(()=>pt.classList.remove('out'),400); },340);
+  } else { switchPage(page); }
+}
+function switchPage(page) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.querySelectorAll('.nav-links button').forEach(b=>b.classList.remove('active'));
+  const btn = document.getElementById('nav-'+page);
+  if(btn) btn.classList.add('active');
+  currentPage = page;
+  window.scrollTo(0,0);
+  if(page==='hub') {
+    // Render cards first (no map dependency)
+    renderResources();
+    // Then init map separately — retries until Leaflet CDN is ready
+    scheduleMapInit();
+  }
+  if(page==='reference') renderExternalSources();
+  setupReveal();
+}
+window.addEventListener('scroll',()=>{ document.getElementById('main-nav').classList.toggle('scrolled',window.scrollY>10); });
+
+// ══════════ SCROLL REVEAL ══════════
+function setupReveal() {
+  const els = document.querySelectorAll('.page.active .reveal,.page.active .reveal-left,.page.active .reveal-scale');
+  const obs = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){ e.target.classList.add('visible'); e.target.classList.remove('exit'); }
+      else { if(e.target.getBoundingClientRect().top<0){ e.target.classList.add('exit'); e.target.classList.remove('visible'); } else { e.target.classList.remove('visible','exit'); } }
+    });
+  },{ threshold:.1 });
+  els.forEach(el=>obs.observe(el));
+}
+
+// ══════════ SPOTLIGHT ══════════
+function renderSpotlight() {
+  const grid = document.getElementById('spotlight-grid');
+  const spots = BASE_RESOURCES.filter(r=>r.spotlight).slice(0,3);
+  grid.innerHTML = spots.map((r,i)=>{
+    const c = CATS[r.category];
+    const bg = CAT_BG[r.category] || 'linear-gradient(135deg,#1d4e89,#00b2ca)';
+    return `<div class="spotlight-card reveal" style="transition-delay:${i*.1}s" onclick="openModal(${r.id})">
+      <div class="sc-img-wrap">
+        <div class="card-img-banner" style="height:210px;background:${bg}">
+          <div class="card-img-banner-icon">${c.icon}</div>
+          <div class="card-img-banner-label">${r.name}</div>
+        </div>
+        <div class="sc-cat-badge chip">${c.icon} ${r.category}</div>
+      </div>
+      <div class="sc-body">
+        <div class="sc-title">${r.name}</div>
+        <div class="sc-desc">${r.desc}</div>
+        <div class="sc-addr">📍 ${r.address}</div>
+      </div>
+    </div>`;
+  }).join('');
+  setupReveal();
+}
+
+// ══════════ CATEGORY QUICK NAV ══════════
+function renderCatQuick() {
+  const grid = document.getElementById('cat-quick-grid');
+  grid.innerHTML = Object.entries(CATS).map(([name,c],i)=>{
+    const count = getAllResources().filter(r=>r.category===name).length;
+    return `<button onclick="goTo('hub');setTimeout(()=>filterBy('${name}'),420)"
+      class="reveal" style="transition-delay:${i*.05}s;background:white;border:2px solid rgba(29,78,137,.08);
+      border-radius:var(--radius-md);padding:18px 14px;cursor:pointer;transition:all .25s;text-align:center;font-family:'Lato',sans-serif"
+      onmouseover="this.style.borderColor='var(--sky)';this.style.transform='translateY(-3px)';this.style.boxShadow='var(--shadow)'"
+      onmouseout="this.style.borderColor='rgba(29,78,137,.08)';this.style.transform='';this.style.boxShadow=''">
+      <div style="font-size:1.8rem;margin-bottom:7px">${c.icon}</div>
+      <div style="font-weight:800;font-size:12px;color:var(--navy);margin-bottom:3px">${name}</div>
+      <div style="font-size:11px;font-weight:700;color:var(--muted)">${count} resource${count!==1?'s':''}</div>
+    </button>`;
+  }).join('');
+  setupReveal();
+}
+
+// ══════════ RESOURCE HUB ══════════
+function setFilter(btn) {
+  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  currentFilter = btn.dataset.cat;
+  filterResources();
+}
+function filterBy(cat) {
+  currentFilter = cat;
+  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.toggle('active', c.dataset.cat===cat||(cat==='All'&&c.dataset.cat==='All')));
+  filterResources();
+}
+function filterResources() {
+  searchQuery = (document.getElementById('search-input')?.value||'').toLowerCase();
+  renderResources();
+}
+function getFiltered() {
+  const all = getAllResources();
+  return all.filter(r=>{
+    const matchCat = currentFilter==='All' || r.category===currentFilter;
+    const matchSearch = !searchQuery ||
+      r.name.toLowerCase().includes(searchQuery) ||
+      r.desc.toLowerCase().includes(searchQuery) ||
+      r.category.toLowerCase().includes(searchQuery) ||
+      r.address.toLowerCase().includes(searchQuery);
+    return matchCat && matchSearch;
+  });
+}
+function renderResources() {
+  const filtered = getFiltered();
+  const grid = document.getElementById('resource-grid');
+  const badge = document.getElementById('filter-count');
+  if(badge) badge.textContent = filtered.length;
+  if(!filtered.length) {
+    grid.innerHTML = `<div class="no-results"><div style="font-size:2.5rem;margin-bottom:10px">🔍</div><h3>No results found</h3><p>Try a different search term or filter.</p></div>`;
+  } else {
+    grid.innerHTML = filtered.map(r=>{
+      const c = CATS[r.category] || CATS['Volunteer'];
+      const bg = CAT_BG[r.category] || 'linear-gradient(135deg,#1d4e89,#00b2ca)';
+      const isNew = r.isUserSubmitted;
+      return `<div class="resource-card" onclick="openModal(${r.id})">
+        <div class="rc-img-wrap">
+          <div class="card-img-banner" style="height:170px;background:${bg}">
+            <div class="card-img-banner-icon">${c.icon}</div>
+            <div class="card-img-banner-label">${r.name}</div>
+          </div>
+        </div>
+        <div class="rc-body">
+          <div class="rc-cat"><span class="chip" style="background:${c.bg};color:${c.color}">${c.icon} ${r.category}</span>${isNew?'<span class="new-badge">NEW</span>':''}</div>
+          <div class="rc-title">${r.name}</div>
+          <div class="rc-desc">${r.desc}</div>
+          <div class="rc-addr">📍 ${r.address}</div>
+          <div class="rc-actions">
+            <button class="rc-more-btn">More Info →</button>
+            <button class="rc-delete-btn" onclick="event.stopPropagation();adminDeleteResource(${r.id})">🗑 Delete</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  updateMapMarkers(filtered);
+  // Reapply admin mode class if active
+  if (isAdmin) {
+    const grid = document.getElementById('resource-grid');
+    if (grid) grid.classList.add('admin-mode-active');
+  }
+}
+
+// ══════════ HUB VIEW TOGGLE ══════════
+let currentHubView = 'list';
+let mapFullpage = null;
+
+function switchHubView(view) {
+  currentHubView = view;
+  document.getElementById('tab-list').classList.toggle('active', view === 'list');
+  document.getElementById('tab-map').classList.toggle('active', view === 'map');
+  document.getElementById('hub-list-view').classList.toggle('hidden', view === 'map');
+  document.getElementById('hub-filters').style.display = view === 'list' ? '' : 'none';
+  const mapView = document.getElementById('hub-map-view');
+  mapView.classList.toggle('active', view === 'map');
+
+  if (view === 'map') {
+    // Build the category legend
+    const legend = document.getElementById('map-legend-cats');
+    if (legend && !legend.innerHTML) {
+      legend.innerHTML = Object.entries(CATS).map(([name, c]) =>
+        `<span style="display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;background:white;box-shadow:0 2px 8px rgba(29,78,137,.08);color:var(--navy)">${c.icon} ${name}</span>`
+      ).join('');
+    }
+    scheduleFullpageMapInit();
+  }
+}
+
+function scheduleFullpageMapInit() {
+  if (mapFullpage) { setTimeout(() => mapFullpage.invalidateSize(), 100); return; }
+  if (typeof L === 'undefined') { setTimeout(scheduleFullpageMapInit, 150); return; }
+  setTimeout(initFullpageMap, 50);
+}
+
+function initFullpageMap() {
+  if (typeof L === 'undefined') { setTimeout(scheduleFullpageMapInit, 150); return; }
+  if (mapFullpage) { mapFullpage.invalidateSize(); return; }
+  try {
+    mapFullpage = L.map('map-fullpage').setView([35.7290, -78.8520], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors', maxZoom: 18
+    }).addTo(mapFullpage);
+    getAllResources().forEach(r => {
+      if (!r.lat || !r.lng) return;
+      const c = CATS[r.category] || CATS['Volunteer'];
+      const icon = L.divIcon({
+        className: '',
+        html: `<div style="width:36px;height:36px;background:${c.hex};border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(0,0,0,.25);border:2px solid white;"><span style="transform:rotate(45deg);font-size:15px">${c.icon}</span></div>`,
+        iconSize: [36, 36], iconAnchor: [18, 36], popupAnchor: [0, -38]
+      });
+      L.marker([r.lat, r.lng], { icon }).addTo(mapFullpage)
+        .bindPopup(`<div style="font-family:'Lato',sans-serif;min-width:190px">
+          <div style="font-weight:800;font-size:14px;color:#1d4e89;margin-bottom:4px">${r.name}</div>
+          <div style="font-size:11px;color:#5a7a99;margin-bottom:4px">${c.icon} ${r.category}</div>
+          <div style="font-size:11px;color:#5a7a99;margin-bottom:8px">${r.address}</div>
+          <button onclick="openModal(${r.id})" style="font-family:'Lato',sans-serif;font-size:11px;font-weight:700;background:#00b2ca;color:white;border:none;padding:6px 13px;border-radius:14px;cursor:pointer">View Details</button>
+        </div>`, { maxWidth: 230 });
+    });
+  } catch(err) {
+    mapFullpage = null;
+    setTimeout(scheduleFullpageMapInit, 300);
+  }
+}
+
+// ══════════ MAP ══════════
+function scheduleMapInit() {
+  if(map) {
+    // Already initialized — just refresh markers
+    filterResources();
+    return;
+  }
+  if(typeof L === 'undefined') {
+    // Leaflet CDN not ready yet — retry in 150ms
+    setTimeout(scheduleMapInit, 150);
+    return;
+  }
+  // Leaflet is available and map div should be visible now
+  setTimeout(initMap, 50);
+}
+function initMap() {
+  if(typeof L === 'undefined') { setTimeout(scheduleMapInit, 150); return; }
+  if(map) { filterResources(); return; }
+  try {
+    map = L.map('map').setView([35.7290,-78.8520],13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{ attribution:'© OpenStreetMap contributors', maxZoom:18 }).addTo(map);
+    filterResources(); // now safe to add markers
+  } catch(err) {
+    console.warn('Map init failed, retrying…', err);
+    map = null;
+    setTimeout(scheduleMapInit, 300);
+  }
+}
+function updateMapMarkers(filtered) {
+  if(!map || typeof L === 'undefined') return;
+  mapMarkers.forEach(m=>m.remove()); mapMarkers=[];
+  filtered.forEach(r=>{
+    if(!r.lat||!r.lng) return;
+    const c = CATS[r.category]||CATS['Volunteer'];
+    const icon = L.divIcon({ className:'',
+      html:`<div style="width:34px;height:34px;background:${c.hex};border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(0,0,0,.25);border:2px solid white;"><span style="transform:rotate(45deg);font-size:15px">${c.icon}</span></div>`,
+      iconSize:[34,34],iconAnchor:[17,34],popupAnchor:[0,-36]
+    });
+    const m = L.marker([r.lat,r.lng],{icon}).addTo(map)
+      .bindPopup(`<div style="font-family:'Lato',sans-serif;min-width:170px">
+        <div style="font-weight:800;font-size:13px;color:#1d4e89;margin-bottom:3px">${r.name}</div>
+        <div style="font-size:11px;color:#5a7a99;margin-bottom:7px">${r.address}</div>
+        <button onclick="openModal(${r.id})" style="font-family:'Lato',sans-serif;font-size:11px;font-weight:700;background:#00b2ca;color:white;border:none;padding:5px 12px;border-radius:14px;cursor:pointer">View Details</button>
+      </div>`,{maxWidth:210});
+    mapMarkers.push(m);
+  });
+}
+function openFSMap() {
+  if(typeof L === 'undefined') { showToast('⚠️ Map is still loading, try again in a moment'); return; }
+  document.getElementById('map-fs-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+  if(!mapFS) {
+    setTimeout(()=>{
+      mapFS = L.map('map-fs').setView([35.7290,-78.8520],13);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap contributors',maxZoom:18}).addTo(mapFS);
+      getFiltered().forEach(r=>{
+        if(!r.lat||!r.lng) return;
+        const c=CATS[r.category]||CATS['Volunteer'];
+        const icon=L.divIcon({className:'',html:`<div style="width:38px;height:38px;background:${c.hex};border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 14px rgba(0,0,0,.25);border:2px solid white;"><span style="transform:rotate(45deg);font-size:17px">${c.icon}</span></div>`,iconSize:[38,38],iconAnchor:[19,38],popupAnchor:[0,-40]});
+        L.marker([r.lat,r.lng],{icon}).addTo(mapFS).bindPopup(`<div style="font-family:'Lato',sans-serif;min-width:190px"><div style="font-weight:800;font-size:14px;color:#1d4e89;margin-bottom:4px">${r.name}</div><div style="font-size:12px;color:#5a7a99;margin-bottom:8px">${r.address}</div><button onclick="closeFSMap();openModal(${r.id})" style="font-family:'Lato',sans-serif;font-size:11px;font-weight:700;background:#00b2ca;color:white;border:none;padding:6px 13px;border-radius:14px;cursor:pointer">View Details</button></div>`,{maxWidth:220});
+      });
+    },150);
+  } else { setTimeout(()=>mapFS.invalidateSize(),100); }
+}
+function closeFSMap(e) {
+  if(e && e.target!==document.getElementById('map-fs-overlay')) return;
+  document.getElementById('map-fs-overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+// ══════════ ADMIN MODE ══════════
+const ADMIN_PASSWORD = 'ApexAdmin2026';
+let isAdmin = false;
+let pendingDeleteId = null;
+
+function openAdminLogin() {
+  if (isAdmin) { exitAdmin(); return; }
+  document.getElementById('admin-login-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => document.getElementById('admin-pw-input').focus(), 100);
+}
+
+function closeAdminLogin() {
+  document.getElementById('admin-login-overlay').classList.remove('open');
+  document.getElementById('admin-pw-input').value = '';
+  document.getElementById('admin-error').classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+function closeAdminLoginOuter(e) {
+  if (e.target === document.getElementById('admin-login-overlay')) closeAdminLogin();
+}
+
+function toggleAdminPw() {
+  const inp = document.getElementById('admin-pw-input');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+function attemptAdminLogin() {
+  const pw = document.getElementById('admin-pw-input').value;
+  if (pw === ADMIN_PASSWORD) {
+    isAdmin = true;
+    closeAdminLogin();
+    activateAdminMode();
+  } else {
+    const err = document.getElementById('admin-error');
+    err.classList.add('show');
+    document.getElementById('admin-pw-input').value = '';
+    document.getElementById('admin-pw-input').focus();
+    setTimeout(() => err.classList.remove('show'), 3000);
+  }
+}
+
+function activateAdminMode() {
+  document.getElementById('admin-bar').classList.add('active');
+  document.getElementById('admin-nav-btn').textContent = '🔓 Admin ON';
+  document.getElementById('admin-nav-btn').style.borderColor = 'rgba(231,76,60,.6)';
+  document.getElementById('admin-nav-btn').style.color = '#e74c3c';
+  document.getElementById('admin-nav-btn').style.fontWeight = '800';
+  // Add admin-mode-active class to resource grid so delete buttons show
+  const grid = document.getElementById('resource-grid');
+  if (grid) grid.classList.add('admin-mode-active');
+  // Re-render so delete buttons appear
+  if (currentPage === 'hub') filterResources();
+  showToast('🔓 Admin mode active — you can now delete resources');
+}
+
+function exitAdmin() {
+  isAdmin = false;
+  document.getElementById('admin-bar').classList.remove('active');
+  document.getElementById('admin-nav-btn').textContent = '🔒 Admin';
+  document.getElementById('admin-nav-btn').style.borderColor = 'rgba(231,76,60,.25)';
+  document.getElementById('admin-nav-btn').style.color = '#c0392b';
+  document.getElementById('admin-nav-btn').style.fontWeight = '700';
+  const grid = document.getElementById('resource-grid');
+  if (grid) grid.classList.remove('admin-mode-active');
+  if (currentPage === 'hub') filterResources();
+  closeModal();
+  showToast('🔒 Exited admin mode');
+}
+
+function adminDeleteResource(id) {
+  pendingDeleteId = id;
+  const all = getAllResources();
+  const r = all.find(x => x.id === id);
+  if (!r) return;
+  const isBase = BASE_RESOURCES.some(x => x.id === id);
+  document.getElementById('delete-confirm-text').innerHTML =
+    `You are about to permanently remove <strong>"${r.name}"</strong> from the hub.${isBase ? '<br><br><span style="color:#e74c3c;font-weight:700">⚠️ This is a built-in resource. It will be hidden for this session only.</span>' : '<br><br>This resource was user-submitted and will be permanently removed.'}`;
+  document.getElementById('delete-confirm-btn').onclick = () => confirmDelete();
+  document.getElementById('delete-confirm-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+async function confirmDelete() {
+  if (!pendingDeleteId) return;
+  const id = pendingDeleteId;
+  const isBase = BASE_RESOURCES.some(x => x.id === id);
+
+  if (isBase) {
+    // Hide base resources in sessionStorage (resets on refresh by design)
+    const hidden = JSON.parse(sessionStorage.getItem('apex-hidden') || '[]');
+    if (!hidden.includes(id)) hidden.push(id);
+    sessionStorage.setItem('apex-hidden', JSON.stringify(hidden));
+  } else {
+    // Delete from server (and localStorage fallback)
+    await deleteFromAPI(id);
+  }
+
+  closeDeleteConfirm();
+  closeModal();
+  pendingDeleteId = null;
+  filterResources();
+  renderCatQuick();
+  renderExternalSources();
+  showToast('🗑 Resource removed successfully');
+}
+
+function closeDeleteConfirm() {
+  document.getElementById('delete-confirm-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function closeDeleteConfirmOuter(e) {
+  if (e.target === document.getElementById('delete-confirm-overlay')) closeDeleteConfirm();
+}
+
+// Override getAllResources to respect hidden list
+function getAllResources() {
+  const hidden = JSON.parse(sessionStorage.getItem('apex-hidden') || '[]');
+  const submitted = loadSubmitted();
+  return [...BASE_RESOURCES, ...submitted].filter(r => !hidden.includes(r.id));
+}
+
+// ══════════ MODAL ══════════
+function openModal(id) {
+  const all = getAllResources();
+  const r = all.find(x=>x.id===id); if(!r) return;
+  const c = CATS[r.category]||CATS['Volunteer'];
+  const bg = CAT_BG[r.category] || 'linear-gradient(135deg,#1d4e89,#00b2ca)';
+  document.getElementById('m-img-wrap').innerHTML =
+    `<div class="card-img-banner" style="height:220px;background:${bg}">
+      <div class="card-img-banner-icon" style="font-size:3.5rem">${c.icon}</div>
+      <div class="card-img-banner-label" style="font-size:16px">${r.name}</div>
+    </div>`;
+  document.getElementById('m-cat').innerHTML = `<span class="chip" style="background:${c.bg};color:${c.color}">${c.icon} ${r.category}</span>`;
+  document.getElementById('m-title').textContent = r.name;
+  document.getElementById('m-desc').textContent = r.desc;
+  document.getElementById('m-addr').textContent = r.address;
+  document.getElementById('m-phone').textContent = r.phone || 'Not available';
+  document.getElementById('m-web').innerHTML = r.website ? `<a href="https://${r.website.replace('https://','')}" target="_blank" style="color:var(--sky)">${r.website}</a>` : 'Not available';
+  document.getElementById('m-hours').textContent = formatHoursDisplay(r);
+  // Show engage type badge
+  const engageLabels = { 'in-person':'🏃 In-Person','online':'💻 Online','both':'🔄 Both','walkIn':'🚶 Walk-In' };
+  const engageEl = document.getElementById('m-engage');
+  if (engageEl) {
+    engageEl.textContent = r.engageType ? engageLabels[r.engageType] || '' : '';
+    engageEl.style.display = r.engageType ? 'inline-flex' : 'none';
+  }
+  // Show delete button only in admin mode
+  const delBtn = document.getElementById('m-delete-btn');
+  if (delBtn) delBtn.style.display = isAdmin ? 'inline-flex' : 'none';
+  if (delBtn) delBtn.onclick = () => adminDeleteResource(r.id);
+  document.getElementById('resource-modal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeModal() { document.getElementById('resource-modal').classList.remove('open'); document.body.style.overflow=''; }
+function closeModalOuter(e) { if(e.target===document.getElementById('resource-modal')) closeModal(); }
+
+// ══════════ SURVEY ══════════
+function selectOpt(btn, key, multi) {
+  if(!multi) {
+    btn.closest('.survey-options').querySelectorAll('.survey-opt').forEach(b=>b.classList.remove('selected'));
+    btn.classList.add('selected'); surveyAnswers[key]=btn.dataset.val;
+  } else {
+    btn.classList.toggle('selected');
+    const v=btn.dataset.val, idx=surveyAnswers[key].indexOf(v);
+    if(idx===-1) surveyAnswers[key].push(v); else surveyAnswers[key].splice(idx,1);
+  }
+}
+function nextStep(from) {
+  if(from<4){ document.getElementById('step-'+from).classList.remove('active'); document.getElementById('step-'+(from+1)).classList.add('active'); currentStep=from+1; updateProg(); }
+}
+function prevStep(from) {
+  if(from>1){ document.getElementById('step-'+from).classList.remove('active'); document.getElementById('step-'+(from-1)).classList.add('active'); currentStep=from-1; updateProg(); }
+}
+function updateProg() {
+  document.querySelectorAll('#survey-progress .progress-dot').forEach((d,i)=>{ d.classList.remove('done','current'); if(i<currentStep-1) d.classList.add('done'); else if(i===currentStep-1) d.classList.add('current'); });
+}
+function showResults() {
+  document.getElementById('step-4').classList.remove('active');
+  document.getElementById('step-results').classList.add('active');
+  document.querySelectorAll('#survey-progress .progress-dot').forEach(d=>d.classList.add('done'));
+
+  const needs   = surveyAnswers.need.length ? surveyAnswers.need : Object.keys(CATS);
+  const engage  = surveyAnswers.engage;  // 'in-person' | 'online' | 'both' | 'walkIn' | null
+  const timeSlot= surveyAnswers.time;    // 'weekday-morning' | 'weekday-evening' | 'weekend' | 'anytime' | null
+
+  // Day sets for time matching
+  const weekdays = ['Mon','Tue','Wed','Thu','Fri'];
+  const weekends = ['Sat','Sun'];
+
+  function engageMatch(r) {
+    if (!engage || !r.engageType) return true; // no filter if not specified
+    if (engage === 'both') return true; // "both are fine" matches everything
+    if (r.engageType === 'both') return true; // resource offers both, matches any preference
+    return r.engageType === engage;
+  }
+
+  function timeMatch(r) {
+    if (!timeSlot || timeSlot === 'anytime' || !r.availDays) return true;
+    if (timeSlot === 'weekend') return r.availDays.some(d => weekends.includes(d));
+    if (timeSlot === 'weekday-morning' || timeSlot === 'weekday-evening') {
+      const hasWeekday = r.availDays.some(d => weekdays.includes(d));
+      if (!hasWeekday) return false;
+      if (!r.openTime || !r.closeTime) return true;
+      const open  = parseInt(r.openTime.split(':')[0]);
+      const close = parseInt(r.closeTime.split(':')[0]);
+      if (timeSlot === 'weekday-morning') return open <= 12;
+      if (timeSlot === 'weekday-evening') return close >= 17;
+    }
+    return true;
+  }
+
+  // Score each resource: category match (required) + engage match + time match
+  let pool = getAllResources().filter(r => needs.includes(r.category));
+
+  // Boost by who
+  if (surveyAnswers.who === 'senior')    pool = [...getAllResources().filter(r=>['Seniors','Health','Recreation'].includes(r.category)), ...pool];
+  if (surveyAnswers.who === 'child' || surveyAnswers.who === 'family') pool = [...getAllResources().filter(r=>['Youth','Education','Recreation'].includes(r.category)), ...pool];
+  if (surveyAnswers.who === 'immigrant') pool = [...getAllResources().filter(r=>r.category==='Immigration'), ...pool];
+
+  // Deduplicate then score
+  const seen = new Set();
+  const unique = pool.filter(r => { if(seen.has(r.id)) return false; seen.add(r.id); return true; });
+
+  // Sort: exact engage+time matches first, then partial, then rest
+  const scored = unique.map(r => {
+    let score = 0;
+    if (engageMatch(r)) score += 2;
+    if (timeMatch(r))   score += 2;
+    return { r, score };
+  }).sort((a, b) => b.score - a.score);
+
+  document.getElementById('results-grid').innerHTML = scored.slice(0, 6).map(({ r }) => {
+    const c  = CATS[r.category] || CATS['Volunteer'];
+    const bg = CAT_BG[r.category] || 'linear-gradient(135deg,#1d4e89,#00b2ca)';
+    const engageLabels = { 'in-person':'🏃 In-Person','online':'💻 Online','both':'🔄 Both','walkIn':'🚶 Walk-In' };
+    const engagePill = r.engageType ? `<span style="font-size:10px;font-weight:700;color:var(--sky);background:rgba(0,178,202,.1);padding:2px 8px;border-radius:12px;display:inline-block;margin-top:4px">${engageLabels[r.engageType]||''}</span>` : '';
+    return `<div class="result-card" onclick="openModal(${r.id})">
+      <div class="card-img-banner" style="height:110px;background:${bg}">
+        <div class="card-img-banner-icon" style="font-size:2rem">${c.icon}</div>
+      </div>
+      <div class="result-card-body">
+        <div class="result-card-cat">${c.icon} ${r.category}</div>
+        <div class="result-card-title">${r.name}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px;font-weight:500">${r.address.split(',')[0]}</div>
+        ${engagePill}
+      </div>
+    </div>`;
+  }).join('');
+}
+function resetSurvey() {
+  surveyAnswers={who:null,need:[],engage:null,time:null}; currentStep=1;
+  document.querySelectorAll('.survey-step').forEach(s=>s.classList.remove('active'));
+  document.getElementById('step-1').classList.add('active');
+  document.querySelectorAll('.survey-opt').forEach(o=>o.classList.remove('selected'));
+  updateProg();
+}
+
+// ══════════ STRUCTURED HOURS & ENGAGE FORM HELPERS ══════════
+function buildTimeOptions() {
+  const selects = [document.getElementById('f-open-time'), document.getElementById('f-close-time')];
+  const times = [];
+  for (let h = 6; h <= 23; h++) {
+    ['00','30'].forEach(m => {
+      const hour12 = h > 12 ? h - 12 : h === 0 ? 12 : h;
+      const ampm = h < 12 ? 'AM' : 'PM';
+      times.push({ val: `${String(h).padStart(2,'0')}:${m}`, label: `${hour12}:${m} ${ampm}` });
+    });
+  }
+  selects.forEach(sel => {
+    if (!sel) return;
+    const placeholder = sel.id === 'f-open-time' ? 'Open time…' : 'Close time…';
+    sel.innerHTML = `<option value="">${placeholder}</option>` +
+      times.map(t => `<option value="${t.val}">${t.label}</option>`).join('');
+  });
+}
+
+function selectEngage(btn) {
+  document.querySelectorAll('.engage-opt').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function toggleDay(btn) {
+  btn.classList.toggle('selected');
+}
+
+function getSelectedDays() {
+  return [...document.querySelectorAll('.day-btn.selected')].map(b => b.dataset.day);
+}
+
+function getSelectedEngage() {
+  const btn = document.querySelector('.engage-opt.selected');
+  return btn ? btn.dataset.val : null;
+}
+
+function formatHoursDisplay(r) {
+  if (r.hoursSpecial) return r.hoursSpecial;
+  if (!r.availDays || !r.availDays.length) return r.hours || 'See website for hours';
+  const dayStr = r.availDays.length === 7 ? 'Daily' : r.availDays.join(', ');
+  if (!r.openTime || !r.closeTime) return dayStr;
+  const fmt = t => {
+    const [h, m] = t.split(':').map(Number);
+    const h12 = h > 12 ? h - 12 : h === 0 ? 12 : h;
+    return `${h12}:${String(m).padStart(2,'0')} ${h < 12 ? 'AM' : 'PM'}`;
+  };
+  return `${dayStr}, ${fmt(r.openTime)} – ${fmt(r.closeTime)}`;
+}
+
+function resetFormHours() {
+  document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('selected'));
+  document.querySelectorAll('.engage-opt').forEach(b => b.classList.remove('selected'));
+  document.getElementById('f-open-time').value = '';
+  document.getElementById('f-close-time').value = '';
+  document.getElementById('f-hours-varies').checked = false;
+  document.getElementById('f-hours-appt').checked = false;
+  document.getElementById('f-hours-24').checked = false;
+}
+
+// ══════════ ADDRESS VALIDATION ══════════
+function validateAddress(input) {
+  const val  = input.value.trim();
+  const hint = document.getElementById('f-addr-hint');
+  if (!val) { hint.style.display = 'none'; input.style.borderColor = ''; return; }
+  const hasStreet = /\d+/.test(val);
+  const hasApex   = /apex/i.test(val);
+  const hasNC     = /\bNC\b|north carolina/i.test(val);
+  if (!hasStreet) {
+    hint.style.display = 'block'; hint.style.color = '#e67e22';
+    hint.innerHTML = '⚠️ Include a street number (e.g. <em>1600 Olive Chapel Rd</em>)';
+    input.style.borderColor = '';
+  } else if (!hasApex || !hasNC) {
+    hint.style.display = 'block'; hint.style.color = '#e67e22';
+    hint.innerHTML = '⚠️ Address should include <strong>Apex, NC</strong> — e.g. <em>826 E Williams St, Apex, NC 27502</em>';
+    input.style.borderColor = '';
+  } else {
+    hint.style.display = 'block'; hint.style.color = '#2a8a6a';
+    hint.innerHTML = '✓ Looks good! This address will be pinned on the map.';
+    input.style.borderColor = 'var(--mint)';
+  }
+}
+
+// ══════════ SUBMIT FORM (localStorage + Nominatim geocoding) ══════════
+async function submitForm() {
+  const name       = document.getElementById('f-name').value.trim();
+  const cat        = document.getElementById('f-cat').value;
+  const addr       = document.getElementById('f-addr').value.trim();
+  const desc       = document.getElementById('f-desc').value.trim();
+  const sub        = document.getElementById('f-submitter').value.trim();
+  const email      = document.getElementById('f-email').value.trim();
+  const engageType = getSelectedEngage();
+
+  if (!name||!cat||!addr||!desc||!sub||!email) { showToast('⚠️ Please fill in all required fields'); return; }
+  if (!engageType) { showToast('⚠️ Please select an engagement type'); return; }
+
+  const hasStreet = /\d+/.test(addr);
+  const hasApex   = /apex/i.test(addr);
+  const hasNC     = /\bNC\b|north carolina/i.test(addr);
+  if (!hasStreet || !hasApex || !hasNC) {
+    const hint = document.getElementById('f-addr-hint');
+    hint.style.display = 'block'; hint.style.color = '#e74c3c';
+    hint.innerHTML = '❌ Please enter a full address with a street number and <strong>Apex, NC</strong>';
+    document.getElementById('f-addr').focus();
+    return;
+  }
+
+  // Collect structured hours
+  const days       = getSelectedDays();
+  const openTime   = document.getElementById('f-open-time').value;
+  const closeTime  = document.getElementById('f-close-time').value;
+  const varies     = document.getElementById('f-hours-varies').checked;
+  const appt       = document.getElementById('f-hours-appt').checked;
+  const h24        = document.getElementById('f-hours-24').checked;
+  let hoursSpecial = null;
+  if (h24)         hoursSpecial = 'Open 24/7';
+  else if (appt)   hoursSpecial = 'By appointment only';
+  else if (varies) hoursSpecial = 'Hours vary by season';
+
+  // Lock submit button while geocoding
+  const btn = document.getElementById('f-submit-btn');
+  btn.disabled = true; btn.textContent = '🔍 Locating on map…'; btn.style.opacity = '0.75';
+
+  // Geocode — hard 9s deadline so the button ALWAYS restores no matter what
+  let lat = null, lng = null;
+  const geocodeWithTimeout = (url, opts = {}, ms = 4000) => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), ms);
+    return fetch(url, { ...opts, signal: controller.signal })
+      .finally(() => clearTimeout(timer));
+  };
+  const hardDeadline = new Promise(resolve => setTimeout(resolve, 9000));
+  await Promise.race([
+    (async () => {
+      try {
+        const q = encodeURIComponent(addr + ', USA');
+        const nominatimUrl = `https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1`;
+        let data;
+        try {
+          const res = await geocodeWithTimeout(nominatimUrl,
+            { headers: { 'Accept-Language':'en', 'User-Agent':'ApexResourceHub/1.0' } });
+          data = await res.json();
+        } catch {
+          const res = await geocodeWithTimeout(
+            `https://corsproxy.io/?url=${encodeURIComponent(nominatimUrl)}`, {}, 4000);
+          data = await res.json();
+        }
+        if (data && data.length > 0) {
+          lat = parseFloat(data[0].lat);
+          lng = parseFloat(data[0].lon);
+        }
+      } catch { /* geocoding unavailable — saves without pin */ }
+    })(),
+    hardDeadline
+  ]);
+
+  btn.disabled = false; btn.textContent = '➕ Submit Resource'; btn.style.opacity = '';
+
+  const catImages = {
+    'Food & Hunger':'https://picsum.photos/seed/foodpantry1/600/400',
+    'Housing':'https://picsum.photos/seed/housinghelp/600/400',
+    'Health':'https://picsum.photos/seed/redcross1/600/400',
+    'Education':'https://picsum.photos/seed/education1/600/400',
+    'Arts & Culture':'https://picsum.photos/seed/artsshow/600/400',
+    'Youth':'https://picsum.photos/seed/youthcamp/600/400',
+    'Seniors':'https://picsum.photos/seed/seniorctr/600/400',
+    'Environment':'https://picsum.photos/seed/earthfest1/600/400',
+    'Immigration':'https://picsum.photos/seed/community1/600/400',
+    'Recreation':'https://picsum.photos/seed/running5k/600/400',
+    'Volunteer':'https://picsum.photos/seed/volunteers1/600/400',
+  };
+  const newId = Date.now();
+  const newResource = {
+    id: newId, name, category: cat, desc, address: addr,
+    phone:    document.getElementById('f-phone').value.trim() || 'Not available',
+    website:  document.getElementById('f-web').value.trim() || '',
+    img:      catImages[cat] || catImages['Volunteer'],
+    lat, lng,
+    engageType,
+    availDays:    days.length ? days : null,
+    openTime:     openTime  || null,
+    closeTime:    closeTime || null,
+    hoursSpecial: hoursSpecial,
+    isUserSubmitted: true,
+    submittedBy:  sub,
+    submittedEmail: email,
+    submittedDate: new Date().toLocaleDateString()
+  };
+
+  // Save to server (falls back to localStorage automatically if offline)
+  const saved = await postToAPI(newResource);
+
+  // Success message reflects whether map pin was found
+  const successMsg = document.querySelector('#form-success p');
+  if (successMsg) successMsg.textContent = lat
+    ? 'Saved and added to the hub — your resource is now pinned on the map! 📍'
+    : 'Saved and added to the hub! (Could not locate address on map — check the address and resubmit if needed.)';
+  document.getElementById('form-success').style.display = 'block';
+  document.getElementById('form-success').scrollIntoView({ behavior:'smooth', block:'nearest' });
+
+  // Live-add pin to any open maps
+  if (map && lat) { filterResources(); }
+  if (mapFullpage && lat && lng && typeof L !== 'undefined') {
+    const c = CATS[cat] || CATS['Volunteer'];
+    const icon = L.divIcon({ className:'',
+      html:`<div style="width:36px;height:36px;background:${c.hex};border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(0,0,0,.25);border:2px solid white;"><span style="transform:rotate(45deg);font-size:15px">${c.icon}</span></div>`,
+      iconSize:[36,36], iconAnchor:[18,36], popupAnchor:[0,-38]
+    });
+    L.marker([lat,lng],{icon}).addTo(mapFullpage)
+      .bindPopup(`<div style="font-family:'Lato',sans-serif;min-width:190px"><div style="font-weight:700;font-size:14px;color:#1d4e89;margin-bottom:4px">${name}</div><div style="font-size:11px;color:#5a7a99;margin-bottom:8px">${addr}</div><button onclick="openModal(${saved.id})" style="font-family:'Lato',sans-serif;font-size:11px;font-weight:700;background:#00b2ca;color:white;border:none;padding:6px 13px;border-radius:14px;cursor:pointer">View Details</button></div>`,{maxWidth:230});
+  }
+
+  // Clear form
+  ['f-name','f-addr','f-phone','f-web','f-desc','f-submitter','f-email'].forEach(id=>{ document.getElementById(id).value=''; });
+  document.getElementById('f-cat').value='';
+  document.getElementById('f-addr-hint').style.display = 'none';
+  document.getElementById('f-addr').style.borderColor = '';
+  resetFormHours();
+  setTimeout(()=>{ document.getElementById('form-success').style.display='none'; }, 7000);
+
+  renderCatQuick();
+  renderExternalSources();
+}
+
+// ══════════ EXTERNAL SOURCES (Reference Page) ══════════
+function renderExternalSources() {
+  const container = document.getElementById('external-sources-container');
+  if (!container) return;
+  const submitted = loadSubmitted();
+
+  if (!submitted.length) {
+    container.innerHTML = `
+      <div style="background:rgba(0,178,202,.05);border:2px dashed rgba(0,178,202,.2);border-radius:var(--radius-md);padding:32px;text-align:center;color:var(--muted)">
+        <div style="font-size:2rem;margin-bottom:10px">📭</div>
+        <div style="font-weight:700;font-size:14px;color:var(--navy);margin-bottom:6px">No community submissions yet</div>
+        <div style="font-size:13px;font-weight:500">Resources submitted through the Add a Resource form will appear here automatically.</div>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = `
+    <div style="margin-bottom:14px;display:flex;align-items:center;gap:10px">
+      <span style="font-size:12px;font-weight:700;color:var(--muted)">${submitted.length} community-submitted source${submitted.length !== 1 ? 's' : ''}</span>
+    </div>
+    <table class="ref-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Organization Name</th>
+          <th>Category</th>
+          <th>Address</th>
+          <th>Website / Contact</th>
+          <th>Submitted By</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${submitted.map((r, i) => `
+          <tr>
+            <td>${i + 1}</td>
+            <td style="font-weight:700;color:var(--navy)">${r.name}</td>
+            <td><span class="chip" style="background:${(CATS[r.category]||CATS['Volunteer']).bg};color:${(CATS[r.category]||CATS['Volunteer']).color};font-size:10px">${(CATS[r.category]||CATS['Volunteer']).icon} ${r.category}</span></td>
+            <td>${r.address}</td>
+            <td>${r.website ? `<a href="https://${r.website.replace('https://','')}" target="_blank">${r.website}</a>` : r.phone || '—'}</td>
+            <td>${r.submittedBy}<br><span style="color:var(--muted);font-size:11px">${r.submittedEmail}</span></td>
+            <td style="white-space:nowrap">${r.submittedDate}</td>
+          </tr>`).join('')}
+      </tbody>
+    </table>
+    <div style="margin-top:14px;padding:12px 16px;background:rgba(251,209,162,.2);border-radius:var(--radius-sm);border-left:4px solid var(--coral);font-size:12px;color:var(--text);font-weight:600;line-height:1.6">
+      ⚠️ <strong>Disclaimer:</strong> Community-submitted resources are sourced from public contributions and have not been independently verified. Information accuracy is the responsibility of the submitter.
+    </div>`;
+}
+
+// ══════════ TOAST ══════════
+function showToast(msg) {
+  const t = document.createElement('div'); t.className='toast'; t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateX(-50%) translateY(10px)'; },2200);
+  setTimeout(()=>t.remove(),2600);
+}
+
+// ══════════ INIT ══════════
+document.addEventListener('DOMContentLoaded', async () => {
+  // Load submitted resources from server (or localStorage fallback) before rendering
+  await fetchFromAPI();
+
+  buildTimeOptions();
+  renderSpotlight();
+  renderCatQuick();
+  renderExternalSources();
+  setupReveal();
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){
+      closeModal();
+      closeAdminLogin();
+      closeDeleteConfirm();
+      document.getElementById('map-fs-overlay').classList.remove('open');
+      document.body.style.overflow='';
+    }
+  });
+});
+</script>
+</body>
+</html>
