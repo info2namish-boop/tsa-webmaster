@@ -1402,7 +1402,7 @@ let unsubscribeListener = null; // cleanup handle for the listener
 
 async function initFirebase() {
   // Check config has been filled in
-  if (FIREBASE_CONFIG.apiKey === 'AIzaSyBiFYClJfPUeFclCb8GoavChrO4aid2dFg') {
+  if (FIREBASE_CONFIG.apiKey === '') {
     console.warn('⚠️  Firebase not configured — falling back to localStorage.');
     console.warn('    Follow the SETUP instructions in the code comments above.');
     loadFromLocalStorage();
