@@ -1384,22 +1384,8 @@ let mapFS = null;
 let surveyAnswers = { who:null, need:[], engage:null, time:null };
 let currentStep = 1;
 
-// ══════════════════════════════════════════════════════════════
-// FIREBASE FIRESTORE — Shared real-time database
-// Works on GitHub Pages with no server required.
-//
-// SETUP (one-time, ~5 minutes):
-//   1. Go to https://console.firebase.google.com
-//   2. Click "Add project" → name it "apex-resource-hub" → Create
-//   3. In the left sidebar click "Firestore Database" → Create database
-//      → Start in TEST MODE → choose a region → Done
-//   4. In the left sidebar click the gear icon → Project settings
-//   5. Scroll to "Your apps" → click </> (Web) → register app
-//   6. Copy the firebaseConfig object and paste it below replacing the
-//      placeholder values
-// ══════════════════════════════════════════════════════════════
 
-// ── PASTE YOUR FIREBASE CONFIG HERE ──────────────────────────
+
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyBiFYClJfPUeFclCb8GoavChrO4aid2dFg",
   authDomain: "apex-resource-hub-b7a28.firebaseapp.com",
@@ -1408,15 +1394,14 @@ const FIREBASE_CONFIG = {
   messagingSenderId: "1008232160438",
   appId: "1:1008232160438:web:303c3c0b6d1f3ac9a85a17"
 };
-// ─────────────────────────────────────────────────────────────
 
-// Firebase SDK loaded from CDN — no npm, no build step needed
-let db = null;           // Firestore instance
-let submittedResources = []; // in-memory cache kept in sync by real-time listener
-let unsubscribeListener = null; // cleanup handle for Firestore listener
+
+
+let db = null;           
+let submittedResources = []; 
+let unsubscribeListener = null; /
 
 async function initFirebase() {
-  // Check config has been filled in
   if (FIREBASE_CONFIG.apiKey === 'PASTE_YOUR_API_KEY_HERE') {
     console.warn('⚠️  Firebase not configured — falling back to localStorage.');
     console.warn('    Follow the SETUP instructions in the code comments above.');
@@ -1425,7 +1410,7 @@ async function initFirebase() {
   }
 
   try {
-    // Dynamically import Firebase SDK modules (ESM CDN — no build step)
+    
     const { initializeApp }          = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
     const { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy }
                                       = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
@@ -1433,12 +1418,11 @@ async function initFirebase() {
     const app = initializeApp(FIREBASE_CONFIG);
     db = getFirestore(app);
 
-    // Real-time listener — fires immediately with current data and again
-    // whenever ANY user adds or deletes a resource from any device/browser.
+
     const q = query(collection(db, 'submissions'), orderBy('submittedDate', 'asc'));
     unsubscribeListener = onSnapshot(q, (snapshot) => {
       submittedResources = snapshot.docs.map(d => ({ ...d.data(), _docId: d.id }));
-      // Re-render everything that depends on submitted resources
+
       renderCatQuick();
       renderExternalSources();
       if (currentPage === 'hub')       filterResources();
@@ -1461,7 +1445,6 @@ function loadFromLocalStorage() {
 
 async function postToFirebase(resource) {
   if (!db) {
-    // Offline fallback
     submittedResources.push(resource);
     localStorage.setItem('apex-submissions', JSON.stringify(submittedResources));
     return resource;
@@ -1469,7 +1452,7 @@ async function postToFirebase(resource) {
   try {
     const { collection, addDoc } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
     const docRef = await addDoc(collection(db, 'submissions'), resource);
-    // onSnapshot will update submittedResources automatically
+   
     return { ...resource, _docId: docRef.id };
   } catch (err) {
     console.warn('Firestore write failed — saving locally:', err);
@@ -1490,7 +1473,6 @@ async function deleteFromFirebase(id) {
   try {
     const { doc, deleteDoc } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
     await deleteDoc(doc(db, 'submissions', target._docId));
-    // onSnapshot will remove it from submittedResources automatically
   } catch (err) {
     console.warn('Firestore delete failed — removing locally:', err);
     submittedResources = submittedResources.filter(r => r.id !== id);
@@ -1498,9 +1480,8 @@ async function deleteFromFirebase(id) {
   }
 }
 
-// Synchronous helpers used throughout the existing code — unchanged interface
 function loadSubmitted()      { return submittedResources; }
-function saveSubmitted(arr)   { submittedResources = arr; } // kept for compatibility
+function saveSubmitted(arr)   { submittedResources = arr; } 
 function getAllResources() {
   const submitted = loadSubmitted();
   return [...BASE_RESOURCES, ...submitted];
@@ -1550,9 +1531,7 @@ function switchPage(page) {
   currentPage = page;
   window.scrollTo(0,0);
   if(page==='hub') {
-    // Render cards first (no map dependency)
     renderResources();
-    // Then init map separately — retries until Leaflet CDN is ready
     scheduleMapInit();
   }
   if(page==='reference') renderExternalSources();
@@ -1676,7 +1655,6 @@ function renderResources() {
     }).join('');
   }
   updateMapMarkers(filtered);
-  // Reapply admin mode class if active
   if (isAdmin) {
     const grid = document.getElementById('resource-grid');
     if (grid) grid.classList.add('admin-mode-active');
@@ -1747,16 +1725,13 @@ function initFullpageMap() {
 // ══════════ MAP ══════════
 function scheduleMapInit() {
   if(map) {
-    // Already initialized — just refresh markers
     filterResources();
     return;
   }
   if(typeof L === 'undefined') {
-    // Leaflet CDN not ready yet — retry in 150ms
     setTimeout(scheduleMapInit, 150);
     return;
   }
-  // Leaflet is available and map div should be visible now
   setTimeout(initMap, 50);
 }
 function initMap() {
@@ -1765,7 +1740,7 @@ function initMap() {
   try {
     map = L.map('map').setView([35.7290,-78.8520],13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{ attribution:'© OpenStreetMap contributors', maxZoom:18 }).addTo(map);
-    filterResources(); // now safe to add markers
+    filterResources();
   } catch(err) {
     console.warn('Map init failed, retrying…', err);
     map = null;
@@ -1863,10 +1838,9 @@ function activateAdminMode() {
   document.getElementById('admin-nav-btn').style.borderColor = 'rgba(231,76,60,.6)';
   document.getElementById('admin-nav-btn').style.color = '#e74c3c';
   document.getElementById('admin-nav-btn').style.fontWeight = '800';
-  // Add admin-mode-active class to resource grid so delete buttons show
   const grid = document.getElementById('resource-grid');
   if (grid) grid.classList.add('admin-mode-active');
-  // Re-render so delete buttons appear
+
   if (currentPage === 'hub') filterResources();
   showToast('🔓 Admin mode active — you can now delete resources');
 }
@@ -1904,12 +1878,12 @@ async function confirmDelete() {
   const isBase = BASE_RESOURCES.some(x => x.id === id);
 
   if (isBase) {
-    // Hide base resources in sessionStorage (resets on refresh by design)
+
     const hidden = JSON.parse(sessionStorage.getItem('apex-hidden') || '[]');
     if (!hidden.includes(id)) hidden.push(id);
     sessionStorage.setItem('apex-hidden', JSON.stringify(hidden));
   } else {
-    // Delete from Firestore (falls back to localStorage automatically)
+
     await deleteFromFirebase(id);
   }
 
@@ -1931,7 +1905,7 @@ function closeDeleteConfirmOuter(e) {
   if (e.target === document.getElementById('delete-confirm-overlay')) closeDeleteConfirm();
 }
 
-// Override getAllResources to respect hidden list
+
 function getAllResources() {
   const hidden = JSON.parse(sessionStorage.getItem('apex-hidden') || '[]');
   const submitted = loadSubmitted();
@@ -1999,17 +1973,17 @@ function showResults() {
   document.querySelectorAll('#survey-progress .progress-dot').forEach(d=>d.classList.add('done'));
 
   const needs   = surveyAnswers.need.length ? surveyAnswers.need : Object.keys(CATS);
-  const engage  = surveyAnswers.engage;  // 'in-person' | 'online' | 'both' | 'walkIn' | null
-  const timeSlot= surveyAnswers.time;    // 'weekday-morning' | 'weekday-evening' | 'weekend' | 'anytime' | null
+  const engage  = surveyAnswers.engage;  
+  const timeSlot= surveyAnswers.time;    
 
   // Day sets for time matching
   const weekdays = ['Mon','Tue','Wed','Thu','Fri'];
   const weekends = ['Sat','Sun'];
 
   function engageMatch(r) {
-    if (!engage || !r.engageType) return true; // no filter if not specified
-    if (engage === 'both') return true; // "both are fine" matches everything
-    if (r.engageType === 'both') return true; // resource offers both, matches any preference
+    if (!engage || !r.engageType) return true; 
+    if (engage === 'both') return true; 
+    if (r.engageType === 'both') return true; 
     return r.engageType === engage;
   }
 
@@ -2263,10 +2237,8 @@ async function submitForm() {
     submittedDate: new Date().toLocaleDateString()
   };
 
-  // Save to Firestore (falls back to localStorage automatically if offline)
   const saved = await postToFirebase(newResource);
 
-  // Success message reflects whether map pin was found
   const successMsg = document.querySelector('#form-success p');
   if (successMsg) successMsg.textContent = lat
     ? 'Saved and added to the hub — your resource is now pinned on the map! 📍'
@@ -2358,8 +2330,7 @@ function showToast(msg) {
 
 // ══════════ INIT ══════════
 document.addEventListener('DOMContentLoaded', async () => {
-  // Connect to Firebase Firestore — sets up real-time listener so all devices
-  // see the same resources and get live updates when anyone makes a change.
+
   await initFirebase();
 
   buildTimeOptions();
