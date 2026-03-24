@@ -1138,7 +1138,7 @@
           <tr><td>Google Fonts — Lato</td><td>—</td><td><a href="https://fonts.google.com/specimen/Lato" target="_blank">fonts.google.com</a></td><td>SIL Open Font License (Free)</td><td>Body and UI typography</td></tr>
           <tr><td>Google Fonts — Lobster</td><td>—</td><td><a href="https://fonts.google.com/specimen/Lobster" target="_blank">fonts.google.com</a></td><td>SIL Open Font License (Free)</td><td>Heading typography</td></tr>
           <tr><td>HTML5 / CSS3 / JavaScript</td><td>—</td><td>W3C Standard</td><td>Open Standard</td><td>Core website structure, styling, and interactivity</td></tr>
-          <tr><td>REST API (Express.js)</td><td>—</td><td>server.js (included)</td><td>MIT (Free)</td><td>Backend API for storing and retrieving community-submitted resources shared across all users</td></tr>
+          <tr><td>Firebase Firestore</td><td>10.12.0</td><td><a href="https://firebase.google.com" target="_blank">firebase.google.com</a></td><td>Free (Spark Plan)</td><td>Real-time shared database — all users see the same submitted resources instantly across all devices</td></tr>
         </tbody>
       </table>
     </div>
@@ -1384,56 +1384,123 @@ let mapFS = null;
 let surveyAnswers = { who:null, need:[], engage:null, time:null };
 let currentStep = 1;
 
-// ══════════ BACKEND API ══════════
-// Submitted resources are kept in memory and synced with the server.
-// Falls back to localStorage if the API is unreachable (e.g. opening file:// locally).
-const API = '/api/resources';
-let submittedResources = []; // in-memory cache — shared across all users via the server
+// ══════════════════════════════════════════════════════════════
+// FIREBASE FIRESTORE — Shared real-time database
+// Works on GitHub Pages with no server required.
+//
+// SETUP (one-time, ~5 minutes):
+//   1. Go to https://console.firebase.google.com
+//   2. Click "Add project" → name it "apex-resource-hub" → Create
+//   3. In the left sidebar click "Firestore Database" → Create database
+//      → Start in TEST MODE → choose a region → Done
+//   4. In the left sidebar click the gear icon → Project settings
+//   5. Scroll to "Your apps" → click </> (Web) → register app
+//   6. Copy the firebaseConfig object and paste it below replacing the
+//      placeholder values
+// ══════════════════════════════════════════════════════════════
 
-async function fetchFromAPI() {
+// ── PASTE YOUR FIREBASE CONFIG HERE ──────────────────────────
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBiFYClJfPUeFclCb8GoavChrO4aid2dFg",
+  authDomain: "apex-resource-hub-b7a28.firebaseapp.com",
+  projectId: "apex-resource-hub-b7a28",
+  storageBucket: "apex-resource-hub-b7a28.firebasestorage.app",
+  messagingSenderId: "1008232160438",
+  appId: "1:1008232160438:web:303c3c0b6d1f3ac9a85a17"
+};
+// ─────────────────────────────────────────────────────────────
+
+// Firebase SDK loaded from CDN — no npm, no build step needed
+let db = null;           // Firestore instance
+let submittedResources = []; // in-memory cache kept in sync by real-time listener
+let unsubscribeListener = null; // cleanup handle for Firestore listener
+
+async function initFirebase() {
+  // Check config has been filled in
+  if (FIREBASE_CONFIG.apiKey === 'PASTE_YOUR_API_KEY_HERE') {
+    console.warn('⚠️  Firebase not configured — falling back to localStorage.');
+    console.warn('    Follow the SETUP instructions in the code comments above.');
+    loadFromLocalStorage();
+    return;
+  }
+
   try {
-    const res = await fetch(API);
-    if (!res.ok) throw new Error('API error');
-    submittedResources = await res.json();
-  } catch {
-    // API not available (local file:// or server down) — fall back to localStorage
-    try { submittedResources = JSON.parse(localStorage.getItem('apex-submissions') || '[]'); } catch { submittedResources = []; }
+    // Dynamically import Firebase SDK modules (ESM CDN — no build step)
+    const { initializeApp }          = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
+    const { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy }
+                                      = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+
+    const app = initializeApp(FIREBASE_CONFIG);
+    db = getFirestore(app);
+
+    // Real-time listener — fires immediately with current data and again
+    // whenever ANY user adds or deletes a resource from any device/browser.
+    const q = query(collection(db, 'submissions'), orderBy('submittedDate', 'asc'));
+    unsubscribeListener = onSnapshot(q, (snapshot) => {
+      submittedResources = snapshot.docs.map(d => ({ ...d.data(), _docId: d.id }));
+      // Re-render everything that depends on submitted resources
+      renderCatQuick();
+      renderExternalSources();
+      if (currentPage === 'hub')       filterResources();
+      if (currentPage === 'reference') renderExternalSources();
+    }, (err) => {
+      console.warn('Firestore listener error — falling back to localStorage:', err);
+      loadFromLocalStorage();
+    });
+
+  } catch (err) {
+    console.warn('Firebase failed to load — falling back to localStorage:', err);
+    loadFromLocalStorage();
   }
 }
 
-async function postToAPI(resource) {
+function loadFromLocalStorage() {
+  try { submittedResources = JSON.parse(localStorage.getItem('apex-submissions') || '[]'); }
+  catch { submittedResources = []; }
+}
+
+async function postToFirebase(resource) {
+  if (!db) {
+    // Offline fallback
+    submittedResources.push(resource);
+    localStorage.setItem('apex-submissions', JSON.stringify(submittedResources));
+    return resource;
+  }
   try {
-    const res = await fetch(API, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(resource)
-    });
-    if (!res.ok) throw new Error('API error');
-    const saved = await res.json();
-    submittedResources.push(saved);
-    return saved;
-  } catch {
-    // Fallback: save to localStorage
+    const { collection, addDoc } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+    const docRef = await addDoc(collection(db, 'submissions'), resource);
+    // onSnapshot will update submittedResources automatically
+    return { ...resource, _docId: docRef.id };
+  } catch (err) {
+    console.warn('Firestore write failed — saving locally:', err);
     submittedResources.push(resource);
     localStorage.setItem('apex-submissions', JSON.stringify(submittedResources));
     return resource;
   }
 }
 
-async function deleteFromAPI(id) {
+async function deleteFromFirebase(id) {
+  const target = submittedResources.find(r => r.id === id);
+  if (!db || !target || !target._docId) {
+    // Offline fallback
+    submittedResources = submittedResources.filter(r => r.id !== id);
+    localStorage.setItem('apex-submissions', JSON.stringify(submittedResources));
+    return;
+  }
   try {
-    const res = await fetch(`${API}/${id}`, { method: 'DELETE' });
-    if (!res.ok) throw new Error('API error');
-  } catch {
-    // Fallback: remove from localStorage
+    const { doc, deleteDoc } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+    await deleteDoc(doc(db, 'submissions', target._docId));
+    // onSnapshot will remove it from submittedResources automatically
+  } catch (err) {
+    console.warn('Firestore delete failed — removing locally:', err);
+    submittedResources = submittedResources.filter(r => r.id !== id);
     localStorage.setItem('apex-submissions', JSON.stringify(submittedResources));
   }
-  submittedResources = submittedResources.filter(r => r.id !== id);
 }
 
-// Synchronous helpers used throughout the existing code
-function loadSubmitted() { return submittedResources; }
-function saveSubmitted(arr) { submittedResources = arr; } // kept for compatibility
+// Synchronous helpers used throughout the existing code — unchanged interface
+function loadSubmitted()      { return submittedResources; }
+function saveSubmitted(arr)   { submittedResources = arr; } // kept for compatibility
 function getAllResources() {
   const submitted = loadSubmitted();
   return [...BASE_RESOURCES, ...submitted];
@@ -1842,8 +1909,8 @@ async function confirmDelete() {
     if (!hidden.includes(id)) hidden.push(id);
     sessionStorage.setItem('apex-hidden', JSON.stringify(hidden));
   } else {
-    // Delete from server (and localStorage fallback)
-    await deleteFromAPI(id);
+    // Delete from Firestore (falls back to localStorage automatically)
+    await deleteFromFirebase(id);
   }
 
   closeDeleteConfirm();
@@ -2196,8 +2263,8 @@ async function submitForm() {
     submittedDate: new Date().toLocaleDateString()
   };
 
-  // Save to server (falls back to localStorage automatically if offline)
-  const saved = await postToAPI(newResource);
+  // Save to Firestore (falls back to localStorage automatically if offline)
+  const saved = await postToFirebase(newResource);
 
   // Success message reflects whether map pin was found
   const successMsg = document.querySelector('#form-success p');
@@ -2291,8 +2358,9 @@ function showToast(msg) {
 
 // ══════════ INIT ══════════
 document.addEventListener('DOMContentLoaded', async () => {
-  // Load submitted resources from server (or localStorage fallback) before rendering
-  await fetchFromAPI();
+  // Connect to Firebase Firestore — sets up real-time listener so all devices
+  // see the same resources and get live updates when anyone makes a change.
+  await initFirebase();
 
   buildTimeOptions();
   renderSpotlight();
