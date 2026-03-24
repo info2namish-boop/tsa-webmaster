@@ -324,7 +324,7 @@
   .modal-info-row:last-child { margin-bottom:0; }
   .mii { color:var(--sky); flex-shrink:0; margin-top:1px; }
 
-  /* ── SURVEY ── */
+  /* SURVEY  */
   .survey-page { max-width:780px; margin:0 auto; padding:72px 48px; }
   .survey-card { background:white; border-radius:var(--radius-lg); padding:44px; box-shadow:var(--shadow-lg); }
   .survey-step { display:none; }
@@ -350,7 +350,7 @@
   .result-card-title { font-weight:800; font-size:13px; color:var(--navy); margin-bottom:4px; }
   .result-card-cat { font-size:11px; font-weight:700; color:var(--sky); }
 
-  /* ── SUBMIT FORM ── */
+  /* SUBMIT FORM  */
   .submit-page { max-width:700px; margin:0 auto; padding:72px 48px; }
   .form-card { background:white; border-radius:var(--radius-lg); padding:44px; box-shadow:var(--shadow-lg); }
   .form-group { margin-bottom:22px; }
@@ -365,7 +365,7 @@
   .form-success h3 { font-weight:800; color:#2a8a6a; margin-bottom:6px; font-size:17px; }
   .form-success p { font-size:13px; color:#3a9a7a; font-weight:600; }
 
-  /* ── REFERENCE PAGE ── */
+  /*  REFERENCE PAGE  */
   .ref-header { background:linear-gradient(135deg,#2a3a2a 0%,#1a4a2a 100%); padding:56px 48px 38px; color:white; position:relative; overflow:hidden; }
   .ref-header::before { content:''; position:absolute; width:300px;height:300px;border-radius:50%;background:rgba(125,207,182,.1);top:-60px;right:-60px; }
   .ref-header h2 { font-family:'Lobster',serif; font-size:2.6rem; font-weight:900; margin-bottom:10px; position:relative; z-index:1; }
@@ -388,7 +388,7 @@
   .ref-dl-sub { font-size:12px; color:var(--muted); font-weight:500; }
   .ref-dl-btn { margin-left:auto; flex-shrink:0; }
 
-  /* ── FOOTER ── */
+  /*  FOOTER  */
   footer { background:var(--navy); color:rgba(255,255,255,.7); padding:56px 48px 36px; position:relative; z-index:1; }
   .footer-grid { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:44px; margin-bottom:44px; }
   @media(max-width:900px){.footer-grid{grid-template-columns:1fr 1fr}}
@@ -403,7 +403,7 @@
   .footer-bottom { border-top:1px solid rgba(255,255,255,.1); padding-top:22px; display:flex; justify-content:space-between; align-items:center; font-size:12px; font-weight:600; flex-wrap:wrap; gap:8px; }
   .footer-bottom a { color:var(--sky); text-decoration:none; }
 
-  /* ── FORM ENGAGEMENT + HOURS PICKERS ── */
+  /*  FORM WIDGETS  */
   .engage-opts {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -577,10 +577,10 @@
   .reveal-scale { opacity:0; transform:scale(.93); transition:opacity .55s ease,transform .55s ease; }
   .reveal-scale.visible { opacity:1; transform:scale(1); }
 
-  /* ── TOAST ── */
+  /*  TOAST  */
   .toast { position:fixed; bottom:26px; left:50%; transform:translateX(-50%); background:var(--navy); color:white; padding:11px 22px; border-radius:48px; font-family:'Lato',sans-serif; font-weight:700; font-size:13px; z-index:9999; box-shadow:var(--shadow); transition:all .3s; white-space:nowrap; pointer-events:none; }
 
-  /* ── MISC ── */
+  /*  MISC  */
   ::-webkit-scrollbar { width:5px; }
   ::-webkit-scrollbar-thumb { background:rgba(0,178,202,.3); border-radius:3px; }
   @media(max-width:768px) {
@@ -602,7 +602,7 @@
 
 <div class="page-transition" id="pt"><div class="pt-logo">The Apex Resource Hub</div></div>
 
-<!-- ═══ NAV ═══ -->
+<!--   NAV   -->
 <nav id="main-nav">
   <div class="nav-logo" onclick="goTo('home')">
     <div class="nav-logo-bubble">A</div>
@@ -621,14 +621,14 @@
   <button id="admin-nav-btn" onclick="openAdminLogin()" style="font-family:'Lato',sans-serif;font-weight:700;font-size:12px;padding:7px 16px;border-radius:24px;border:2px solid rgba(231,76,60,.25);background:transparent;color:#c0392b;cursor:pointer;transition:all .2s;white-space:nowrap" onmouseover="this.style.background='rgba(231,76,60,.08)'" onmouseout="this.style.background='transparent'">🔒 Admin</button>
 </nav>
 
-<!-- ═══ ADMIN BAR ═══ -->
+<!--   ADMIN BAR   -->
 <div class="admin-bar" id="admin-bar">
   <div class="admin-bar-dot"></div>
   <span>Admin Mode Active — click any resource card or open "More Info" to delete it</span>
   <button class="admin-exit-btn" onclick="exitAdmin()">✕ Exit Admin</button>
 </div>
 
-<!-- ═══ ADMIN LOGIN MODAL ═══ -->
+<!--   ADMIN LOGIN MODAL   -->
 <div class="modal-overlay" id="admin-login-overlay" onclick="closeAdminLoginOuter(event)">
   <div class="admin-login-modal">
     <div class="al-icon">🔐</div>
@@ -644,7 +644,7 @@
   </div>
 </div>
 
-<!-- ═══ DELETE CONFIRM MODAL ═══ -->
+<!--   DELETE CONFIRM MODAL   -->
 <div class="modal-overlay" id="delete-confirm-overlay" onclick="closeDeleteConfirmOuter(event)">
   <div class="delete-confirm-modal">
     <div style="font-size:2.5rem;margin-bottom:12px">🗑</div>
@@ -657,7 +657,7 @@
   </div>
 </div>
 
-<!-- ═══ RESOURCE MODAL ═══ -->
+<!--   RESOURCE MODAL   -->
 <div class="modal-overlay" id="resource-modal" onclick="closeModalOuter(event)">
   <div class="modal">
     <div style="position:relative">
@@ -673,7 +673,7 @@
         <div class="modal-info-row"><span class="mii">📞</span><span id="m-phone"></span></div>
         <div class="modal-info-row"><span class="mii">🌐</span><span id="m-web"></span></div>
         <div class="modal-info-row"><span class="mii">🕐</span><span id="m-hours"></span></div>
-        <div class="modal-info-row" id="m-engage-row"><span class="mii">💡</span><span id="m-engage" style="display:none;background:rgba(0,178,202,.1);color:var(--sky);padding:2px 10px;border-radius:20px;font-size:11px;font-weight:800"></span></div>
+        <div class="modal-info-row" id="m-engage-row"><span class="mii"></span><span id="m-engage" style="display:none;background:rgba(0,178,202,.1);color:var(--sky);padding:2px 10px;border-radius:20px;font-size:11px;font-weight:800"></span></div>
       </div>
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
         <button class="btn-secondary" onclick="closeModal()">Close</button>
@@ -683,7 +683,7 @@
   </div>
 </div>
 
-<!-- ═══ FULLSCREEN MAP ═══ -->
+<!--   FULLSCREEN MAP   -->
 <div class="map-fs-overlay" id="map-fs-overlay" onclick="closeFSMap(event)">
   <div class="map-fs-inner">
     <div class="map-fs-header">
@@ -694,7 +694,7 @@
   </div>
 </div>
 
-<!-- ═══════════════════════ HOME PAGE ═══════════════════════ -->
+<!--        HOME PAGE        -->
 <div class="page active" id="page-home">
 
   <section class="hero">
@@ -874,7 +874,7 @@
   </div>
 </div>
 
-<!-- ═══════════════════════ SURVEY PAGE ═══════════════════════ -->
+<!--        SURVEY PAGE        -->
 <div class="page" id="page-survey">
   <div class="survey-page">
     <div class="section-label reveal" style="text-align:center">Personalized Recommendations</div>
@@ -959,7 +959,7 @@
   </div>
 </div>
 
-<!-- ═══════════════════════ SUBMIT / ADD RESOURCE PAGE ═══════════════════════ -->
+<!--       SUBMIT / ADD RESOURCE PAGE       -->
 <div class="page" id="page-submit">
   <div class="submit-page">
     <div style="text-align:center;margin-bottom:44px">
@@ -1068,7 +1068,7 @@
   </div>
 </div>
 
-<!-- ═══════════════════════ REFERENCE PAGE ═══════════════════════ -->
+<!--        REFERENCE PAGE       -->
 <div class="page" id="page-reference">
   <div class="ref-header">
     <h2>Reference Page</h2>
@@ -1157,11 +1157,11 @@
   </div><!-- /ref-body -->
 </div><!-- /page-reference -->
 
-<!-- ═══════════════════════ JAVASCRIPT ═══════════════════════ -->
+<!--       JAVASCRIPT       -->
 <!-- Leaflet loaded here (bottom of body) so DOM exists and CDN has time to resolve -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-// ══════════ CATEGORIES ══════════
+//  CAT.S
 const CATS = {
   'Food & Hunger':  { icon:'🥫', bg:'rgba(125,207,182,.15)', color:'#2a8a6a', hex:'#7dcfb6' },
   'Housing':        { icon:'🏠', bg:'rgba(29,78,137,.12)',  color:'#1d4e89', hex:'#1d4e89' },
@@ -1176,7 +1176,7 @@ const CATS = {
   'Volunteer':      { icon:'🤝', bg:'rgba(125,207,182,.15)', color:'#2a8a6a', hex:'#7dcfb6' },
 };
 
-// Gradient backgrounds for card banners — pure CSS, zero network needed
+// Gradient backgrounds for card banners — only CSS, so no copyright issues
 const CAT_BG = {
   'Food & Hunger':  'linear-gradient(135deg,#2a8a6a,#7dcfb6)',
   'Housing':        'linear-gradient(135deg,#1d4e89,#2a6db5)',
@@ -1191,7 +1191,7 @@ const CAT_BG = {
   'Volunteer':      'linear-gradient(135deg,#2a8a6a,#7dcfb6)',
 };
 
-// ══════════ RESOURCE DATA ══════════
+//     RESOURCE DATA    
 const BASE_RESOURCES = [
   { id:1, spotlight:true,
     name:"NeighborUp (Western Wake Crisis Ministry)",
@@ -1375,7 +1375,7 @@ const BASE_RESOURCES = [
     lat:35.7290, lng:-78.8520, engageType:"in-person", availDays:["Sat"], openTime:"09:00", closeTime:"14:00" },
 ];
 
-// ══════════ STATE ══════════
+//     STATE    
 let currentFilter = 'All';
 let searchQuery = '';
 let currentPage = 'home';
@@ -1395,14 +1395,14 @@ const FIREBASE_CONFIG = {
 };
 // ─────────────────────────────────────────────────────────────
 
-// Firebase SDK loaded from CDN — no npm, no build step needed
-let db = null;           // Firestore instance
-let submittedResources = []; // in-memory cache kept in sync by real-time listener
-let unsubscribeListener = null; // cleanup handle for Firestore listener
+// Firebase
+let db = null;
+let submittedResources = []; // in-memory cache synced w. real-time listener
+let unsubscribeListener = null; // cleanup handle for the listener
 
 async function initFirebase() {
   // Check config has been filled in
-  if (FIREBASE_CONFIG.apiKey === 'PASTE_YOUR_API_KEY_HERE') {
+  if (FIREBASE_CONFIG.apiKey === 'AIzaSyBiFYClJfPUeFclCb8GoavChrO4aid2dFg') {
     console.warn('⚠️  Firebase not configured — falling back to localStorage.');
     console.warn('    Follow the SETUP instructions in the code comments above.');
     loadFromLocalStorage();
@@ -1410,7 +1410,7 @@ async function initFirebase() {
   }
 
   try {
-    // Dynamically import Firebase SDK modules (ESM CDN — no build step)
+    // Dynamically import Firebase SDK modules (ESM CDN)
     const { initializeApp }          = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
     const { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy }
                                       = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
@@ -1418,8 +1418,8 @@ async function initFirebase() {
     const app = initializeApp(FIREBASE_CONFIG);
     db = getFirestore(app);
 
-    // Real-time listener — fires immediately with current data and again
-    // whenever ANY user adds or deletes a resource from any device/browser.
+    // Real-time listener
+    // whenever ANY user adds or deletes a resource from any device/browser:
     const q = query(collection(db, 'submissions'), orderBy('submittedDate', 'asc'));
     unsubscribeListener = onSnapshot(q, (snapshot) => {
       submittedResources = snapshot.docs.map(d => ({ ...d.data(), _docId: d.id }));
@@ -1483,7 +1483,7 @@ async function deleteFromFirebase(id) {
   }
 }
 
-// Synchronous helpers used throughout the existing code — unchanged interface
+// Synchronous helpers
 function loadSubmitted()      { return submittedResources; }
 function saveSubmitted(arr)   { submittedResources = arr; } // kept for compatibility
 function getAllResources() {
@@ -1491,7 +1491,7 @@ function getAllResources() {
   return [...BASE_RESOURCES, ...submitted];
 }
 
-// ══════════ BACKGROUND CANVAS ══════════
+//     BACKGROUND CANVAS  
 (function() {
   const canvas = document.getElementById('bg-canvas');
   const ctx = canvas.getContext('2d');
@@ -1517,7 +1517,7 @@ function getAllResources() {
   draw();
 })();
 
-// ══════════ NAVIGATION ══════════
+//   NAV
 function goTo(page, noTransition) {
   if(page === currentPage) return;
   const pt = document.getElementById('pt');
@@ -1537,7 +1537,7 @@ function switchPage(page) {
   if(page==='hub') {
     // Render cards first (no map dependency)
     renderResources();
-    // Then init map separately — retries until Leaflet CDN is ready
+    // Then init map separately, retries until Leaflet CDN is ready
     scheduleMapInit();
   }
   if(page==='reference') renderExternalSources();
@@ -1545,7 +1545,7 @@ function switchPage(page) {
 }
 window.addEventListener('scroll',()=>{ document.getElementById('main-nav').classList.toggle('scrolled',window.scrollY>10); });
 
-// ══════════ SCROLL REVEAL ══════════
+//   SCROLL REVEAL 
 function setupReveal() {
   const els = document.querySelectorAll('.page.active .reveal,.page.active .reveal-left,.page.active .reveal-scale');
   const obs = new IntersectionObserver((entries)=>{
@@ -1557,7 +1557,7 @@ function setupReveal() {
   els.forEach(el=>obs.observe(el));
 }
 
-// ══════════ SPOTLIGHT ══════════
+//    SPOTLIGHT   
 function renderSpotlight() {
   const grid = document.getElementById('spotlight-grid');
   const spots = BASE_RESOURCES.filter(r=>r.spotlight).slice(0,3);
@@ -1582,7 +1582,7 @@ function renderSpotlight() {
   setupReveal();
 }
 
-// ══════════ CATEGORY QUICK NAV ══════════
+//    CATEGORY QUICK NAV  
 function renderCatQuick() {
   const grid = document.getElementById('cat-quick-grid');
   grid.innerHTML = Object.entries(CATS).map(([name,c],i)=>{
@@ -1600,7 +1600,7 @@ function renderCatQuick() {
   setupReveal();
 }
 
-// ══════════ RESOURCE HUB ══════════
+//    RESOURCE HUB
 function setFilter(btn) {
   document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
   btn.classList.add('active');
@@ -1668,7 +1668,7 @@ function renderResources() {
   }
 }
 
-// ══════════ HUB VIEW TOGGLE ══════════
+//     HUB VIEW TOGGLE
 let currentHubView = 'list';
 let mapFullpage = null;
 
@@ -1729,19 +1729,19 @@ function initFullpageMap() {
   }
 }
 
-// ══════════ MAP ══════════
+//    MAP   
 function scheduleMapInit() {
   if(map) {
-    // Already initialized — just refresh markers
+    // Already initialized, just refresh markers
     filterResources();
     return;
   }
   if(typeof L === 'undefined') {
-    // Leaflet CDN not ready yet — retry in 150ms
+    // Leaflet CDN not ready yet: retry in 150ms
     setTimeout(scheduleMapInit, 150);
     return;
   }
-  // Leaflet is available and map div should be visible now
+  // Leaflet is available and map div should be visible
   setTimeout(initMap, 50);
 }
 function initMap() {
@@ -1799,7 +1799,7 @@ function closeFSMap(e) {
   document.body.style.overflow='';
 }
 
-// ══════════ ADMIN MODE ══════════
+//     ADMIN MODE 
 const ADMIN_PASSWORD = 'ApexAdmin2026';
 let isAdmin = false;
 let pendingDeleteId = null;
@@ -1851,7 +1851,7 @@ function activateAdminMode() {
   // Add admin-mode-active class to resource grid so delete buttons show
   const grid = document.getElementById('resource-grid');
   if (grid) grid.classList.add('admin-mode-active');
-  // Re-render so delete buttons appear
+  // Re-render so del. buttons appear
   if (currentPage === 'hub') filterResources();
   showToast('🔓 Admin mode active — you can now delete resources');
 }
@@ -1889,12 +1889,12 @@ async function confirmDelete() {
   const isBase = BASE_RESOURCES.some(x => x.id === id);
 
   if (isBase) {
-    // Hide base resources in sessionStorage (resets on refresh by design)
+    // Hide base resources in sessionStorage (resets on refresh)
     const hidden = JSON.parse(sessionStorage.getItem('apex-hidden') || '[]');
     if (!hidden.includes(id)) hidden.push(id);
     sessionStorage.setItem('apex-hidden', JSON.stringify(hidden));
   } else {
-    // Delete from Firestore (falls back to localStorage automatically)
+    // Delete from Firestore
     await deleteFromFirebase(id);
   }
 
@@ -1916,14 +1916,14 @@ function closeDeleteConfirmOuter(e) {
   if (e.target === document.getElementById('delete-confirm-overlay')) closeDeleteConfirm();
 }
 
-// Override getAllResources to respect hidden list
+// Override getAllResources to respect the hidden list
 function getAllResources() {
   const hidden = JSON.parse(sessionStorage.getItem('apex-hidden') || '[]');
   const submitted = loadSubmitted();
   return [...BASE_RESOURCES, ...submitted].filter(r => !hidden.includes(r.id));
 }
 
-// ══════════ MODAL ══════════
+//     MODAL
 function openModal(id) {
   const all = getAllResources();
   const r = all.find(x=>x.id===id); if(!r) return;
@@ -1948,7 +1948,7 @@ function openModal(id) {
     engageEl.textContent = r.engageType ? engageLabels[r.engageType] || '' : '';
     engageEl.style.display = r.engageType ? 'inline-flex' : 'none';
   }
-  // Show delete button only in admin mode
+  // Show del button only in admin mode
   const delBtn = document.getElementById('m-delete-btn');
   if (delBtn) delBtn.style.display = isAdmin ? 'inline-flex' : 'none';
   if (delBtn) delBtn.onclick = () => adminDeleteResource(r.id);
@@ -1958,7 +1958,7 @@ function openModal(id) {
 function closeModal() { document.getElementById('resource-modal').classList.remove('open'); document.body.style.overflow=''; }
 function closeModalOuter(e) { if(e.target===document.getElementById('resource-modal')) closeModal(); }
 
-// ══════════ SURVEY ══════════
+//    SURVEY    
 function selectOpt(btn, key, multi) {
   if(!multi) {
     btn.closest('.survey-options').querySelectorAll('.survey-opt').forEach(b=>b.classList.remove('selected'));
@@ -1987,14 +1987,14 @@ function showResults() {
   const engage  = surveyAnswers.engage;  // 'in-person' | 'online' | 'both' | 'walkIn' | null
   const timeSlot= surveyAnswers.time;    // 'weekday-morning' | 'weekday-evening' | 'weekend' | 'anytime' | null
 
-  // Day sets for time matching
+  // Day sets to match answers
   const weekdays = ['Mon','Tue','Wed','Thu','Fri'];
   const weekends = ['Sat','Sun'];
 
   function engageMatch(r) {
     if (!engage || !r.engageType) return true; // no filter if not specified
-    if (engage === 'both') return true; // "both are fine" matches everything
-    if (r.engageType === 'both') return true; // resource offers both, matches any preference
+    if (engage === 'both') return true; // "both are fine": matches everything
+    if (r.engageType === 'both') return true; // resource offers both, matches any pref.
     return r.engageType === engage;
   }
 
@@ -2013,10 +2013,10 @@ function showResults() {
     return true;
   }
 
-  // Score each resource: category match (required) + engage match + time match
+  // Score each resource: cat + engage type + time match
   let pool = getAllResources().filter(r => needs.includes(r.category));
 
-  // Boost by who
+  // Boost for who
   if (surveyAnswers.who === 'senior')    pool = [...getAllResources().filter(r=>['Seniors','Health','Recreation'].includes(r.category)), ...pool];
   if (surveyAnswers.who === 'child' || surveyAnswers.who === 'family') pool = [...getAllResources().filter(r=>['Youth','Education','Recreation'].includes(r.category)), ...pool];
   if (surveyAnswers.who === 'immigrant') pool = [...getAllResources().filter(r=>r.category==='Immigration'), ...pool];
@@ -2025,7 +2025,7 @@ function showResults() {
   const seen = new Set();
   const unique = pool.filter(r => { if(seen.has(r.id)) return false; seen.add(r.id); return true; });
 
-  // Sort: exact engage+time matches first, then partial, then rest
+  // Sort: exact engage + time matches first, then partial, then rest
   const scored = unique.map(r => {
     let score = 0;
     if (engageMatch(r)) score += 2;
@@ -2059,7 +2059,7 @@ function resetSurvey() {
   updateProg();
 }
 
-// ══════════ STRUCTURED HOURS & ENGAGE FORM HELPERS ══════════
+//   STRUCTURING HOURS & ENGAGE FORM HELPERS
 function buildTimeOptions() {
   const selects = [document.getElementById('f-open-time'), document.getElementById('f-close-time')];
   const times = [];
@@ -2119,7 +2119,7 @@ function resetFormHours() {
   document.getElementById('f-hours-24').checked = false;
 }
 
-// ══════════ ADDRESS VALIDATION ══════════
+//     ADDRESS VALIDATION  
 function validateAddress(input) {
   const val  = input.value.trim();
   const hint = document.getElementById('f-addr-hint');
@@ -2142,7 +2142,7 @@ function validateAddress(input) {
   }
 }
 
-// ══════════ SUBMIT FORM (localStorage + Nominatim geocoding) ══════════
+//    SUBMIT FORM (localStorage + geocoding)
 async function submitForm() {
   const name       = document.getElementById('f-name').value.trim();
   const cat        = document.getElementById('f-cat').value;
@@ -2166,7 +2166,7 @@ async function submitForm() {
     return;
   }
 
-  // Collect structured hours
+  // Proper hrs. structure
   const days       = getSelectedDays();
   const openTime   = document.getElementById('f-open-time').value;
   const closeTime  = document.getElementById('f-close-time').value;
@@ -2210,12 +2210,12 @@ async function submitForm() {
           lat = parseFloat(data[0].lat);
           lng = parseFloat(data[0].lon);
         }
-      } catch { /* geocoding unavailable — saves without pin */ }
+      } catch { /* if the geocoding can't be done, it saves w.o the map pin */ }
     })(),
     hardDeadline
   ]);
 
-  btn.disabled = false; btn.textContent = '➕ Submit Resource'; btn.style.opacity = '';
+  btn.disabled = false; btn.textContent = 'Submit Resource'; btn.style.opacity = '';
 
   const catImages = {
     'Food & Hunger':'https://picsum.photos/seed/foodpantry1/600/400',
@@ -2251,7 +2251,7 @@ async function submitForm() {
   // Save to Firestore (falls back to localStorage automatically if offline)
   const saved = await postToFirebase(newResource);
 
-  // Success message reflects whether map pin was found
+  // Success message shows whether map pin was found or not
   const successMsg = document.querySelector('#form-success p');
   if (successMsg) successMsg.textContent = lat
     ? 'Saved and added to the hub — your resource is now pinned on the map! 📍'
@@ -2283,7 +2283,7 @@ async function submitForm() {
   renderExternalSources();
 }
 
-// ══════════ EXTERNAL SOURCES (Reference Page) ══════════
+//   EXTERNAL SOURCES (Ref.s Page)
 function renderExternalSources() {
   const container = document.getElementById('external-sources-container');
   if (!container) return;
@@ -2333,7 +2333,7 @@ function renderExternalSources() {
     </div>`;
 }
 
-// ══════════ TOAST ══════════
+//     TOAST(in-site notifs)
 function showToast(msg) {
   const t = document.createElement('div'); t.className='toast'; t.textContent=msg;
   document.body.appendChild(t);
@@ -2341,10 +2341,9 @@ function showToast(msg) {
   setTimeout(()=>t.remove(),2600);
 }
 
-// ══════════ INIT ══════════
+//     INIT    
 document.addEventListener('DOMContentLoaded', async () => {
-  // Connect to Firebase Firestore — sets up real-time listener so all devices
-  // see the same resources and get live updates when anyone makes a change.
+  // Connect to Firebase Firestore — sets up real-time listener for all devices to share the same info.
   await initFirebase();
 
   buildTimeOptions();
