@@ -1143,8 +1143,6 @@
       </table>
     </div>
 
-    <!-- WORK LOG -->
-
     <!-- EXTERNAL SOURCES (community-submitted) -->
     <div class="ref-section">
       <h3>External Sources</h3>
@@ -1384,7 +1382,7 @@ let mapFS = null;
 let surveyAnswers = { who:null, need:[], engage:null, time:null };
 let currentStep = 1;
 
-import { initializeApp } from "firebase/app";
+// ─── FIREBASE CONFIG ────────────────────────────────────────
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyBiFYClJfPUeFclCb8GoavChrO4aid2dFg",
   authDomain: "apex-resource-hub-b7a28.firebaseapp.com",
@@ -1393,7 +1391,6 @@ const FIREBASE_CONFIG = {
   messagingSenderId: "1008232160438",
   appId: "1:1008232160438:web:303c3c0b6d1f3ac9a85a17"
 };
-const app = initializeApp(firebaseConfig);
 // ─────────────────────────────────────────────────────────────
 
 // Firebase
