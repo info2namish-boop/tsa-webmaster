@@ -2248,10 +2248,8 @@ async function submitForm() {
     submittedDate: new Date().toLocaleDateString()
   };
 
-  // Save to Firestore (falls back to localStorage automatically if offline)
   const saved = await postToFirebase(newResource);
 
-  // Success message shows whether map pin was found or not
   const successMsg = document.querySelector('#form-success p');
   if (successMsg) successMsg.textContent = lat
     ? 'Saved and added to the hub — your resource is now pinned on the map! 📍'
@@ -2259,7 +2257,6 @@ async function submitForm() {
   document.getElementById('form-success').style.display = 'block';
   document.getElementById('form-success').scrollIntoView({ behavior:'smooth', block:'nearest' });
 
-  // Live-add pin to any open maps
   if (map && lat) { filterResources(); }
   if (mapFullpage && lat && lng && typeof L !== 'undefined') {
     const c = CATS[cat] || CATS['Volunteer'];
@@ -2271,7 +2268,6 @@ async function submitForm() {
       .bindPopup(`<div style="font-family:'Lato',sans-serif;min-width:190px"><div style="font-weight:700;font-size:14px;color:#1d4e89;margin-bottom:4px">${name}</div><div style="font-size:11px;color:#5a7a99;margin-bottom:8px">${addr}</div><button onclick="openModal(${saved.id})" style="font-family:'Lato',sans-serif;font-size:11px;font-weight:700;background:#00b2ca;color:white;border:none;padding:6px 13px;border-radius:14px;cursor:pointer">View Details</button></div>`,{maxWidth:230});
   }
 
-  // Clear form
   ['f-name','f-addr','f-phone','f-web','f-desc','f-submitter','f-email'].forEach(id=>{ document.getElementById(id).value=''; });
   document.getElementById('f-cat').value='';
   document.getElementById('f-addr-hint').style.display = 'none';
@@ -2283,7 +2279,6 @@ async function submitForm() {
   renderExternalSources();
 }
 
-//   EXTERNAL SOURCES (Ref.s Page)
 function renderExternalSources() {
   const container = document.getElementById('external-sources-container');
   if (!container) return;
@@ -2333,7 +2328,6 @@ function renderExternalSources() {
     </div>`;
 }
 
-//     TOAST(in-site notifs)
 function showToast(msg) {
   const t = document.createElement('div'); t.className='toast'; t.textContent=msg;
   document.body.appendChild(t);
@@ -2341,9 +2335,7 @@ function showToast(msg) {
   setTimeout(()=>t.remove(),2600);
 }
 
-//     INIT    
 document.addEventListener('DOMContentLoaded', async () => {
-  // Connect to Firebase Firestore — sets up real-time listener for all devices to share the same info.
   await initFirebase();
 
   buildTimeOptions();
