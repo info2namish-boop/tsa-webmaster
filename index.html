@@ -594,6 +594,303 @@
     .footer-grid{grid-template-columns:1fr}
     nav{padding:0 14px}
   }
+
+  /* ============================================================
+     MOBILE STYLES  (≤ 768px)
+     All new rules — nothing above is changed.
+  ============================================================ */
+
+  /* --- Hamburger button (hidden on desktop) --- */
+  .mob-hamburger {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    width: 40px; height: 40px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 10px;
+    transition: background .2s;
+    flex-shrink: 0;
+  }
+  .mob-hamburger:hover { background: rgba(0,178,202,.1); }
+  .mob-hamburger span {
+    display: block;
+    width: 22px; height: 2px;
+    background: var(--navy);
+    border-radius: 2px;
+    transition: all .3s cubic-bezier(.77,0,.175,1);
+    transform-origin: center;
+  }
+  .mob-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .mob-hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+  .mob-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  /* --- Mobile drawer menu --- */
+  .mob-menu {
+    display: none;
+    position: fixed;
+    top: 66px; left: 0; right: 0;
+    background: rgba(255,255,255,0.97);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(0,178,202,.15);
+    z-index: 999;
+    padding: 12px 0 16px;
+    box-shadow: 0 16px 48px rgba(29,78,137,.12);
+    transform: translateY(-8px);
+    opacity: 0;
+    transition: opacity .25s ease, transform .25s ease;
+    pointer-events: none;
+  }
+  .mob-menu.open {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: all;
+  }
+  .mob-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 13px 24px;
+    background: none;
+    border: none;
+    font-family: 'Lato', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--navy);
+    cursor: pointer;
+    transition: background .15s;
+    text-align: left;
+  }
+  .mob-menu-item:hover,
+  .mob-menu-item.active { background: rgba(0,178,202,.07); color: var(--sky); }
+  .mob-menu-item .mmi-icon {
+    width: 34px; height: 34px;
+    border-radius: 10px;
+    background: rgba(0,178,202,.1);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .mob-menu-divider {
+    height: 1px;
+    background: rgba(29,78,137,.07);
+    margin: 6px 24px;
+  }
+  .mob-menu-admin {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: calc(100% - 48px);
+    margin: 8px 24px 0;
+    padding: 11px 16px;
+    background: rgba(231,76,60,.06);
+    border: 1.5px solid rgba(231,76,60,.2);
+    border-radius: var(--radius-sm);
+    font-family: 'Lato', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: #c0392b;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .mob-menu-admin:hover { background: rgba(231,76,60,.12); }
+
+  /* --- Bottom tab bar --- */
+  .mob-bottom-nav {
+    display: none;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 64px;
+    background: rgba(255,255,255,0.97);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(0,178,202,.12);
+    z-index: 998;
+    box-shadow: 0 -4px 24px rgba(29,78,137,.08);
+    align-items: stretch;
+  }
+  .mob-tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px 4px 10px;
+    transition: all .2s;
+    position: relative;
+  }
+  .mob-tab::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 20%; right: 20%;
+    height: 2px;
+    border-radius: 0 0 2px 2px;
+    background: var(--sky);
+    transform: scaleX(0);
+    transition: transform .2s;
+  }
+  .mob-tab.active::before { transform: scaleX(1); }
+  .mob-tab-icon {
+    font-size: 19px;
+    line-height: 1;
+    transition: transform .2s;
+  }
+  .mob-tab.active .mob-tab-icon { transform: translateY(-1px); }
+  .mob-tab-label {
+    font-family: 'Lato', sans-serif;
+    font-size: 9px;
+    font-weight: 800;
+    color: var(--muted);
+    letter-spacing: .3px;
+    text-transform: uppercase;
+    transition: color .2s;
+  }
+  .mob-tab.active .mob-tab-label { color: var(--sky); }
+
+  /* ---- Responsive overrides for ≤ 768px ---- */
+  @media (max-width: 768px) {
+
+    /* Show mobile elements, hide desktop-only ones */
+    .mob-hamburger  { display: flex; }
+    .mob-menu       { display: block; }
+    .mob-bottom-nav { display: flex; }
+    .nav-links      { display: none !important; }
+    #admin-nav-btn  { display: none !important; }
+
+    /* Nav height & logo tweak */
+    nav { padding: 0 16px; height: 58px; }
+    .page { padding-top: 58px; padding-bottom: 72px; }
+    .mob-menu { top: 58px; }
+    .admin-bar { top: 58px; }
+
+    /* Toast sits above bottom nav */
+    .toast { bottom: 78px; }
+
+    /* Hero — tighter on mobile */
+    .hero {
+      padding: 36px 20px 100px;
+      min-height: auto;
+    }
+    .hero h1 { font-size: clamp(2.2rem, 9vw, 3.2rem); }
+    .hero p  { font-size: 15px; margin-bottom: 24px; }
+    .hero-cta { flex-direction: column; gap: 10px; }
+    .hero-cta .btn-primary,
+    .hero-cta .btn-secondary { width: 100%; justify-content: center; }
+    .hero-stats {
+      position: static;
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 18px 28px;
+      margin-top: 32px;
+    }
+    .hero-visual { display: none; }
+
+    /* Spotlight grid → single column */
+    .spotlight-grid { grid-template-columns: 1fr; gap: 16px; }
+    .spotlight-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+
+    /* Section spacing */
+    .section { padding: 52px 20px; }
+    .section-title { font-size: clamp(1.6rem, 6vw, 2.2rem); }
+
+    /* About */
+    .about-grid { grid-template-columns: 1fr; gap: 28px; }
+    .about-img-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+
+    /* Category quick nav */
+    #cat-quick-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 10px; }
+
+    /* Hub header */
+    .hub-header { padding: 32px 20px 28px; }
+    .hub-header h2 { font-size: 2rem; }
+    .hub-body { padding: 20px; }
+
+    /* Filter chips — scroll horizontally */
+    .hub-filters {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+    .hub-filters::-webkit-scrollbar { display: none; }
+    .filter-chip { white-space: nowrap; flex-shrink: 0; }
+
+    /* Resource grid → 1 col */
+    .resource-grid { grid-template-columns: 1fr; gap: 14px; }
+
+    /* Map fullpage height */
+    #map-fullpage { height: 60vh; min-height: 320px; }
+
+    /* Hub view toggle */
+    .hub-view-toggle { width: 100%; justify-content: stretch; }
+    .view-tab { flex: 1; justify-content: center; }
+
+    /* Survey */
+    .survey-page { padding: 36px 16px; }
+    .survey-card { padding: 24px 16px; border-radius: var(--radius-md); }
+    .survey-options { grid-template-columns: 1fr 1fr; gap: 8px; }
+    .survey-opt { font-size: 12px; padding: 11px 10px; }
+
+    /* Submit form */
+    .submit-page { padding: 36px 16px; }
+    .form-card { padding: 22px 16px; border-radius: var(--radius-md); }
+    .form-row { grid-template-columns: 1fr; }
+
+    /* Reference page */
+    .ref-header { padding: 32px 20px 24px; }
+    .ref-header h2 { font-size: 2rem; }
+    .ref-body { padding: 24px 16px; }
+    .ref-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .ref-download-card { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .ref-dl-btn { width: 100%; justify-content: center; }
+
+    /* Modal */
+    .modal { border-radius: var(--radius-md) var(--radius-md) 0 0; max-height: 92vh; position: fixed; bottom: 0; left: 0; right: 0; width: 100%; max-width: 100%; margin: 0; animation: modalInMob .3s cubic-bezier(.34,1.56,.64,1); }
+    @keyframes modalInMob { from{transform:translateY(60px);opacity:0} to{transform:translateY(0);opacity:1} }
+    .modal-overlay { align-items: flex-end; padding: 0; }
+    .modal-body { padding: 20px 18px 30px; }
+
+    /* Admin login modal */
+    .admin-login-modal { border-radius: var(--radius-md) var(--radius-md) 0 0; position: fixed; bottom: 0; left: 0; right: 0; width: 100%; max-width: 100%; padding: 28px 20px 36px; }
+
+    /* Delete confirm modal */
+    .delete-confirm-modal { border-radius: var(--radius-md) var(--radius-md) 0 0; position: fixed; bottom: 0; left: 0; right: 0; width: 100%; max-width: 100%; padding: 26px 20px 36px; }
+
+    /* Fullscreen map overlay */
+    .map-fs-inner { max-height: 96vh; border-radius: var(--radius-md) var(--radius-md) 0 0; position: fixed; bottom: 0; left: 0; right: 0; width: 100%; max-width: 100%; }
+
+    /* Results grid */
+    .results-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    /* Footer — hide on mobile (bottom nav replaces it for navigation) */
+    footer { padding: 36px 20px 24px; }
+    .footer-grid { grid-template-columns: 1fr; gap: 24px; }
+    .footer-bottom { flex-direction: column; text-align: center; gap: 4px; }
+
+    /* Admin bar */
+    .admin-bar { font-size: 12px; padding: 8px 16px; }
+    .admin-bar span { font-size: 11px; }
+  }
+
+  /* Extra small screens */
+  @media (max-width: 400px) {
+    .survey-options { grid-template-columns: 1fr; }
+    .results-grid   { grid-template-columns: 1fr; }
+    #cat-quick-grid { grid-template-columns: repeat(2, 1fr) !important; }
+    .hero h1 { font-size: 2rem; }
+    .delete-confirm-btns { flex-direction: column; }
+  }
 </style>
 </head>
 <body>
@@ -619,7 +916,56 @@
     <li><button onclick="goTo('reference')" id="nav-reference">References</button></li>
   </ul>
   <button id="admin-nav-btn" onclick="openAdminLogin()" style="font-family:'Lato',sans-serif;font-weight:700;font-size:12px;padding:7px 16px;border-radius:24px;border:2px solid rgba(231,76,60,.25);background:transparent;color:#c0392b;cursor:pointer;transition:all .2s;white-space:nowrap" onmouseover="this.style.background='rgba(231,76,60,.08)'" onmouseout="this.style.background='transparent'">🔒 Admin</button>
+  <!-- Hamburger (mobile only) -->
+  <button class="mob-hamburger" id="mob-hamburger" onclick="toggleMobMenu()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
+
+<!-- MOBILE DRAWER MENU -->
+<div class="mob-menu" id="mob-menu">
+  <button class="mob-menu-item" id="mob-nav-home" onclick="goTo('home');closeMobMenu()">
+    <span class="mmi-icon">🏠</span>Home
+  </button>
+  <button class="mob-menu-item" id="mob-nav-hub" onclick="goTo('hub');closeMobMenu()">
+    <span class="mmi-icon">📋</span>Resource Hub
+  </button>
+  <button class="mob-menu-item" id="mob-nav-survey" onclick="goTo('survey');closeMobMenu()">
+    <span class="mmi-icon">🔍</span>Find My Match
+  </button>
+  <button class="mob-menu-item" id="mob-nav-submit" onclick="goTo('submit');closeMobMenu()">
+    <span class="mmi-icon">➕</span>Add a Resource
+  </button>
+  <button class="mob-menu-item" id="mob-nav-reference" onclick="goTo('reference');closeMobMenu()">
+    <span class="mmi-icon">📖</span>References
+  </button>
+  <div class="mob-menu-divider"></div>
+  <button class="mob-menu-admin" onclick="openAdminLogin();closeMobMenu()">🔒 Admin Access</button>
+</div>
+
+<!-- MOBILE BOTTOM TAB BAR -->
+<div class="mob-bottom-nav" id="mob-bottom-nav">
+  <button class="mob-tab active" id="mobtab-home" onclick="goTo('home')">
+    <span class="mob-tab-icon">🏠</span>
+    <span class="mob-tab-label">Home</span>
+  </button>
+  <button class="mob-tab" id="mobtab-hub" onclick="goTo('hub')">
+    <span class="mob-tab-icon">📋</span>
+    <span class="mob-tab-label">Resources</span>
+  </button>
+  <button class="mob-tab" id="mobtab-survey" onclick="goTo('survey')">
+    <span class="mob-tab-icon">🔍</span>
+    <span class="mob-tab-label">Match</span>
+  </button>
+  <button class="mob-tab" id="mobtab-submit" onclick="goTo('submit')">
+    <span class="mob-tab-icon">➕</span>
+    <span class="mob-tab-label">Add</span>
+  </button>
+  <button class="mob-tab" id="mobtab-reference" onclick="goTo('reference')">
+    <span class="mob-tab-icon">📖</span>
+    <span class="mob-tab-label">Refs</span>
+  </button>
+</div>
 
 <!--   ADMIN BAR   -->
 <div class="admin-bar" id="admin-bar">
@@ -1887,12 +2233,10 @@ async function confirmDelete() {
   const isBase = BASE_RESOURCES.some(x => x.id === id);
 
   if (isBase) {
-    // Hide base resources in sessionStorage (resets on refresh)
     const hidden = JSON.parse(sessionStorage.getItem('apex-hidden') || '[]');
     if (!hidden.includes(id)) hidden.push(id);
     sessionStorage.setItem('apex-hidden', JSON.stringify(hidden));
   } else {
-    // Delete from Firestore
     await deleteFromFirebase(id);
   }
 
@@ -1982,17 +2326,16 @@ function showResults() {
   document.querySelectorAll('#survey-progress .progress-dot').forEach(d=>d.classList.add('done'));
 
   const needs   = surveyAnswers.need.length ? surveyAnswers.need : Object.keys(CATS);
-  const engage  = surveyAnswers.engage;  // 'in-person' | 'online' | 'both' | 'walkIn' | null
-  const timeSlot= surveyAnswers.time;    // 'weekday-morning' | 'weekday-evening' | 'weekend' | 'anytime' | null
+  const engage  = surveyAnswers.engage;  
+  const timeSlot= surveyAnswers.time;   
 
-  // Day sets to match answers
   const weekdays = ['Mon','Tue','Wed','Thu','Fri'];
   const weekends = ['Sat','Sun'];
 
   function engageMatch(r) {
-    if (!engage || !r.engageType) return true; // no filter if not specified
-    if (engage === 'both') return true; // "both are fine": matches everything
-    if (r.engageType === 'both') return true; // resource offers both, matches any pref.
+    if (!engage || !r.engageType) return true; 
+    if (engage === 'both') return true; 
+    if (r.engageType === 'both') return true; 
     return r.engageType === engage;
   }
 
@@ -2011,19 +2354,15 @@ function showResults() {
     return true;
   }
 
-  // Score each resource: cat + engage type + time match
   let pool = getAllResources().filter(r => needs.includes(r.category));
 
-  // Boost for who
   if (surveyAnswers.who === 'senior')    pool = [...getAllResources().filter(r=>['Seniors','Health','Recreation'].includes(r.category)), ...pool];
   if (surveyAnswers.who === 'child' || surveyAnswers.who === 'family') pool = [...getAllResources().filter(r=>['Youth','Education','Recreation'].includes(r.category)), ...pool];
   if (surveyAnswers.who === 'immigrant') pool = [...getAllResources().filter(r=>r.category==='Immigration'), ...pool];
 
-  // Deduplicate then score
   const seen = new Set();
   const unique = pool.filter(r => { if(seen.has(r.id)) return false; seen.add(r.id); return true; });
 
-  // Sort: exact engage + time matches first, then partial, then rest
   const scored = unique.map(r => {
     let score = 0;
     if (engageMatch(r)) score += 2;
@@ -2057,7 +2396,6 @@ function resetSurvey() {
   updateProg();
 }
 
-//   STRUCTURING HOURS & ENGAGE FORM HELPERS
 function buildTimeOptions() {
   const selects = [document.getElementById('f-open-time'), document.getElementById('f-close-time')];
   const times = [];
@@ -2117,7 +2455,6 @@ function resetFormHours() {
   document.getElementById('f-hours-24').checked = false;
 }
 
-//     ADDRESS VALIDATION  
 function validateAddress(input) {
   const val  = input.value.trim();
   const hint = document.getElementById('f-addr-hint');
@@ -2140,7 +2477,6 @@ function validateAddress(input) {
   }
 }
 
-//    SUBMIT FORM (localStorage + geocoding)
 async function submitForm() {
   const name       = document.getElementById('f-name').value.trim();
   const cat        = document.getElementById('f-cat').value;
@@ -2164,7 +2500,6 @@ async function submitForm() {
     return;
   }
 
-  // Proper hrs. structure
   const days       = getSelectedDays();
   const openTime   = document.getElementById('f-open-time').value;
   const closeTime  = document.getElementById('f-close-time').value;
@@ -2346,11 +2681,45 @@ document.addEventListener('DOMContentLoaded', async () => {
       closeModal();
       closeAdminLogin();
       closeDeleteConfirm();
+      closeMobMenu();
       document.getElementById('map-fs-overlay').classList.remove('open');
       document.body.style.overflow='';
     }
   });
 });
+
+function toggleMobMenu() {
+  const menu = document.getElementById('mob-menu');
+  const btn  = document.getElementById('mob-hamburger');
+  const open = menu.classList.toggle('open');
+  btn.classList.toggle('open', open);
+  document.body.style.overflow = open ? 'hidden' : '';
+}
+function closeMobMenu() {
+  document.getElementById('mob-menu').classList.remove('open');
+  document.getElementById('mob-hamburger').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('click', e => {
+  const menu = document.getElementById('mob-menu');
+  const btn  = document.getElementById('mob-hamburger');
+  if (menu.classList.contains('open') && !menu.contains(e.target) && !btn.contains(e.target)) {
+    closeMobMenu();
+  }
+});
+
+const _origGoTo = goTo;
+const _origSwitchPage = switchPage;
+window.switchPage = function(page) {
+  _origSwitchPage(page);
+  document.querySelectorAll('.mob-tab').forEach(t => t.classList.remove('active'));
+  const activeTab = document.getElementById('mobtab-' + page);
+  if (activeTab) activeTab.classList.add('active');
+  document.querySelectorAll('.mob-menu-item').forEach(t => t.classList.remove('active'));
+  const activeDraw = document.getElementById('mob-nav-' + page);
+  if (activeDraw) activeDraw.classList.add('active');
+};
 </script>
 </body>
 </html>
