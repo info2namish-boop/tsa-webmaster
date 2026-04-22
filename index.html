@@ -119,13 +119,13 @@
 
   /* Hero blobs */
   .hero-visual { position:absolute; right:0; top:0; bottom:0; width:50%; display:flex; align-items:center; justify-content:center; overflow:hidden; }
-  .hero-blob-wrap { position:relative; width:500px; height:500px; }
+  .hero-blob-wrap { position:relative; width:500px; height:500px; perspective:1400px; transform-style:preserve-3d; }
   .hero-blob { position:absolute; border-radius:60% 40% 70% 30%/50% 60% 40% 50%; animation:morph 8s ease-in-out infinite; }
   .hb1 { width:400px;height:400px;top:50px;left:50px;background:linear-gradient(135deg,rgba(0,178,202,.2),rgba(125,207,182,.2));animation-delay:0s; }
   .hb2 { width:260px;height:260px;top:20px;right:30px;background:linear-gradient(135deg,rgba(251,209,162,.5),rgba(247,146,86,.3));animation-delay:-3s;border-radius:70% 30% 50% 50%/40% 60% 40% 60%; }
   .hb3 { width:180px;height:180px;bottom:40px;left:70px;background:linear-gradient(135deg,rgba(29,78,137,.15),rgba(0,178,202,.15));animation-delay:-5s;border-radius:40% 60% 60% 40%/60% 30% 70% 40%; }
   @keyframes morph { 0%,100%{border-radius:60% 40% 70% 30%/50% 60% 40% 50%} 25%{border-radius:30% 70% 40% 60%/70% 40% 60% 30%} 50%{border-radius:50% 50% 30% 70%/40% 70% 30% 60%} 75%{border-radius:70% 30% 60% 40%/30% 50% 70% 50%} }
-  .float-cards { position:absolute; width:100%; height:100%; top:0; left:0; }
+  .float-cards { position:absolute; width:100%; z-index:2; height:100%; top:0; left:0; }
   .float-card { position:absolute; background:white; border-radius:var(--radius-md); padding:12px 16px; box-shadow:var(--shadow); display:flex; align-items:center; gap:8px; font-weight:700; font-size:12px; color:var(--navy); white-space:nowrap; animation:floatUp 6s ease-in-out infinite; }
   .float-card:nth-child(1){top:18%;left:8%;animation-delay:0s}
   .float-card:nth-child(2){top:36%;right:6%;animation-delay:-2s}
@@ -133,6 +133,80 @@
   .float-card:nth-child(4){top:76%;right:14%;animation-delay:-1s}
   .fc-icon { width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0; }
   @keyframes floatUp { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+  .hero-map-scene {
+    position:absolute; inset:52px; z-index:1; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transform-style:preserve-3d; transition:transform .2s ease;
+  }
+  .hero-map-scene:hover .hero-map-core { box-shadow:0 24px 60px rgba(29,78,137,.25); }
+  .hero-map-core {
+    position:relative; width:320px; height:320px; transform-style:preserve-3d;
+    animation:heroMapFloat 7s ease-in-out infinite;
+  }
+  .hero-map-ring {
+    position:absolute; inset:18px; border-radius:50%;
+    border:1px solid rgba(29,78,137,.12);
+    background:radial-gradient(circle, rgba(0,178,202,.08), transparent 62%);
+    transform-style:preserve-3d;
+  }
+  .hero-map-ring.r2 { inset:46px; border-style:dashed; border-color:rgba(0,178,202,.18); animation:spinSlow 18s linear infinite; }
+  .hero-map-ring.r3 { inset:78px; border-color:rgba(247,146,86,.22); transform:rotateX(76deg); }
+  .hero-map-platform {
+    position:absolute; left:50%; top:50%; width:230px; height:230px; transform-style:preserve-3d;
+    transform:translate(-50%,-50%) rotateX(62deg) rotateZ(-28deg);
+  }
+  .hero-map-plane {
+    position:absolute; inset:0; border-radius:34px;
+    background:
+      linear-gradient(90deg, rgba(29,78,137,.12) 1px, transparent 1px),
+      linear-gradient(rgba(29,78,137,.12) 1px, transparent 1px),
+      linear-gradient(135deg, rgba(255,255,255,.98), rgba(238,249,255,.92));
+    background-size:36px 36px,36px 36px,100% 100%;
+    box-shadow:
+      0 26px 50px rgba(29,78,137,.18),
+      inset 0 1px 0 rgba(255,255,255,.7);
+    overflow:hidden;
+  }
+  .hero-map-plane::before,
+  .hero-map-plane::after {
+    content:''; position:absolute; border-radius:999px;
+  }
+  .hero-map-plane::before {
+    width:160px; height:16px; background:rgba(125,207,182,.45);
+    top:88px; left:26px; transform:rotate(30deg);
+    box-shadow:0 0 0 8px rgba(125,207,182,.18);
+  }
+  .hero-map-plane::after {
+    width:124px; height:14px; background:rgba(0,178,202,.34);
+    right:28px; top:122px; transform:rotate(-26deg);
+    box-shadow:0 0 0 8px rgba(0,178,202,.14);
+  }
+  .hero-map-shadow {
+    position:absolute; inset:24px; border-radius:36px; background:rgba(29,78,137,.12);
+    transform:translateZ(-20px) translateY(34px) scale(.96); filter:blur(18px);
+  }
+  .hero-map-pin {
+    position:absolute; width:44px; height:44px; border-radius:50% 50% 50% 0;
+    display:flex; align-items:center; justify-content:center; color:white; font-size:18px;
+    transform:rotate(-45deg); box-shadow:0 14px 24px rgba(29,78,137,.2); z-index:3;
+  }
+  .hero-map-pin span { transform:rotate(45deg); }
+  .hero-map-pin.p1 { left:26px; top:42px; background:linear-gradient(135deg,var(--sky),var(--navy)); }
+  .hero-map-pin.p2 { right:34px; top:62px; background:linear-gradient(135deg,var(--coral),#f26d3d); }
+  .hero-map-pin.p3 { left:112px; bottom:30px; background:linear-gradient(135deg,var(--mint),#2ea885); }
+  .hero-map-pin.p4 { right:78px; bottom:64px; background:linear-gradient(135deg,var(--peach),var(--coral)); }
+  .hero-map-hotspot {
+    position:absolute; left:50%; bottom:8px; transform:translateX(-50%);
+    display:inline-flex; align-items:center; gap:8px; padding:10px 16px;
+    background:rgba(255,255,255,.92); border-radius:999px; box-shadow:var(--shadow);
+    color:var(--navy); font-size:12px; font-weight:800; z-index:4;
+  }
+  .hero-map-hotspot::before {
+    content:''; width:10px; height:10px; border-radius:50%; background:var(--sky);
+    box-shadow:0 0 0 6px rgba(0,178,202,.12);
+  }
+  @keyframes heroMapFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+  @keyframes spinSlow { from{transform:rotate(0)} to{transform:rotate(360deg)} }
 
   /* Highlights(spotlights) */
   .spotlight-header { display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:48px; flex-wrap:wrap; gap:16px; }
@@ -281,6 +355,67 @@
     font-weight: 700;
     color: var(--navy);
   }
+  .hero-map-panel {
+    position:fixed; inset:0; z-index:2600; display:none; align-items:center; justify-content:center;
+    background:rgba(13,33,56,.35); backdrop-filter:blur(10px); padding:22px;
+  }
+  .hero-map-panel.open { display:flex; animation:fadeIn .28s ease; }
+  .hero-map-panel-card {
+    width:min(1100px,100%); max-height:88vh; overflow:hidden;
+    background:linear-gradient(135deg,rgba(255,255,255,.98),rgba(248,251,255,.98));
+    border-radius:36px; box-shadow:0 42px 110px rgba(12,32,56,.28);
+    display:grid; grid-template-columns:1.1fr .9fr; position:relative;
+    animation:panelUp .34s cubic-bezier(.34,1.56,.64,1);
+  }
+  .hero-map-panel-close {
+    position:absolute; top:18px; right:18px; width:40px; height:40px; border:none; border-radius:50%;
+    background:rgba(29,78,137,.08); color:var(--navy); cursor:pointer; font-size:16px; z-index:2;
+  }
+  .hero-map-panel-map-wrap {
+    padding:26px; background:linear-gradient(180deg,#eff8ff,#f8fbff);
+    border-right:1px solid rgba(29,78,137,.08);
+  }
+  .hero-map-panel-map-shell {
+    height:100%; min-height:500px; border-radius:28px; overflow:hidden;
+    background:linear-gradient(135deg,rgba(0,178,202,.08),rgba(29,78,137,.12));
+    border:1px solid rgba(0,178,202,.14); box-shadow:inset 0 1px 0 rgba(255,255,255,.7);
+    position:relative;
+  }
+  #hero-map-launch-map { width:100%; height:100%; }
+  .hero-map-panel-copy {
+    padding:34px 30px 30px; display:flex; flex-direction:column; justify-content:center;
+    background:linear-gradient(180deg,#ffffff,#f8fbff);
+  }
+  .hero-map-panel-kicker { font-size:11px; font-weight:800; letter-spacing:1.7px; text-transform:uppercase; color:var(--sky); margin-bottom:10px; }
+  .hero-map-panel-copy h3 {
+    font-family:'Lobster',serif; font-size:2.1rem; line-height:1.08; color:var(--navy); margin-bottom:14px;
+  }
+  .hero-map-panel-copy p {
+    font-size:14px; color:var(--muted); line-height:1.8; margin-bottom:22px;
+  }
+  .hero-map-shortcuts {
+    display:grid; grid-template-columns:1fr 1fr; gap:12px;
+  }
+  .hero-map-shortcut {
+    background:white; border:2px solid rgba(29,78,137,.08); border-radius:22px; padding:16px 16px 15px;
+    cursor:pointer; transition:transform .22s, box-shadow .22s, border-color .22s; text-align:left;
+    box-shadow:0 6px 20px rgba(29,78,137,.06);
+  }
+  .hero-map-shortcut:hover {
+    transform:translateY(-4px); border-color:rgba(0,178,202,.24); box-shadow:0 14px 28px rgba(29,78,137,.12);
+  }
+  .hero-map-shortcut strong { display:block; color:var(--navy); font-size:13px; margin-bottom:5px; }
+  .hero-map-shortcut span { display:block; color:var(--muted); font-size:12px; line-height:1.55; font-weight:600; }
+  .hero-map-panel-footer {
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:18px;
+  }
+  .hero-map-quick-btn {
+    border:none; border-radius:999px; padding:10px 16px; background:rgba(0,178,202,.08); color:var(--navy);
+    font-size:12px; font-weight:800; cursor:pointer; transition:all .2s;
+  }
+  .hero-map-quick-btn:hover { background:rgba(0,178,202,.16); transform:translateY(-2px); }
+  @keyframes panelUp { from{opacity:0; transform:translateY(22px) scale(.95)} to{opacity:1; transform:translateY(0) scale(1)} }
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
   .hub-header { background:linear-gradient(135deg,var(--navy) 0%,#2a6db5 100%); padding:56px 48px 38px; color:white; position:relative; overflow:hidden; }
   .hub-header::before { content:''; position:absolute; width:380px;height:380px;border-radius:50%;background:rgba(255,255,255,.04);top:-100px;right:-80px; }
   .hub-header h2 { font-family:'Lobster',serif; font-size:2.8rem; font-weight:900; margin-bottom:10px; position:relative; z-index:1; }
@@ -299,8 +434,8 @@
   .hub-layout { display:grid; grid-template-columns:1fr 400px; gap:28px; align-items:start; }
   @media(max-width:1100px){.hub-layout{grid-template-columns:1fr}}
   .resource-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:20px; }
-  .resource-card { background:white; border-radius:var(--radius-md); overflow:hidden; box-shadow:0 4px 20px rgba(29,78,137,.07); transition:transform .3s,box-shadow .3s; cursor:pointer; border:2px solid transparent; }
-  .resource-card:hover { transform:translateY(-4px); box-shadow:0 12px 40px rgba(29,78,137,.12); border-color:rgba(0,178,202,.2); }
+  .resource-card { background:white; border-radius:var(--radius-md); overflow:hidden; box-shadow:0 4px 20px rgba(29,78,137,.07); transition:transform .3s,box-shadow .3s,border-color .3s; cursor:pointer; border:2px solid transparent; transform-style:preserve-3d; }
+  .resource-card:hover { transform:translateY(-6px) rotateX(2deg) rotateY(-2deg); box-shadow:0 18px 44px rgba(29,78,137,.14); border-color:rgba(0,178,202,.2); }
   .rc-img-wrap { overflow:hidden; height:170px; position:relative; }
   .rc-img { width:100%; height:100%; object-fit:cover; display:block; transition:transform .4s; }
   .resource-card:hover .rc-img { transform:scale(1.05); }
@@ -833,6 +968,11 @@
       margin-top: 32px;
     }
     .hero-visual { display: none; }
+    .hero-map-panel-card { grid-template-columns:1fr; max-height:92vh; }
+    .hero-map-panel-map-wrap { padding:18px; border-right:none; border-bottom:1px solid rgba(29,78,137,.08); }
+    .hero-map-panel-map-shell { min-height:320px; }
+    .hero-map-panel-copy { padding:24px 20px 22px; }
+    .hero-map-shortcuts { grid-template-columns:1fr; }
 
     /* Spotlight grid → single column */
     .spotlight-grid { grid-template-columns: 1fr; gap: 16px; }
@@ -1081,6 +1221,49 @@
   </div>
 </div>
 
+<!--   HERO MAP LAUNCH PANEL   -->
+<div class="hero-map-panel" id="hero-map-panel" onclick="closeHeroMapPanel(event)">
+  <div class="hero-map-panel-card">
+    <button class="hero-map-panel-close" aria-label="Close interactive map panel" onclick="closeHeroMapPanel()">✕</button>
+    <div class="hero-map-panel-map-wrap">
+      <div class="hero-map-panel-map-shell">
+        <div id="hero-map-launch-map"></div>
+      </div>
+    </div>
+    <div class="hero-map-panel-copy">
+      <div class="hero-map-panel-kicker">Hub Preview</div>
+      <h3>Use the map as a launch point into the rest of the website.</h3>
+      <p>Click one of these paths to jump straight into the part of the site you want.</p>
+      <div class="hero-map-shortcuts">
+        <button class="hero-map-shortcut" type="button" onclick="heroMapNavigate('hub',{view:'map'})">
+          <strong>Open Full Map View</strong>
+          <span>Jump straight into the Resource Hub with the interactive map visible.</span>
+        </button>
+        <button class="hero-map-shortcut" type="button" onclick="heroMapNavigate('hub',{view:'list',category:'Food & Hunger'})">
+          <strong>Find Food Resources</strong>
+          <span>Browse the resource list to find the food you need.</span>
+        </button>
+        <button class="hero-map-shortcut" type="button" onclick="heroMapNavigate('hub',{view:'list',category:'Health'})">
+          <strong>Locate Health Support</strong>
+          <span>Open the directory focused on health and wellness services.</span>
+        </button>
+        <button class="hero-map-shortcut" type="button" onclick="heroMapNavigate('survey')">
+          <strong>Get Matched</strong>
+          <span>Move into the guided survey to narrow down what fits best.</span>
+        </button>
+        <button class="hero-map-shortcut" type="button" onclick="heroMapNavigate('submit')">
+          <strong>Add A Resource</strong>
+          <span>Fill out the community submission form and contribute something new.</span>
+        </button>
+        <button class="hero-map-shortcut" type="button" onclick="heroMapNavigate('reference')">
+          <strong>View References</strong>
+          <span>Check out the organizations that made this site possible.</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!--        HOME PAGE        -->
 <div class="page active" id="page-home">
 
@@ -1099,6 +1282,21 @@
         <div class="hero-blob hb1"></div>
         <div class="hero-blob hb2"></div>
         <div class="hero-blob hb3"></div>
+        <div class="hero-map-scene" id="hero-map-scene" onclick="openHeroMapPanel()" role="button" tabindex="0" aria-label="Open interactive map preview">
+          <div class="hero-map-core" id="hero-map-core">
+            <div class="hero-map-ring r1"></div>
+            <div class="hero-map-ring r2"></div>
+            <div class="hero-map-ring r3"></div>
+            <div class="hero-map-platform">
+              <div class="hero-map-shadow"></div>
+              <div class="hero-map-plane"></div>
+              <div class="hero-map-pin p1"><span>🥫</span></div>
+              <div class="hero-map-pin p2"><span>❤️</span></div>
+              <div class="hero-map-pin p3"><span>🌟</span></div>
+              <div class="hero-map-pin p4"><span>🤝</span></div>
+            </div>
+          </div>
+        </div>
         <div class="float-cards" id="float-cards-container"></div>
       </div>
     </div>
@@ -1383,6 +1581,13 @@
         <div class="form-group">
           <label class="form-label">Website URL</label>
           <input class="form-input" type="url" id="f-web" placeholder="https://example.org">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Image URL <span style="color:var(--muted);font-weight:600">(optional)</span></label>
+        <input class="form-input" type="url" id="f-img" placeholder="https://example.com/image.jpg">
+        <div style="margin-top:6px;font-size:11px;font-weight:600;color:var(--muted)">
+          Paste a direct link to an image. If left blank or address fails, a category image will be used instead.
         </div>
       </div>
       <div class="form-group">
@@ -1763,6 +1968,8 @@ let searchQuery = '';
 let currentPage = 'home';
 let map = null, mapMarkers = [];
 let mapFS = null;
+let heroLaunchMap = null;
+let pendingHubJump = null;
 let surveyAnswers = { who:null, need:[], engage:null, time:null };
 let currentStep = 1;
 
@@ -1921,11 +2128,108 @@ function switchPage(page) {
     renderResources();
     // Then init map separately, retries until Leaflet CDN is ready
     scheduleMapInit();
+    if (pendingHubJump) {
+      setTimeout(() => {
+        if (pendingHubJump.view) switchHubView(pendingHubJump.view);
+        if (pendingHubJump.category) filterBy(pendingHubJump.category);
+        pendingHubJump = null;
+      }, 80);
+    }
   }
   if(page==='reference') renderExternalSources();
   setupReveal();
 }
 window.addEventListener('scroll',()=>{ document.getElementById('main-nav').classList.toggle('scrolled',window.scrollY>10); });
+
+function bindHeroMapScene() {
+  const scene = document.getElementById('hero-map-scene');
+  const core = document.getElementById('hero-map-core');
+  if (!scene || !core) return;
+
+  scene.addEventListener('mousemove', (e) => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const rect = scene.getBoundingClientRect();
+    const px = (e.clientX - rect.left) / rect.width - 0.5;
+    const py = (e.clientY - rect.top) / rect.height - 0.5;
+    scene.style.transform = `translateY(${-py * 8}px)`;
+    core.style.transform = `rotateX(${(-py * 16).toFixed(2)}deg) rotateY(${(px * 22).toFixed(2)}deg)`;
+  });
+
+  scene.addEventListener('mouseleave', () => {
+    scene.style.transform = '';
+    core.style.transform = '';
+  });
+
+  scene.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      openHeroMapPanel();
+    }
+  });
+}
+
+function initHeroLaunchMap() {
+  if (heroLaunchMap || typeof L === 'undefined') return;
+  const mapEl = document.getElementById('hero-map-launch-map');
+  if (!mapEl) return;
+
+  heroLaunchMap = L.map('hero-map-launch-map', {
+    zoomControl: false,
+    attributionControl: false,
+    scrollWheelZoom: false,
+    dragging: true,
+    doubleClickZoom: false
+  }).setView([35.7290, -78.8520], 12.9);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors',
+    maxZoom: 18
+  }).addTo(heroLaunchMap);
+
+  getAllResources().slice(0, 16).forEach(r => {
+    if (!r.lat || !r.lng) return;
+    const c = CATS[r.category] || CATS['Volunteer'];
+    const icon = L.divIcon({
+      className: '',
+      html: `<div style="width:30px;height:30px;background:${c.hex};border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(0,0,0,.18);border:2px solid white;"><span style="transform:rotate(45deg);font-size:13px">${c.icon}</span></div>`,
+      iconSize: [30, 30],
+      iconAnchor: [15, 30]
+    });
+    L.marker([r.lat, r.lng], { icon }).addTo(heroLaunchMap);
+  });
+}
+
+function openHeroMapPanel() {
+  const panel = document.getElementById('hero-map-panel');
+  if (!panel) return;
+  panel.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => {
+    initHeroLaunchMap();
+    if (heroLaunchMap) heroLaunchMap.invalidateSize();
+  }, 180);
+}
+
+function closeHeroMapPanel(e) {
+  if (e && e.target !== document.getElementById('hero-map-panel')) return;
+  const panel = document.getElementById('hero-map-panel');
+  if (!panel) return;
+  panel.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function heroMapNavigate(page, opts = {}) {
+  pendingHubJump = page === 'hub' ? opts : null;
+  closeHeroMapPanel();
+
+  if (page === currentPage && page === 'hub') {
+    if (opts.view) switchHubView(opts.view);
+    if (opts.category) setTimeout(() => filterBy(opts.category), 120);
+    return;
+  }
+
+  goTo(page);
+}
 
 //   SCROLL REVEAL 
 function setupReveal() {
@@ -2064,13 +2368,23 @@ function renderResources() {
       const c = CATS[r.category] || CATS['Volunteer'];
       const bg = CAT_BG[r.category] || 'linear-gradient(135deg,#1d4e89,#00b2ca)';
       const isNew = r.isUserSubmitted;
-      return `<div class="resource-card" onclick="openModal(${r.id})">
+      return `<div class="resource-card" onclick="openModal(${r.id})" style="background:${c.bg}">
         <div class="rc-img-wrap">
-          <div class="card-img-banner" style="height:170px;background:${bg}">
-            <div class="card-img-banner-icon">${c.icon}</div>
-            <div class="card-img-banner-label">${r.name}</div>
-          </div>
+          ${r.img
+            ? `<img class="rc-img" src="${r.img}" alt="${r.name}"
+                  onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
+                  loading="lazy">
+              <div class="card-img-banner" style="height:170px;background:${bg};display:none">
+                <div class="card-img-banner-icon">${c.icon}</div>
+                <div class="card-img-banner-label">${r.name}</div>
+              </div>`
+            : `<div class="card-img-banner" style="height:170px;background:${bg}">
+                <div class="card-img-banner-icon">${c.icon}</div>
+                <div class="card-img-banner-label">${r.name}</div>
+              </div>`
+          }
         </div>
+
         <div class="rc-body">
           <div class="rc-cat"><span class="chip" style="background:${c.bg};color:${c.color}">${c.icon} ${r.category}</span>${isNew?'<span class="new-badge">NEW</span>':''}</div>
           <div class="rc-title">${r.name}</div>
@@ -2356,11 +2670,17 @@ function openModal(id) {
   const r = all.find(x=>x.id===id); if(!r) return;
   const c = CATS[r.category]||CATS['Volunteer'];
   const bg = CAT_BG[r.category] || 'linear-gradient(135deg,#1d4e89,#00b2ca)';
-  document.getElementById('m-img-wrap').innerHTML =
-    `<div class="card-img-banner" style="height:220px;background:${bg}">
-      <div class="card-img-banner-icon" style="font-size:3.5rem">${c.icon}</div>
-      <div class="card-img-banner-label" style="font-size:16px">${r.name}</div>
-    </div>`;
+  document.getElementById('m-img-wrap').innerHTML = r.img
+    ? `<img class="modal-img" src="${r.img}" alt="${r.name}"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="card-img-banner" style="height:220px;background:${bg};display:none">
+        <div class="card-img-banner-icon" style="font-size:3.5rem">${c.icon}</div>
+        <div class="card-img-banner-label" style="font-size:16px">${r.name}</div>
+      </div>`
+    : `<div class="card-img-banner" style="height:220px;background:${bg}">
+        <div class="card-img-banner-icon" style="font-size:3.5rem">${c.icon}</div>
+        <div class="card-img-banner-label" style="font-size:16px">${r.name}</div>
+      </div>`;
   document.getElementById('m-cat').innerHTML = `<span class="chip" style="background:${c.bg};color:${c.color}">${c.icon} ${r.category}</span>`;
   document.getElementById('m-title').textContent = r.name;
   document.getElementById('m-desc').textContent = r.desc;
@@ -2653,7 +2973,7 @@ async function submitForm() {
     id: newId, name, category: cat, desc, address: addr,
     phone:    document.getElementById('f-phone').value.trim() || 'Not available',
     website:  document.getElementById('f-web').value.trim() || '',
-    img:      catImages[cat] || catImages['Volunteer'],
+    img: document.getElementById('f-img').value.trim() || catImages[cat] || catImages['Volunteer'],
     lat, lng,
     engageType,
     availDays:    days.length ? days : null,
@@ -2686,7 +3006,7 @@ async function submitForm() {
       .bindPopup(`<div style="font-family:'Lato',sans-serif;min-width:190px"><div style="font-weight:700;font-size:14px;color:#1d4e89;margin-bottom:4px">${name}</div><div style="font-size:11px;color:#5a7a99;margin-bottom:8px">${addr}</div><button onclick="openModal(${saved.id})" style="font-family:'Lato',sans-serif;font-size:11px;font-weight:700;background:#00b2ca;color:white;border:none;padding:6px 13px;border-radius:14px;cursor:pointer">View Details</button></div>`,{maxWidth:230});
   }
 
-  ['f-name','f-addr','f-phone','f-web','f-desc','f-submitter','f-email'].forEach(id=>{ document.getElementById(id).value=''; });
+  ['f-name','f-addr','f-phone','f-web','f-img','f-desc','f-submitter','f-email'].forEach(id=>{ document.getElementById(id).value=''; });
   document.getElementById('f-cat').value='';
   document.getElementById('f-addr-hint').style.display = 'none';
   document.getElementById('f-addr').style.borderColor = '';
@@ -2757,6 +3077,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   await initFirebase();
 
   buildTimeOptions();
+  bindHeroMapScene();
   renderSpotlight();
   renderFloatCards();
   renderCatQuick();
@@ -2768,6 +3089,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       closeAdminLogin();
       closeDeleteConfirm();
       closeMobMenu();
+      closeHeroMapPanel();
       document.getElementById('map-fs-overlay').classList.remove('open');
       document.body.style.overflow='';
     }
