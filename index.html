@@ -1975,13 +1975,12 @@ let currentStep = 1;
 
 // ─── FIREBASE CONFIG ────────────────────────────────────────
 const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyDpgxWmU8JjtJWdptmNh2e7wQAAVnVk13o",
-  authDomain: "nats-apex-resource-hub.firebaseapp.com",
-  projectId: "nats-apex-resource-hub",
-  storageBucket: "nats-apex-resource-hub.firebasestorage.app",
-  messagingSenderId: "653794289652",
-  appId: "1:653794289652:web:edc6f12f12e511a726bba1",
-  measurementId: "G-PYL97X55KS"
+  apiKey: "AIzaSyBiFYClJfPUeFclCb8GoavChrO4aid2dFg",
+  authDomain: "apex-resource-hub-b7a28.firebaseapp.com",
+  projectId: "apex-resource-hub-b7a28",
+  storageBucket: "apex-resource-hub-b7a28.firebasestorage.app",
+  messagingSenderId: "1008232160438",
+  appId: "1:1008232160438:web:303c3c0b6d1f3ac9a85a17"
 };
 // ─────────────────────────────────────────────────────────────
 
@@ -2293,12 +2292,20 @@ function renderSpotlight() {
   grid.innerHTML = spots.map((r, i) => {
     const c = CATS[r.category];
     const bg = CAT_BG[r.category] || 'linear-gradient(135deg,#1d4e89,#00b2ca)';
-    return `<div class="spotlight-card reveal" style="transition-delay:${i*.1}s" onclick="openModal(${r.id})">
+    return `<div class="spotlight-card reveal" style="transition-delay:${i*.1}s;background:${c.bg}" onclick="openModal(${r.id})">
       <div class="sc-img-wrap">
-        <div class="card-img-banner" style="height:210px;background:${bg}">
-          <div class="card-img-banner-icon">${c.icon}</div>
-          <div class="card-img-banner-label">${r.name}</div>
-        </div>
+        ${r.img
+          ? `<img src="${r.img}" alt="${r.name}" style="width:100%;height:210px;object-fit:cover;display:block;transition:transform .5s"
+                onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div class="card-img-banner" style="height:210px;background:${bg};display:none">
+              <div class="card-img-banner-icon">${c.icon}</div>
+              <div class="card-img-banner-label">${r.name}</div>
+            </div>`
+          : `<div class="card-img-banner" style="height:210px;background:${bg}">
+              <div class="card-img-banner-icon">${c.icon}</div>
+              <div class="card-img-banner-label">${r.name}</div>
+            </div>`
+        }
         <div class="sc-cat-badge chip">${c.icon} ${r.category}</div>
       </div>
       <div class="sc-body">
@@ -2781,10 +2788,17 @@ function showResults() {
     const bg = CAT_BG[r.category] || 'linear-gradient(135deg,#1d4e89,#00b2ca)';
     const engageLabels = { 'in-person':'🏃 In-Person','online':'💻 Online','both':'🔄 Both','walkIn':'🚶 Walk-In' };
     const engagePill = r.engageType ? `<span style="font-size:10px;font-weight:700;color:var(--sky);background:rgba(0,178,202,.1);padding:2px 8px;border-radius:12px;display:inline-block;margin-top:4px">${engageLabels[r.engageType]||''}</span>` : '';
-    return `<div class="result-card" onclick="openModal(${r.id})">
-      <div class="card-img-banner" style="height:110px;background:${bg}">
-        <div class="card-img-banner-icon" style="font-size:2rem">${c.icon}</div>
-      </div>
+    return `<div class="result-card" onclick="openModal(${r.id})" style="background:${c.bg}">
+      ${r.img
+        ? `<img src="${r.img}" alt="${r.name}" style="width:100%;height:110px;object-fit:cover;display:block"
+              onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="card-img-banner" style="height:110px;background:${bg};display:none">
+            <div class="card-img-banner-icon" style="font-size:2rem">${c.icon}</div>
+          </div>`
+        : `<div class="card-img-banner" style="height:110px;background:${bg}">
+            <div class="card-img-banner-icon" style="font-size:2rem">${c.icon}</div>
+          </div>`
+      }
       <div class="result-card-body">
         <div class="result-card-cat">${c.icon} ${r.category}</div>
         <div class="result-card-title">${r.name}</div>
