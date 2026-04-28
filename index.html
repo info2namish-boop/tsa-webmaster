@@ -525,7 +525,14 @@
   .result-card-body { padding:12px 14px; }
   .result-card-title { font-weight:800; font-size:13px; color:var(--navy); margin-bottom:4px; }
   .result-card-cat { font-size:11px; font-weight:700; color:var(--sky); }
-
+  .survey-error {
+    font-size: 12px;
+    font-weight: 700;
+    color: #c0392b;
+    margin-top: 8px;
+    display: none;
+  }
+.survey-error.show { display: block; }
   /* SUBMIT FORM  */
   .submit-page { max-width:700px; margin:0 auto; padding:72px 48px; }
   .form-card { background:white; border-radius:var(--radius-lg); padding:44px; box-shadow:var(--shadow-lg); }
@@ -1488,6 +1495,7 @@
           <button class="survey-opt" data-val="immigrant" onclick="selectOpt(this,'who')"><span class="survey-opt-icon">🌎</span>An Immigrant</button>
           <button class="survey-opt" data-val="volunteer" onclick="selectOpt(this,'who')"><span class="survey-opt-icon">🤝</span>To Volunteer</button>
         </div>
+        <div class="survey-error" id="err-1">⚠️ Please select an option before continuing.</div>
         <div class="survey-nav"><span class="survey-step-label">Step 1 of 4</span><button class="btn-primary" onclick="nextStep(1)">Next →</button></div>
       </div>
       <!-- Step 2 -->
@@ -1507,6 +1515,7 @@
           <button class="survey-opt" data-val="Immigration" onclick="selectOpt(this,'need',true)"><span class="survey-opt-icon">🌎</span>Immigration Help</button>
           <button class="survey-opt" data-val="Volunteer" onclick="selectOpt(this,'need',true)"><span class="survey-opt-icon">🤝</span>Volunteering</button>
         </div>
+        <div class="survey-error" id="err-2">⚠️ Please select an option before continuing.</div>
         <div class="survey-nav"><button class="btn-secondary" onclick="prevStep(2)">← Back</button><span class="survey-step-label">Step 2 of 4</span><button class="btn-primary" onclick="nextStep(2)">Next →</button></div>
       </div>
       <!-- Step 3 -->
@@ -1519,6 +1528,7 @@
           <button class="survey-opt" data-val="both" onclick="selectOpt(this,'engage')"><span class="survey-opt-icon">🔄</span>Both Are Fine</button>
           <button class="survey-opt" data-val="walkIn" onclick="selectOpt(this,'engage')"><span class="survey-opt-icon">🚶</span>Walk-In Services</button>
         </div>
+        <div class="survey-error" id="err-3">⚠️ Please select an option before continuing.</div>
         <div class="survey-nav"><button class="btn-secondary" onclick="prevStep(3)">← Back</button><span class="survey-step-label">Step 3 of 4</span><button class="btn-primary" onclick="nextStep(3)">Next →</button></div>
       </div>
       <!-- Step 4 -->
@@ -1531,6 +1541,7 @@
           <button class="survey-opt" data-val="weekend" onclick="selectOpt(this,'time')"><span class="survey-opt-icon">🎉</span>Weekends</button>
           <button class="survey-opt" data-val="anytime" onclick="selectOpt(this,'time')"><span class="survey-opt-icon">⏰</span>Flexible</button>
         </div>
+        <div class="survey-error" id="err-4">⚠️ Please select an option before continuing.</div>
         <div class="survey-nav"><button class="btn-secondary" onclick="prevStep(4)">← Back</button><span class="survey-step-label">Step 4 of 4</span><button class="btn-primary" onclick="showResults()">Show Results</button></div>
       </div>
       <!-- Results -->
@@ -2736,7 +2747,22 @@ function selectOpt(btn, key, multi) {
   }
 }
 function nextStep(from) {
-  if(from<4){ document.getElementById('step-'+from).classList.remove('active'); document.getElementById('step-'+(from+1)).classList.add('active'); currentStep=from+1; updateProg(); }
+  const err = document.getElementById('err-'+from);
+  const valid =
+    from === 1 ? surveyAnswers.who !== null :
+    from === 2 ? surveyAnswers.need.length > 0 :
+    from === 3 ? surveyAnswers.engage !== null :
+    true;
+  if (!valid) {
+    err.classList.add('show');
+    setTimeout(() => err.classList.remove('show'), 3000);
+    return;
+  }
+  err.classList.remove('show');
+  document.getElementById('step-'+from).classList.remove('active');
+  document.getElementById('step-'+(from+1)).classList.add('active');
+  currentStep = from+1;
+  updateProg();
 }
 function prevStep(from) {
   if(from>1){ document.getElementById('step-'+from).classList.remove('active'); document.getElementById('step-'+(from-1)).classList.add('active'); currentStep=from-1; updateProg(); }
@@ -2749,8 +2775,15 @@ function showResults() {
   document.getElementById('step-results').classList.add('active');
   document.querySelectorAll('#survey-progress .progress-dot').forEach(d=>d.classList.add('done'));
 
+  const err4 = document.getElementById('err-4');
+  if (!surveyAnswers.time) {
+    err4.classList.add('show');
+    setTimeout(() => err4.classList.remove('show'), 3000);
+    return;
+  }
+  err4.classList.remove('show');
   const needs   = surveyAnswers.need.length ? surveyAnswers.need : Object.keys(CATS);
-  const engage  = surveyAnswers.engage;  
+  const engage  = surveyAnswers.engage;
   const timeSlot= surveyAnswers.time;   
 
   const weekdays = ['Mon','Tue','Wed','Thu','Fri'];
