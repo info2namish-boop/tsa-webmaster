@@ -1594,7 +1594,7 @@
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Phone Number</label>
-          <input class="form-input" type="tel" id="f-phone" placeholder="(919) 000-0000">
+          <input class="form-input" type="tel" id="f-phone" placeholder="(919) 000-0000" oninput="formatPhone(this)" maxlength="14">
         </div>
         <div class="form-group">
           <label class="form-label">Website URL</label>
@@ -2988,6 +2988,17 @@ function validateAddress(input) {
     hint.style.display = 'block'; hint.style.color = '#2a8a6a';
     hint.innerHTML = '✓ Looks good! This address will be pinned on the map.';
     input.style.borderColor = 'var(--mint)';
+  }
+}
+
+function formatPhone(input) {
+  let digits = input.value.replace(/\D/g, '').slice(0, 10);
+  if (digits.length <= 3) {
+    input.value = digits.length ? '(' + digits : '';
+  } else if (digits.length <= 6) {
+    input.value = '(' + digits.slice(0,3) + ') ' + digits.slice(3);
+  } else {
+    input.value = '(' + digits.slice(0,3) + ') ' + digits.slice(3,6) + '-' + digits.slice(6);
   }
 }
 
