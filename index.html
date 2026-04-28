@@ -1439,17 +1439,17 @@
     <div class="hub-filters" id="hub-filters">
       <span class="filter-label">Filter:</span>
       <button class="filter-chip active" data-cat="All" onclick="setFilter(this)">All <span class="count-badge" id="filter-count">0</span></button>
-      <button class="filter-chip" data-cat="Food & Hunger" onclick="setFilter(this)">🥫 Food &amp; Hunger</button>
-      <button class="filter-chip" data-cat="Housing" onclick="setFilter(this)">🏠 Housing</button>
-      <button class="filter-chip" data-cat="Health" onclick="setFilter(this)">❤️ Health</button>
-      <button class="filter-chip" data-cat="Education" onclick="setFilter(this)">📚 Education</button>
-      <button class="filter-chip" data-cat="Arts & Culture" onclick="setFilter(this)">🎨 Arts &amp; Culture</button>
-      <button class="filter-chip" data-cat="Youth" onclick="setFilter(this)">🌟 Youth</button>
-      <button class="filter-chip" data-cat="Seniors" onclick="setFilter(this)">👵 Seniors</button>
-      <button class="filter-chip" data-cat="Environment" onclick="setFilter(this)">🌿 Environment</button>
-      <button class="filter-chip" data-cat="Immigration" onclick="setFilter(this)">🌎 Immigration</button>
-      <button class="filter-chip" data-cat="Recreation" onclick="setFilter(this)">⚽ Recreation</button>
-      <button class="filter-chip" data-cat="Volunteer" onclick="setFilter(this)">🤝 Volunteer</button>
+      <button class="filter-chip" data-cat="Food & Hunger" onclick="setFilter(this)">🥫 Food &amp; Hunger <span class="count-badge" id="fc-Food"></span></button>
+      <button class="filter-chip" data-cat="Housing" onclick="setFilter(this)">🏠 Housing <span class="count-badge" id="fc-Housing"></span></button>
+      <button class="filter-chip" data-cat="Health" onclick="setFilter(this)">❤️ Health <span class="count-badge" id="fc-Health"></span></button>
+      <button class="filter-chip" data-cat="Education" onclick="setFilter(this)">📚 Education <span class="count-badge" id="fc-Education"></span></button>
+      <button class="filter-chip" data-cat="Arts & Culture" onclick="setFilter(this)">🎨 Arts &amp; Culture <span class="count-badge" id="fc-Arts"></span></button>
+      <button class="filter-chip" data-cat="Youth" onclick="setFilter(this)">🌟 Youth <span class="count-badge" id="fc-Youth"></span></button>
+      <button class="filter-chip" data-cat="Seniors" onclick="setFilter(this)">👵 Seniors <span class="count-badge" id="fc-Seniors"></span></button>
+      <button class="filter-chip" data-cat="Environment" onclick="setFilter(this)">🌿 Environment <span class="count-badge" id="fc-Environment"></span></button>
+      <button class="filter-chip" data-cat="Immigration" onclick="setFilter(this)">🌎 Immigration <span class="count-badge" id="fc-Immigration"></span></button>
+      <button class="filter-chip" data-cat="Recreation" onclick="setFilter(this)">⚽ Recreation <span class="count-badge" id="fc-Recreation"></span></button>
+      <button class="filter-chip" data-cat="Volunteer" onclick="setFilter(this)">🤝 Volunteer <span class="count-badge" id="fc-Volunteer"></span></button>
     </div>
 
     <!-- LIST VIEW -->
@@ -2391,6 +2391,13 @@ function renderResources() {
   const grid = document.getElementById('resource-grid');
   const badge = document.getElementById('filter-count');
   if(badge) badge.textContent = filtered.length;
+  
+  const all = getAllResources();
+  const countMap = { 'Food & Hunger': 'Food', 'Housing': 'Housing', 'Health': 'Health', 'Education': 'Education', 'Arts & Culture': 'Arts', 'Youth': 'Youth', 'Seniors': 'Seniors', 'Environment': 'Environment', 'Immigration': 'Immigration', 'Recreation': 'Recreation', 'Volunteer': 'Volunteer' };
+  Object.entries(countMap).forEach(([cat, id]) => {
+    const el = document.getElementById('fc-' + id);
+    if (el) el.textContent = all.filter(r => r.category === cat).length;
+  });
   if(!filtered.length) {
     grid.innerHTML = `<div class="no-results"><div style="font-size:2.5rem;margin-bottom:10px">🔍</div><h3>No results found</h3><p>Try a different search term or filter.</p></div>`;
   } else {
