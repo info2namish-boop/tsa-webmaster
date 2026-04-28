@@ -1638,18 +1638,18 @@
           <button type="button" class="day-btn" data-day="Sun" onclick="toggleDay(this)">Sun</button>
         </div>
         <div class="hours-range" id="f-hours-range">
-          <select class="form-select" id="f-open-time">
+          <select class="form-select" id="f-open-time" onchange="uncheck24()">
             <option value="">Open time…</option>
           </select>
           <div class="range-sep">to</div>
-          <select class="form-select" id="f-close-time">
+          <select class="form-select" id="f-close-time" onchange="uncheck24()">
             <option value="">Close time…</option>
           </select>
         </div>
         <div class="hours-special">
-          <label><input type="checkbox" id="f-hours-varies"> Hours vary by season</label>
-          <label><input type="checkbox" id="f-hours-appt"> By appointment only</label>
-          <label><input type="checkbox" id="f-hours-24"> Open 24/7</label>
+          <label><input type="checkbox" id="f-hours-varies" onchange="uncheck24()"> Hours vary by season</label>
+          <label><input type="checkbox" id="f-hours-appt" onchange="uncheck24()"> By appointment only</label>
+          <label><input type="checkbox" id="f-hours-24" onchange="toggle24hrs(this)"> Open 24/7</label>
         </div>
       </div>
       <div class="form-group">
@@ -2036,6 +2036,8 @@ async function initFirebase() {
       renderCatQuick();
       renderExternalSources();
       if (currentPage === 'hub')       filterResources();
+      const badge = document.getElementById('filter-count');
+      if(badge) badge.textContent = getAllResources().length;
       if (currentPage === 'reference') renderExternalSources();
     }, (err) => {
       console.warn('Firestore listener error — falling back to localStorage:', err);
@@ -2390,7 +2392,7 @@ function renderResources() {
   const filtered = getFiltered();
   const grid = document.getElementById('resource-grid');
   const badge = document.getElementById('filter-count');
-  if(badge) badge.textContent = filtered.length;
+  if(badge && badge.textContent === '0') badge.textContent = getAllResources().length;
   
   const all = getAllResources();
   const countMap = { 'Food & Hunger': 'Food', 'Housing': 'Housing', 'Health': 'Health', 'Education': 'Education', 'Arts & Culture': 'Arts', 'Youth': 'Youth', 'Seniors': 'Seniors', 'Environment': 'Environment', 'Immigration': 'Immigration', 'Recreation': 'Recreation', 'Volunteer': 'Volunteer' };
@@ -2915,6 +2917,24 @@ function selectEngage(btn) {
 
 function toggleDay(btn) {
   btn.classList.toggle('selected');
+  document.getElementById('f-hours-24').checked = false;
+}
+
+function toggle24hrs(cb) {
+  if (cb.checked) {
+    // select all days
+    document.querySelectorAll('.day-btn').forEach(b => b.classList.add('selected'));
+    // set open time to 12:00 AM and close to 11:59 PM
+    document.getElementById('f-open-time').value  = '00:00';
+    document.getElementById('f-close-time').value = '23:59';
+    // uncheck conflicting options
+    document.getElementById('f-hours-varies').checked = false;
+    document.getElementById('f-hours-appt').checked   = false;
+  }
+}
+
+function uncheck24() {
+  document.getElementById('f-hours-24').checked = false;
 }
 
 function getSelectedDays() {
