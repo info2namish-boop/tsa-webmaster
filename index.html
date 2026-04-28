@@ -2771,11 +2771,16 @@ function updateProg() {
   document.querySelectorAll('#survey-progress .progress-dot').forEach((d,i)=>{ d.classList.remove('done','current'); if(i<currentStep-1) d.classList.add('done'); else if(i===currentStep-1) d.classList.add('current'); });
 }
 function showResults() {
+  const err4 = document.getElementById('err-4');
+  if (!surveyAnswers.time) {
+    err4.classList.add('show');
+    setTimeout(() => err4.classList.remove('show'), 3000);
+    return;
+  }
+  err4.classList.remove('show');
   document.getElementById('step-4').classList.remove('active');
   document.getElementById('step-results').classList.add('active');
   document.querySelectorAll('#survey-progress .progress-dot').forEach(d=>d.classList.add('done'));
-
-  const err4 = document.getElementById('err-4');
   if (!surveyAnswers.time) {
     err4.classList.add('show');
     setTimeout(() => err4.classList.remove('show'), 3000);
