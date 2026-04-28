@@ -2979,25 +2979,12 @@ async function submitForm() {
 
   btn.disabled = false; btn.textContent = 'Submit Resource'; btn.style.opacity = '';
 
-  const catImages = {
-    'Food & Hunger':'https://picsum.photos/seed/foodpantry1/600/400',
-    'Housing':'https://picsum.photos/seed/housinghelp/600/400',
-    'Health':'https://picsum.photos/seed/redcross1/600/400',
-    'Education':'https://picsum.photos/seed/education1/600/400',
-    'Arts & Culture':'https://picsum.photos/seed/artsshow/600/400',
-    'Youth':'https://picsum.photos/seed/youthcamp/600/400',
-    'Seniors':'https://picsum.photos/seed/seniorctr/600/400',
-    'Environment':'https://picsum.photos/seed/earthfest1/600/400',
-    'Immigration':'https://picsum.photos/seed/community1/600/400',
-    'Recreation':'https://picsum.photos/seed/running5k/600/400',
-    'Volunteer':'https://picsum.photos/seed/volunteers1/600/400',
-  };
   const newId = Date.now();
   const newResource = {
     id: newId, name, category: cat, desc, address: addr,
     phone:    document.getElementById('f-phone').value.trim() || 'Not available',
     website:  document.getElementById('f-web').value.trim() || '',
-    img: document.getElementById('f-img').value.trim() || catImages[cat] || catImages['Volunteer'],
+    img: document.getElementById('f-img').value.trim() || null,
     lat, lng,
     engageType,
     availDays:    days.length ? days : null,
