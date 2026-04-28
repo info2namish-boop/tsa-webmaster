@@ -1466,7 +1466,6 @@
       </div>
       <div class="map-fullpage-wrap">
         <div id="map-fullpage"></div>
-        <div class="map-fullpage-legend" id="map-legend-cats"></div>
       </div>
     </div>
   </div>
@@ -2373,6 +2372,9 @@ function filterBy(cat) {
 function filterResources() {
   searchQuery = (document.getElementById('search-input')?.value||'').toLowerCase();
   renderResources();
+  if (currentHubView === 'map' && mapFullpage) {
+    updateFullpageMapMarkers(getFiltered());
+  }
 }
 function getFiltered() {
   const all = getAllResources();
@@ -2445,18 +2447,12 @@ function switchHubView(view) {
   document.getElementById('tab-list').classList.toggle('active', view === 'list');
   document.getElementById('tab-map').classList.toggle('active', view === 'map');
   document.getElementById('hub-list-view').classList.toggle('hidden', view === 'map');
-  document.getElementById('hub-filters').style.display = view === 'list' ? '' : 'none';
+  document.getElementById('hub-filters').style.display = '';
   const mapView = document.getElementById('hub-map-view');
   mapView.classList.toggle('active', view === 'map');
 
   if (view === 'map') {
-    const legend = document.getElementById('map-legend-cats');
-    if (legend && !legend.innerHTML) {
-      legend.innerHTML = Object.entries(CATS).map(([name, c]) =>
-        `<span>${c.icon} ${name}</span>`
-      ).join('');
-    }
-    scheduleFullpageMapInit();  // ← this was missing
+    scheduleFullpageMapInit();
   }
 }
 
@@ -2501,7 +2497,31 @@ function initFullpageMap() {
     setTimeout(scheduleFullpageMapInit, 300);
   }
 }
-
+  
+function updateFullpageMapMarkers(filtered) {
+  if (!mapFullpage || typeof L === 'undefined') return;
+  mapFullpage.eachLayer(layer => {
+    if (layer instanceof L.Marker) layer.remove();
+  });
+  filtered.forEach(r => {
+    if (!r.lat || !r.lng) return;
+    const c = CATS[r.category] || CATS['Volunteer'];
+    const icon = L.divIcon({
+      className: '',
+      html: `<div style="width:36px;height:36px;background:${c.hex};border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(0,0,0,.25);border:2px solid white;"><span style="transform:rotate(45deg);font-size:15px">${c.icon}</span></div>`,
+      iconSize: [36,36], iconAnchor: [18,36], popupAnchor: [0,-38]
+    });
+    L.marker([r.lat, r.lng], { icon })
+      .addTo(mapFullpage)
+      .bindPopup(`<div style="font-family:'Lato',sans-serif;min-width:190px">
+        <div style="font-weight:800;font-size:14px;color:#1d4e89;margin-bottom:4px">${r.name}</div>
+        <div style="font-size:11px;color:#5a7a99;margin-bottom:8px">${r.address}</div>
+        <button onclick="openModal(${r.id})" style="font-family:'Lato',sans-serif;font-size:11px;font-weight:700;background:#00b2ca;color:white;border:none;padding:6px 13px;border-radius:14px;cursor:pointer">View Details</button>
+      </div>`, { maxWidth: 230 })
+      .bindTooltip(r.name, { permanent:false, direction:'top', offset:[0,-40], className:'map-pin-tooltip' });
+  });
+}
+  
 //    MAP   
 function scheduleMapInit() {
   if(map) {
