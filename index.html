@@ -2381,7 +2381,6 @@ function getFiltered() {
     const matchCat = currentFilter==='All' || r.category===currentFilter;
     const matchSearch = !searchQuery ||
       r.name.toLowerCase().includes(searchQuery) ||
-      r.desc.toLowerCase().includes(searchQuery) ||
       r.category.toLowerCase().includes(searchQuery) ||
       r.address.toLowerCase().includes(searchQuery);
     return matchCat && matchSearch;
