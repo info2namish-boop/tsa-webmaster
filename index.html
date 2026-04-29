@@ -2129,14 +2129,6 @@ async function deleteFromFirebase(id) {
   }
 }
 
-// Synchronous helpers
-function loadSubmitted()      { return submittedResources; }
-function saveSubmitted(arr)   { submittedResources = arr; } // kept for compatibility
-function getAllResources() {
-  const submitted = loadSubmitted();
-  return [...BASE_RESOURCES, ...submitted];
-}
-
 //     BACKGROUND CANVAS  
 (function() {
   const canvas = document.getElementById('bg-canvas');
@@ -2766,8 +2758,7 @@ function closeDeleteConfirmOuter(e) {
 // Override getAllResources to respect the hidden list
 function getAllResources() {
   const hidden = JSON.parse(sessionStorage.getItem('apex-hidden') || '[]');
-  const submitted = loadSubmitted();
-  return [...BASE_RESOURCES, ...submitted].filter(r => !hidden.includes(r.id));
+  return [...BASE_RESOURCES, ...submittedResources].filter(r => !hidden.includes(r.id));
 }
 
 //     MODAL
@@ -3176,7 +3167,7 @@ async function submitForm() {
 function renderExternalSources() {
   const container = document.getElementById('external-sources-container');
   if (!container) return;
-  const submitted = loadSubmitted();
+  const submitted = submittedResources;
 
   if (!submitted.length) {
     container.innerHTML = `
