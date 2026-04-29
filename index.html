@@ -775,7 +775,7 @@
     .form-card,.survey-card{padding:24px 20px}
     .form-row{grid-template-columns:1fr}
     .about-grid{grid-template-columns:1fr;gap:36px}
-    .hero-stats{flex-direction:column;gap:14px;bottom:20px;left:20px}
+    .hero-stats{flex-direction:column;gap:14px;bottom:20px;left:32px}
     footer{padding:44px 20px 28px}
     .footer-grid{grid-template-columns:1fr}
     nav{padding:0 14px}
@@ -1551,9 +1551,9 @@
           <p class="survey-sub" style="margin:0 auto">Based on your responses, here are the resources we think will help most.</p>
         </div>
         <div class="results-grid" id="results-grid"></div>
-        <div style="text-align:center;margin-top:28px">
-          <button class="btn-secondary" onclick="resetSurvey()" style="margin-right:10px">↺ Start Over</button>
-          <button class="btn-primary" onclick="goTo('hub')">View All Resources →</button>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;margin-top:28px">
+          <button class="btn-primary" onclick="goTo('hub')" style="width:100%">View All Resources →</button>
+          <button class="btn-secondary" onclick="resetSurvey()" style="width:100%">↺ Start Over</button>
         </div>
       </div>
     </div>
