@@ -2699,6 +2699,7 @@ function activateAdminMode() {
   // Re-render so del. buttons appear
   if (currentPage === 'hub') filterResources();
   showToast('🔓 Admin mode active — you can now delete resources');
+  if (window.innerWidth <= 768) document.querySelectorAll('.page').forEach(p => p.style.paddingTop = '112px');
 }
 
 function exitAdmin() {
@@ -2708,6 +2709,7 @@ function exitAdmin() {
   document.getElementById('admin-nav-btn').style.borderColor = 'rgba(231,76,60,.25)';
   document.getElementById('admin-nav-btn').style.color = '#c0392b';
   document.getElementById('admin-nav-btn').style.fontWeight = '700';
+  document.querySelectorAll('.page').forEach(p => p.style.paddingTop = '');
   const grid = document.getElementById('resource-grid');
   if (grid) grid.classList.remove('admin-mode-active');
   if (currentPage === 'hub') filterResources();
