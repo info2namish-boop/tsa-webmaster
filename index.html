@@ -356,6 +356,7 @@
   ============================================================ */
 
   .modal-overlay { display:none; position:fixed; top:0;left:0;right:0;bottom:0; background:rgba(10,30,60,.5); backdrop-filter:blur(8px); z-index:2000; align-items:center; justify-content:center; padding:20px; }
+  #delete-confirm-overlay { z-index:2500; }
   .modal-overlay.open { display:flex; }
   .modal { background:white; border-radius:var(--radius-lg); max-width:620px; width:100%; max-height:85vh; overflow-y:auto; box-shadow:0 32px 100px rgba(0,0,0,.2); animation:modalIn .3s cubic-bezier(.34,1.56,.64,1); scrollbar-width:thin; }
   @keyframes modalIn { from{transform:scale(.9) translateY(20px);opacity:0} to{transform:scale(1) translateY(0);opacity:1} }
