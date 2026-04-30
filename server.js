@@ -1,15 +1,3 @@
-/**
- * The Apex Resource Hub — Backend Server
- * Serves the frontend and provides a REST API for community-submitted resources.
- *
- * Endpoints:
- *   GET    /api/resources        → returns all submitted resources
- *   POST   /api/resources        → saves a new resource
- *   DELETE /api/resources/:id    → removes a resource (admin action)
- *
- * Storage: resources.json (simple file-based DB — no external service needed)
- * Deploy:  AWS Elastic Beanstalk, EC2, App Runner, or any Node.js host
- */
 
 const express  = require('express');
 const fs       = require('fs');
