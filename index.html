@@ -345,7 +345,11 @@
   .map-fs-header { padding:14px 20px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid rgba(29,78,137,.08); flex-shrink:0; }
   .map-fs-header h3 { font-weight:800; font-size:15px; color:var(--navy); }
   #map-fs { flex:1; min-height:500px; width:100%; }
-
+  .map-fs-legend { background:white; padding:10px 16px; display:flex; flex-wrap:wrap; gap:8px; align-items:center; border-top:1px solid rgba(29,78,137,.08); flex-shrink:0; }
+  .map-fs-legend-btn { font-family:'Lato',sans-serif; font-size:11px; font-weight:700; padding:4px 12px; border-radius:20px; border:2px solid transparent; background:white; color:var(--navy); cursor:pointer; transition:all .2s; box-shadow:0 2px 8px rgba(29,78,137,.06); display:inline-flex; align-items:center; gap:5px; }
+  .map-fs-legend-btn:hover { border-color:var(--sky); color:var(--sky); }
+  .map-fs-legend-btn.active { background:var(--sky); color:white; border-color:var(--sky); }
+  
   /* Tooltip shown on pin hover, separate from the click popup */
   .map-pin-tooltip { background:rgba(29,78,137,0.92); color:white; border:none; border-radius:8px; padding:5px 10px; font-family:'Lato',sans-serif; font-size:12px; font-weight:700; box-shadow:0 4px 12px rgba(0,0,0,0.2); }
   .map-pin-tooltip::before { border-top-color:rgba(29,78,137,0.92) !important; }
@@ -827,6 +831,7 @@
       <button class="btn-secondary" style="padding:7px 16px;font-size:12px" onclick="closeFSMap()">✕ Close</button>
     </div>
     <div id="map-fs"></div>
+    <div class="map-fs-legend" id="map-fs-legend"></div>
   </div>
 </div>
 
@@ -2269,6 +2274,7 @@ function openFSMap() {
         attribution: '© OpenStreetMap contributors', maxZoom: 18
       }).addTo(mapFS);
       updateFSMapMarkers();
+      buildFSLegend();
     }, 150);
   } else {
     setTimeout(() => { mapFS.invalidateSize(); updateFSMapMarkers(); }, 100);
@@ -2279,6 +2285,65 @@ function updateFSMapMarkers() {
   if (!mapFS || typeof L === 'undefined') return;
   mapFS.eachLayer(layer => { if (layer instanceof L.Marker) layer.remove(); });
   getFiltered().forEach(r => {
+    if (!r.lat || !r.lng) return;
+    const c    = CATS[r.category] || CATS['Volunteer'];
+    const icon = L.divIcon({
+      className: '',
+      html: `<div style="width:38px;height:38px;background:${c.hex};border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 14px rgba(0,0,0,.25);border:2px solid white;"><span style="transform:rotate(45deg);font-size:17px">${c.icon}</span></div>`,
+      iconSize: [38,38], iconAnchor: [19,38], popupAnchor: [0,-40]
+    });
+    L.marker([r.lat, r.lng], { icon }).addTo(mapFS)
+      .bindPopup(`<div style="font-family:'Lato',sans-serif;min-width:190px">
+        <div style="font-weight:800;font-size:14px;color:#1d4e89;margin-bottom:4px">${r.name}</div>
+        <div style="font-size:12px;color:#5a7a99;margin-bottom:8px">${r.address}</div>
+        <button onclick="closeFSMap();openModal(${r.id})" style="font-family:'Lato',sans-serif;font-size:11px;font-weight:700;background:#00b2ca;color:white;border:none;padding:6px 13px;border-radius:14px;cursor:pointer">View Details</button>
+      </div>`, { maxWidth: 220 })
+      .bindTooltip(r.name, { permanent:false, direction:'top', offset:[0,-40], className:'map-pin-tooltip' });
+  });
+}
+
+function buildFSLegend() {
+  const legend = document.getElementById('map-fs-legend');
+  if (!legend) return;
+  legend.innerHTML =
+    `<button class="map-fs-legend-btn${currentFilter === 'All' ? ' active' : ''}" data-cat="All" onclick="setFSFilter(this)">All</button>` +
+    Object.entries(CATS).map(([name, c]) =>
+      `<button class="map-fs-legend-btn${currentFilter === name ? ' active' : ''}" data-cat="${name}" onclick="setFSFilter(this)">${c.icon} ${name}</button>`
+    ).join('');
+
+  // redraw pins to match current hub filter
+  if (currentFilter !== 'All') {
+    const filtered = getAllResources().filter(r => r.category === currentFilter);
+    mapFS.eachLayer(layer => { if (layer instanceof L.Marker) layer.remove(); });
+    filtered.forEach(r => {
+      if (!r.lat || !r.lng) return;
+      const c    = CATS[r.category] || CATS['Volunteer'];
+      const icon = L.divIcon({
+        className: '',
+        html: `<div style="width:38px;height:38px;background:${c.hex};border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 14px rgba(0,0,0,.25);border:2px solid white;"><span style="transform:rotate(45deg);font-size:17px">${c.icon}</span></div>`,
+        iconSize:[38,38], iconAnchor:[19,38], popupAnchor:[0,-40]
+      });
+      L.marker([r.lat, r.lng], { icon }).addTo(mapFS)
+        .bindPopup(`<div style="font-family:'Lato',sans-serif;min-width:190px">
+          <div style="font-weight:800;font-size:14px;color:#1d4e89;margin-bottom:4px">${r.name}</div>
+          <div style="font-size:12px;color:#5a7a99;margin-bottom:8px">${r.address}</div>
+          <button onclick="closeFSMap();openModal(${r.id})" style="font-family:'Lato',sans-serif;font-size:11px;font-weight:700;background:#00b2ca;color:white;border:none;padding:6px 13px;border-radius:14px;cursor:pointer">View Details</button>
+        </div>`, { maxWidth:220 })
+        .bindTooltip(r.name, { permanent:false, direction:'top', offset:[0,-40], className:'map-pin-tooltip' });
+    });
+  }
+}
+
+function setFSFilter(btn) {
+  document.querySelectorAll('.map-fs-legend-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const cat = btn.dataset.cat;
+  if (!mapFS || typeof L === 'undefined') return;
+  mapFS.eachLayer(layer => { if (layer instanceof L.Marker) layer.remove(); });
+  const filtered = getAllResources().filter(r =>
+    cat === 'All' || r.category === cat
+  );
+  filtered.forEach(r => {
     if (!r.lat || !r.lng) return;
     const c    = CATS[r.category] || CATS['Volunteer'];
     const icon = L.divIcon({
