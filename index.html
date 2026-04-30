@@ -2841,8 +2841,18 @@ async function submitForm() {
   else if (appt)   hoursSpecial = 'By appointment only';
   else if (varies) hoursSpecial = 'Hours vary by season';
 
+  const isDuplicate = getAllResources().some(r =>
+    r.name.trim().toLowerCase()    === name.toLowerCase() &&
+    r.address.trim().toLowerCase() === addr.toLowerCase()
+  );
+  if (isDuplicate) {
+    showToast('⚠️ This resource already exists in the hub');
+    return;
+  }
+  
   const btn = document.getElementById('f-submit-btn');
   btn.disabled = true; btn.textContent = '🔍 Locating on map…'; btn.style.opacity = '0.75';
+  
 
   let lat = null, lng = null;
   const geocodeWithTimeout = (url, opts = {}, ms = 4000) => {
