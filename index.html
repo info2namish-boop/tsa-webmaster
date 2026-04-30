@@ -1396,27 +1396,39 @@
 </div>
 
 
-<!--       JAVASCRIPT       -->
-<!-- Leaflet loaded here (bottom of body) so DOM exists and CDN has time to resolve -->
+<!--  ============================================================
+      JAVASCRIPT
+      Leaflet loads at the bottom of the body so the DOM exists
+      and the CDN has time to resolve before map init runs.
+============================================================  -->
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-//  CAT.S
+
+
+// ============================================================
+// CATEGORY DATA
+// CATS is the single source of truth for all category visuals.
+// Changing an entry here updates cards, filters, map pins,
+// the survey, and the category quick nav all at once.
+// CAT_BG provides gradient fallback banners when no photo exists.
+// ============================================================
+
 const CATS = {
   'Food & Hunger':  { icon:'🥫', bg:'rgba(125,207,182,.15)', color:'#2a8a6a', hex:'#7dcfb6' },
-  'Housing':        { icon:'🏠', bg:'rgba(29,78,137,.12)',  color:'#1d4e89', hex:'#1d4e89' },
-  'Health':         { icon:'❤️', bg:'rgba(247,146,86,.15)', color:'#b05020', hex:'#f79256' },
-  'Education':      { icon:'📚', bg:'rgba(0,178,202,.12)',  color:'#007a8e', hex:'#00b2ca' },
-  'Arts & Culture': { icon:'🎨', bg:'rgba(251,209,162,.3)', color:'#8a6020', hex:'#fbd1a2' },
-  'Youth':          { icon:'🌟', bg:'rgba(247,146,86,.12)', color:'#b05010', hex:'#f79256' },
-  'Seniors':        { icon:'👵', bg:'rgba(212,165,213,.2)', color:'#7a3a8a', hex:'#d4a5d5' },
-  'Environment':    { icon:'🌿', bg:'rgba(39,174,96,.12)',  color:'#1a6a40', hex:'#27ae60' },
-  'Immigration':    { icon:'🌎', bg:'rgba(52,152,219,.12)', color:'#1a5f8a', hex:'#3498db' },
-  'Recreation':     { icon:'⚽', bg:'rgba(0,178,202,.12)',  color:'#007a8e', hex:'#00b2ca' },
-  'Volunteer':      { icon:'🤝', bg:'rgba(224,145,10,.15)', color:'#a06808', hex:'#e0910a' },
+  'Housing':        { icon:'🏠', bg:'rgba(29,78,137,.12)',   color:'#1d4e89', hex:'#1d4e89' },
+  'Health':         { icon:'❤️', bg:'rgba(247,146,86,.15)',  color:'#b05020', hex:'#f79256' },
+  'Education':      { icon:'📚', bg:'rgba(0,178,202,.12)',   color:'#007a8e', hex:'#00b2ca' },
+  'Arts & Culture': { icon:'🎨', bg:'rgba(251,209,162,.3)',  color:'#8a6020', hex:'#fbd1a2' },
+  'Youth':          { icon:'🌟', bg:'rgba(247,146,86,.12)',  color:'#b05010', hex:'#f79256' },
+  'Seniors':        { icon:'👵', bg:'rgba(212,165,213,.2)',  color:'#7a3a8a', hex:'#d4a5d5' },
+  'Environment':    { icon:'🌿', bg:'rgba(39,174,96,.12)',   color:'#1a6a40', hex:'#27ae60' },
+  'Immigration':    { icon:'🌎', bg:'rgba(52,152,219,.12)',  color:'#1a5f8a', hex:'#3498db' },
+  'Recreation':     { icon:'⚽', bg:'rgba(0,178,202,.12)',   color:'#007a8e', hex:'#00b2ca' },
+  'Volunteer':      { icon:'🤝', bg:'rgba(224,145,10,.15)',  color:'#a06808', hex:'#e0910a' },
   'Other':          { icon:'❔', bg:'rgba(100,120,150,.12)', color:'#4a6070', hex:'#6a8099' },
 };
 
-// Gradient backgrounds for card banners — only CSS, so no copyright issues
 const CAT_BG = {
   'Food & Hunger':  'linear-gradient(135deg,#2a8a6a,#7dcfb6)',
   'Housing':        'linear-gradient(135deg,#1d4e89,#2a6db5)',
@@ -1432,247 +1444,228 @@ const CAT_BG = {
   'Other':          'linear-gradient(135deg,#4a6070,#6a8099)',
 };
 
-//     RESOURCE DATA    
+
+// ============================================================
+// RESOURCE DATA
+// Hardcoded base resources that ship with the site.
+// spotlight:true makes a resource eligible for the daily
+// spotlight rotation. img URLs fall back to the CSS gradient
+// banner if they fail or are left null.
+// ============================================================
+
 const BASE_RESOURCES = [
-  { id:1, spotlight:true,
-    name:"NeighborUp (Western Wake Crisis Ministry)",
-    category:"Food & Hunger",
+  { id:1,  spotlight:true,
+    name:"NeighborUp (Western Wake Crisis Ministry)",   category:"Food & Hunger",
     desc:"NeighborUp provides financial and food assistance to Apex, Holly Springs, Fuquay-Varina, Cary and surrounding residents. Walk-ins welcome. Information, advocacy, and referral services also available.",
-    address:"1600 Olive Chapel Rd, Suite 408, Apex, NC 27502",
-    phone:"(919) 362-6282", website:"neighborup.org",
-    hours:"Mon–Fri 9am–12pm, 1pm–4pm",
-    img:"https://neighborup.org/wp-content/uploads/Banner-1-1.png",
+    address:"1600 Olive Chapel Rd, Suite 408, Apex, NC 27502", phone:"(919) 362-6282", website:"neighborup.org",
+    hours:"Mon–Fri 9am–12pm, 1pm–4pm", img:"https://neighborup.org/wp-content/uploads/Banner-1-1.png",
     lat:35.7281, lng:-78.8632, engageType:"walkIn", availDays:["Mon","Tue","Wed","Thu","Fri"], openTime:"09:00", closeTime:"16:00" },
-  { id:2, spotlight:true,
-    name:"Halle Cultural Arts Center",
-    category:"Arts & Culture",
+
+  { id:2,  spotlight:true,
+    name:"Halle Cultural Arts Center",                  category:"Arts & Culture",
     desc:"Apex's premier arts venue hosting live performances, art galleries, community exhibits, and creative programs for all ages. The Halle brings culture and creativity to the heart of downtown Apex.",
-    address:"237 N Salem St, Apex, NC 27502",
-    phone:"(919) 249-3703", website:"apexnc.org/halle",
-    hours:"Tue–Sat 10am–5pm, Sun 1pm–5pm",
-    img:"https://apexnc.org/ImageRepository/Document?documentID=31774",
+    address:"237 N Salem St, Apex, NC 27502", phone:"(919) 249-3703", website:"apexnc.org/halle",
+    hours:"Tue–Sat 10am–5pm, Sun 1pm–5pm", img:"https://apexnc.org/ImageRepository/Document?documentID=31774",
     lat:35.7321, lng:-78.8502, engageType:"in-person", availDays:["Tue","Wed","Thu","Fri","Sat","Sun"], openTime:"10:00", closeTime:"17:00" },
-  { id:3, spotlight:true,
-    name:"Apex Community Park",
-    category:"Recreation",
+
+  { id:3,  spotlight:true,
+    name:"Apex Community Park",                         category:"Recreation",
     desc:"A 162-acre community park featuring athletic fields, trails, a lake, playgrounds, and picnic shelters. Host to countless community events including Peakfest and summer concerts.",
-    address:"2200 Laura Duncan Rd, Apex, NC 27502",
-    phone:"(919) 249-3300", website:"apexnc.org/parks",
-    hours:"Daily dawn–dusk",
-    img:"https://www.apexnc.org/ImageRepository/Document?documentID=1290",
+    address:"2200 Laura Duncan Rd, Apex, NC 27502", phone:"(919) 249-3300", website:"apexnc.org/parks",
+    hours:"Daily dawn–dusk", img:"https://www.apexnc.org/ImageRepository/Document?documentID=1290",
     lat:35.7204, lng:-78.8419, engageType:"in-person", availDays:["Mon","Tue","Wed","Thu","Fri","Sat","Sun"], openTime:"07:00", closeTime:"21:00" },
+
   { id:4,
-    name:"White Oak Foundation",
-    category:"Housing",
+    name:"White Oak Foundation",                        category:"Housing",
     desc:"Dedicated to preventing foreclosures, promoting education, ensuring food security, providing scholarships, and offering crisis assistance to families across the community.",
-    address:"1624 White Oak Church Rd, Apex, NC 27502",
-    phone:"(919) 888-2100", website:"wofnc.org",
-    hours:"Mon–Fri 9am–5pm",
-    img:"https://static.wixstatic.com/media/899dd5_239d675329d14618b692cfce3270e6e9~mv2.jpg/v1/fill/w_2193,h_886,al_c,q_85,enc_avif,quality_auto/899dd5_239d675329d14618b692cfce3270e6e9~mv2.jpg",
+    address:"1624 White Oak Church Rd, Apex, NC 27502", phone:"(919) 888-2100", website:"wofnc.org",
+    hours:"Mon–Fri 9am–5pm", img:"https://static.wixstatic.com/media/899dd5_239d675329d14618b692cfce3270e6e9~mv2.jpg/v1/fill/w_2193,h_886,al_c,q_85,enc_avif,quality_auto/899dd5_239d675329d14618b692cfce3270e6e9~mv2.jpg",
     lat:35.7095, lng:-78.8705, engageType:"walkIn", availDays:["Mon","Tue","Wed","Thu","Fri"], openTime:"09:00", closeTime:"17:00" },
+
   { id:5,
-    name:"Apex Immigration Services",
-    category:"Immigration",
+    name:"Apex Immigration Services",                   category:"Immigration",
     desc:"Helping immigrants and refugees build better lives by providing low-cost immigration legal services, immigrant rights information, and a comprehensive referral network.",
-    address:"203 E Moore St, Apex, NC 27502",
-    phone:"(919) 367-9014", website:"apeximm.org",
-    hours:"Mon–Thu 9am–4pm",
-    img:"https://www.apeximm.org/wp-content/uploads/2018/05/1.jpg",
+    address:"203 E Moore St, Apex, NC 27502", phone:"(919) 367-9014", website:"apeximm.org",
+    hours:"Mon–Thu 9am–4pm", img:"https://www.apeximm.org/wp-content/uploads/2018/05/1.jpg",
     lat:35.7315, lng:-78.8480, engageType:"in-person", availDays:["Mon","Tue","Wed","Thu"], openTime:"09:00", closeTime:"16:00" },
+
   { id:6,
-    name:"Habitat for Humanity ReStore",
-    category:"Housing",
+    name:"Habitat for Humanity ReStore",                category:"Housing",
     desc:"Sells donated furniture, appliances, and building materials at a fraction of retail cost. Proceeds support Habitat's mission of building affordable housing in Wake County.",
-    address:"826 E Williams St, Apex, NC 27502",
-    phone:"(919) 803-4040", website:"habitatwake.org",
-    hours:"Mon–Sat 10am–5pm",
-    img:"https://www.trianglerestores.org/sites/default/files/styles/tile/public/2017-11/HuthPhoto-Apex-KAH_2047.jpg?h=2e3eca71&itok=-GKcuZzu",
+    address:"826 E Williams St, Apex, NC 27502", phone:"(919) 803-4040", website:"habitatwake.org",
+    hours:"Mon–Sat 10am–5pm", img:"https://www.trianglerestores.org/sites/default/files/styles/tile/public/2017-11/HuthPhoto-Apex-KAH_2047.jpg?h=2e3eca71&itok=-GKcuZzu",
     lat:35.7284, lng:-78.8439, engageType:"in-person", availDays:["Mon","Tue","Wed","Thu","Fri","Sat"], openTime:"10:00", closeTime:"17:00" },
+
   { id:7,
-    name:"Meals on Wheels of Wake County",
-    category:"Seniors",
+    name:"Meals on Wheels of Wake County",              category:"Seniors",
     desc:"Delivers nutritious noon-time meals every weekday to elderly, homebound, and disabled Wake County residents. Volunteers always welcome.",
-    address:"Wake County Service Area (Apex pickup available)",
-    phone:"(919) 833-1999", website:"meals-on-wheelswake.org",
-    hours:"Mon–Fri delivery 10:30am–1:30pm",
-    img:"https://www.wakemow.org/sites/wakemow/files/styles/internal_page_header/public/2025-09/Meals%20on%20Wheels%20-%20Client%20or%20Volunteer%201_0.jpg?h=2e5fd910&itok=cGLsi4fn",
+    address:"Wake County Service Area (Apex pickup available)", phone:"(919) 833-1999", website:"meals-on-wheelswake.org",
+    hours:"Mon–Fri delivery 10:30am–1:30pm", img:"https://www.wakemow.org/sites/wakemow/files/styles/internal_page_header/public/2025-09/Meals%20on%20Wheels%20-%20Client%20or%20Volunteer%201_0.jpg?h=2e5fd910&itok=cGLsi4fn",
     lat:35.7300, lng:-78.8580, engageType:"in-person", availDays:["Mon","Tue","Wed","Thu","Fri"], openTime:"10:30", closeTime:"13:30" },
+
   { id:8,
-    name:"Camp G.R.A.C.E.",
-    category:"Youth",
+    name:"Camp G.R.A.C.E.",                            category:"Youth",
     desc:"A developmentally appropriate summer day camp for children with autism, providing a safe, nurturing environment where campers learn, play, and thrive with specialized support.",
-    address:"Apex, NC 27502",
-    phone:"(919) 249-3300", website:"apexnc.org/campgrace",
-    hours:"Summer sessions (June–August)",
-    img:"https://thecampgrace.com/images/2017/12/lakes-1.jpg",
+    address:"Apex, NC 27502", phone:"(919) 249-3300", website:"apexnc.org/campgrace",
+    hours:"Summer sessions (June–August)", img:"https://thecampgrace.com/images/2017/12/lakes-1.jpg",
     lat:35.7265, lng:-78.8560, engageType:"in-person", availDays:["Mon","Tue","Wed","Thu","Fri"], openTime:"08:00", closeTime:"17:00" },
+
   { id:9,
-    name:"American Red Cross — Triangle",
-    category:"Health",
+    name:"American Red Cross — Triangle",               category:"Health",
     desc:"Provides disaster relief, emergency blood supply, and health and safety training. Blood drives held regularly at locations throughout Apex and Wake County.",
-    address:"Multiple Apex & Triangle locations",
-    phone:"(919) 231-1602", website:"redcross.org",
-    hours:"Blood drives vary; 24/7 disaster hotline",
-    img:"https://www.redcross.org/content/dam/redcross/imported-images/714x410-MO-TXGC-Tropical-Storm-Harvey.jpg.transform/1288/q82/feature/image.jpeg",
+    address:"Multiple Apex & Triangle locations", phone:"(919) 231-1602", website:"redcross.org",
+    hours:"Blood drives vary; 24/7 disaster hotline", img:"https://www.redcross.org/content/dam/redcross/imported-images/714x410-MO-TXGC-Tropical-Storm-Harvey.jpg.transform/1288/q82/feature/image.jpeg",
     lat:35.7330, lng:-78.8510, engageType:"both", availDays:["Mon","Tue","Wed","Thu","Fri","Sat"], openTime:"08:00", closeTime:"17:00" },
+
   { id:10,
-    name:"Note in the Pocket",
-    category:"Education",
+    name:"Note in the Pocket",                          category:"Education",
     desc:"Provides new clothing to children in need across North Carolina, ensuring every child feels confident and ready to learn — removing a key barrier to thriving in school.",
-    address:"Wake County Service Area",
-    phone:"(919) 371-1882", website:"noteinthepocket.org",
-    hours:"Mon–Fri 9am–5pm",
-    img:"https://noteinthepocket.org/wp-content/uploads/2023/04/kids-clothing-min.jpg",
+    address:"Wake County Service Area", phone:"(919) 371-1882", website:"noteinthepocket.org",
+    hours:"Mon–Fri 9am–5pm", img:"https://noteinthepocket.org/wp-content/uploads/2023/04/kids-clothing-min.jpg",
     lat:35.7250, lng:-78.8600, engageType:"both", availDays:["Mon","Tue","Wed","Thu","Fri"], openTime:"09:00", closeTime:"17:00" },
+
   { id:11,
-    name:"Apex Youth Council",
-    category:"Youth",
+    name:"Apex Youth Council",                          category:"Youth",
     desc:"A student-run organization for local middle and high schoolers that enhances the community through leadership, service, and event planning. Applications open each August.",
-    address:"Apex, NC 27502",
-    phone:"(919) 249-3300", website:"apexnc.org/youthcouncil",
-    hours:"Meets monthly; programs vary",
-    img:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRHH4ExZQ0_BU5ItF44b4VounI9woj0oBrEmw&s",
+    address:"Apex, NC 27502", phone:"(919) 249-3300", website:"apexnc.org/youthcouncil",
+    hours:"Meets monthly; programs vary", img:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRHH4ExZQ0_BU5ItF44b4VounI9woj0oBrEmw&s",
     lat:35.7305, lng:-78.8495, engageType:"both", availDays:["Mon","Tue","Wed","Thu","Fri","Sat"], openTime:"09:00", closeTime:"18:00" },
+
   { id:12,
-    name:"Connecting Community",
-    category:"Volunteer",
+    name:"Connecting Community",                        category:"Volunteer",
     desc:"Hosts engaging events connecting underserved community members with local agencies and resources. Volunteers help at multiple events throughout the year.",
-    address:"Apex, NC (multiple event locations)",
-    phone:"(919) 249-3300", website:"apexnc.org/volunteering",
-    hours:"Events throughout the year",
-    img:"https://i0.wp.com/connectingcommunitync.org/wp-content/uploads/2023/11/cconecting.png?fit=354%2C292",
+    address:"Apex, NC (multiple event locations)", phone:"(919) 249-3300", website:"apexnc.org/volunteering",
+    hours:"Events throughout the year", img:"https://i0.wp.com/connectingcommunitync.org/wp-content/uploads/2023/11/cconecting.png?fit=354%2C292",
     lat:35.7275, lng:-78.8555, engageType:"in-person", availDays:["Mon","Tue","Wed","Thu","Fri","Sat"], openTime:"09:00", closeTime:"17:00" },
+
   { id:13,
-    name:"EarthFest Apex",
-    category:"Environment",
+    name:"EarthFest Apex",                              category:"Environment",
     desc:"Annual Earth Day celebration featuring environmental education, live music, food, and family activities. Promotes sustainability and conservation in the Apex community.",
-    address:"Apex Community Park, 2200 Laura Duncan Rd",
-    phone:"(919) 249-3300", website:"apexnc.org/earthfest",
-    hours:"Annual event (April)",
-    img:"https://apexnc.org/ImageRepository/Document?documentID=53970",
+    address:"Apex Community Park, 2200 Laura Duncan Rd", phone:"(919) 249-3300", website:"apexnc.org/earthfest",
+    hours:"Annual event (April)", img:"https://apexnc.org/ImageRepository/Document?documentID=53970",
     lat:35.7204, lng:-78.8419, engageType:"in-person", availDays:["Mon","Tue","Wed","Thu","Fri","Sat","Sun"], openTime:"07:00", closeTime:"21:00" },
+
   { id:14,
-    name:"Olde Fashioned 4th of July",
-    category:"Recreation",
+    name:"Olde Fashioned 4th of July",                 category:"Recreation",
     desc:"Apex's beloved Independence Day celebration with live entertainment, food vendors, family activities, and a fireworks show over Apex Community Park. A town tradition since the 1980s.",
-    address:"Apex Community Park, 2200 Laura Duncan Rd",
-    phone:"(919) 249-3300", website:"apexnc.org/4thofjuly",
-    hours:"Annual event (July 4th)",
-    img:"https://apexnc.org/ImageRepository/Document?documentID=53880",
+    address:"Apex Community Park, 2200 Laura Duncan Rd", phone:"(919) 249-3300", website:"apexnc.org/4thofjuly",
+    hours:"Annual event (July 4th)", img:"https://apexnc.org/ImageRepository/Document?documentID=53880",
     lat:35.7204, lng:-78.8419, engageType:"in-person", availDays:["Mon","Tue","Wed","Thu","Fri","Sat","Sun"], openTime:"07:00", closeTime:"21:00" },
+
   { id:15,
-    name:"Guardian Angel Thrift Store",
-    category:"Food & Hunger",
+    name:"Guardian Angel Thrift Store",                 category:"Food & Hunger",
     desc:"A nonprofit thrift store raising funds to support local families. Accepts gently used donations and offers affordable clothing, household items, and furniture.",
-    address:"Apex, NC 27502",
-    phone:"(919) 303-1000", website:"guardianangelnc.org",
-    hours:"Mon–Sat 10am–6pm",
-    img:"https://images.squarespace-cdn.com/content/v1/65fdac0e3515ee09ce0b8194/7b3f209a-dee1-4e9d-9b17-c6312034911b/test.jpg?format=1500w",
+    address:"Apex, NC 27502", phone:"(919) 303-1000", website:"guardianangelnc.org",
+    hours:"Mon–Sat 10am–6pm", img:"https://images.squarespace-cdn.com/content/v1/65fdac0e3515ee09ce0b8194/7b3f209a-dee1-4e9d-9b17-c6312034911b/test.jpg?format=1500w",
     lat:35.7268, lng:-78.8590, engageType:"in-person", availDays:["Mon","Tue","Wed","Thu","Fri","Sat"], openTime:"10:00", closeTime:"18:00" },
+
   { id:16,
-    name:"Give the Gift of Swim",
-    category:"Youth",
+    name:"Give the Gift of Swim",                       category:"Youth",
     desc:"Provides free or reduced-cost swim lessons to underserved children in Apex, building life-saving aquatic skills and breaking down financial barriers.",
-    address:"Apex Area Aquatic Centers",
-    phone:"(919) 249-3300", website:"apexnc.org/swim",
-    hours:"Summer sessions; apply in spring",
-    img:"https://cdn1.sportngin.com/attachments/text_block/155f-153847675/thumbnail_IMG_4456_large.jpg",
+    address:"Apex Area Aquatic Centers", phone:"(919) 249-3300", website:"apexnc.org/swim",
+    hours:"Summer sessions; apply in spring", img:"https://cdn1.sportngin.com/attachments/text_block/155f-153847675/thumbnail_IMG_4456_large.jpg",
     lat:35.7260, lng:-78.8480, engageType:"in-person", availDays:["Mon","Tue","Wed","Thu","Fri"], openTime:"09:00", closeTime:"17:00" },
+
   { id:17,
-    name:"Apex Turkey Trot 5K",
-    category:"Recreation",
+    name:"Apex Turkey Trot 5K",                         category:"Recreation",
     desc:"Annual Thanksgiving morning run/walk through scenic Apex streets benefiting local charities. Open to all ages and fitness levels — a beloved community tradition.",
-    address:"Downtown Apex, NC 27502",
-    phone:"(919) 249-3300", website:"apexnc.org/turkeytrot",
-    hours:"Annual event (Thanksgiving morning)",
-    img:"https://exploreapexnc.com/wp-content/uploads/2024/05/IMG_7253-scaled.jpg",
+    address:"Downtown Apex, NC 27502", phone:"(919) 249-3300", website:"apexnc.org/turkeytrot",
+    hours:"Annual event (Thanksgiving morning)", img:"https://exploreapexnc.com/wp-content/uploads/2024/05/IMG_7253-scaled.jpg",
     lat:35.7320, lng:-78.8500, engageType:"in-person", availDays:["Thu"], openTime:"07:00", closeTime:"12:00" },
+
   { id:18,
-    name:"Peakfest",
-    category:"Arts & Culture",
+    name:"Peakfest",                                    category:"Arts & Culture",
     desc:"Apex's signature downtown street festival celebrating the Piedmont region with live music, local art, food vendors, and family activities each spring in historic downtown Apex.",
-    address:"Downtown Apex, Salem St, Apex, NC 27502",
-    phone:"(919) 249-3300", website:"apexnc.org/peakfest",
-    hours:"Annual (Spring Saturday, 9am–5pm)",
-    img:"https://static.wixstatic.com/media/9e159c_2becbfd6ddbe4e97ac95d7c7e93a1994~mv2.jpg/v1/fill/w_1004,h_1108,al_c,q_85,enc_avif,quality_auto/9e159c_2becbfd6ddbe4e97ac95d7c7e93a1994~mv2.jpg",
+    address:"Downtown Apex, Salem St, Apex, NC 27502", phone:"(919) 249-3300", website:"apexnc.org/peakfest",
+    hours:"Annual (Spring Saturday, 9am–5pm)", img:"https://static.wixstatic.com/media/9e159c_2becbfd6ddbe4e97ac95d7c7e93a1994~mv2.jpg/v1/fill/w_1004,h_1108,al_c,q_85,enc_avif,quality_auto/9e159c_2becbfd6ddbe4e97ac95d7c7e93a1994~mv2.jpg",
     lat:35.7325, lng:-78.8495, engageType:"in-person", availDays:["Sat"], openTime:"09:00", closeTime:"17:00" },
+
   { id:19,
-    name:"Apex Senior Center",
-    category:"Seniors",
+    name:"Apex Senior Center",                          category:"Seniors",
     desc:"Offers fitness classes, social programs, day trips, health screenings, and enrichment for adults 55+. A welcoming hub for older adults to connect and stay active.",
-    address:"68 Hunter St, Apex, NC 27502",
-    phone:"(919) 249-3494", website:"apexnc.org/seniors",
-    hours:"Mon–Fri 8am–5pm",
-    img:"https://www.apexnc.org/ImageRepository/Document?documentID=37233",
+    address:"68 Hunter St, Apex, NC 27502", phone:"(919) 249-3494", website:"apexnc.org/seniors",
+    hours:"Mon–Fri 8am–5pm", img:"https://www.apexnc.org/ImageRepository/Document?documentID=37233",
     lat:35.7335, lng:-78.8485, engageType:"in-person", availDays:["Mon","Tue","Wed","Thu","Fri"], openTime:"08:00", closeTime:"17:00" },
+
   { id:20,
-    name:"Think Apex Day",
-    category:"Volunteer",
+    name:"Think Apex Day",                              category:"Volunteer",
     desc:"Annual community service day (last Saturday in April) where Apex residents volunteer together at parks, nonprofits, and neighborhoods. Everyone welcome — individual or group sign-ups.",
-    address:"Multiple Apex locations",
-    phone:"(919) 249-1122", website:"apexnc.org/thinkapex",
-    hours:"Annual (Last Saturday in April, 9am–2pm)",
-    img:"https://www.apexnc.org/ImageRepository/Document?documentID=46833",
+    address:"Multiple Apex locations", phone:"(919) 249-1122", website:"apexnc.org/thinkapex",
+    hours:"Annual (Last Saturday in April, 9am–2pm)", img:"https://www.apexnc.org/ImageRepository/Document?documentID=46833",
     lat:35.7290, lng:-78.8520, engageType:"in-person", availDays:["Sat"], openTime:"09:00", closeTime:"14:00" },
 ];
 
-//     STATE    
-let currentFilter = 'All';
-let searchQuery = '';
-let currentPage = 'home';
-let map = null, mapMarkers = [];
-let mapFS = null;
+
+// ============================================================
+// GLOBAL STATE
+// These variables persist for the entire session and are shared
+// across all functions. map/mapFullpage/mapFS are Leaflet
+// instances. pendingHubJump stores nav options applied after
+// a page transition completes.
+// ============================================================
+
+let currentFilter  = 'All';
+let searchQuery    = '';
+let currentPage    = 'home';
+let currentHubView = 'list';
+
+let map          = null, mapMarkers = [];
+let mapFullpage  = null;
+let mapFS        = null;
 let heroLaunchMap = null;
-let pendingHubJump = null;
+
+let pendingHubJump  = null;
+let isAdmin         = false;
+let pendingDeleteId = null;
+
 let surveyAnswers = { who:null, need:[], engage:null, time:null };
-let currentStep = 1;
+let currentStep   = 1;
 
-// ─── FIREBASE CONFIG ────────────────────────────────────────
+
+// ============================================================
+// FIREBASE
+// Replace FIREBASE_CONFIG values from your Firebase console.
+// If apiKey is blank, the app falls back to localStorage.
+// db is null until initFirebase() resolves.
+// submittedResources is kept in sync by the real-time listener.
+// ============================================================
+
 const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyBiFYClJfPUeFclCb8GoavChrO4aid2dFg",
-  authDomain: "apex-resource-hub-b7a28.firebaseapp.com",
-  projectId: "apex-resource-hub-b7a28",
-  storageBucket: "apex-resource-hub-b7a28.firebasestorage.app",
+  apiKey:            "AIzaSyBiFYClJfPUeFclCb8GoavChrO4aid2dFg",
+  authDomain:        "apex-resource-hub-b7a28.firebaseapp.com",
+  projectId:         "apex-resource-hub-b7a28",
+  storageBucket:     "apex-resource-hub-b7a28.firebasestorage.app",
   messagingSenderId: "1008232160438",
-  appId: "1:1008232160438:web:303c3c0b6d1f3ac9a85a17"
+  appId:             "1:1008232160438:web:303c3c0b6d1f3ac9a85a17"
 };
-// ─────────────────────────────────────────────────────────────
 
-// Firebase
-let db = null;
-let submittedResources = []; // in-memory cache synced w. real-time listener
-let unsubscribeListener = null; // cleanup handle for the listener
+let db                  = null;
+let submittedResources  = [];
+let unsubscribeListener = null;
 
 async function initFirebase() {
-  // Check config has been filled in
   if (FIREBASE_CONFIG.apiKey === '') {
-    console.warn('⚠️  Firebase not configured — falling back to localStorage.');
-    console.warn('    Follow the SETUP instructions in the code comments above.');
+    console.warn('Firebase not configured — falling back to localStorage.');
     loadFromLocalStorage();
     return;
   }
-
   try {
-    // Dynamically import Firebase SDK modules (ESM CDN)
-    const { initializeApp }          = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
+    const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js');
     const { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy }
-                                      = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+      = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
 
     const app = initializeApp(FIREBASE_CONFIG);
     db = getFirestore(app);
 
-    // Real-time listener
-    // whenever ANY user adds or deletes a resource from any device/browser:
     const q = query(collection(db, 'submissions'), orderBy('submittedDate', 'asc'));
     unsubscribeListener = onSnapshot(q, (snapshot) => {
       submittedResources = snapshot.docs.map(d => ({ ...d.data(), _docId: d.id }));
-      // Re-render everything that depends on submitted resources
       renderCatQuick();
       renderExternalSources();
       if (currentPage === 'hub')       filterResources();
-      const badge = document.getElementById('filter-count');
-      if(badge) badge.textContent = getAllResources().length;
       if (currentPage === 'reference') renderExternalSources();
+      const badge = document.getElementById('filter-count');
+      if (badge) badge.textContent = getAllResources().length;
     }, (err) => {
       console.warn('Firestore listener error — falling back to localStorage:', err);
       loadFromLocalStorage();
@@ -1691,7 +1684,6 @@ function loadFromLocalStorage() {
 
 async function postToFirebase(resource) {
   if (!db) {
-    // Offline fallback
     submittedResources.push(resource);
     localStorage.setItem('apex-submissions', JSON.stringify(submittedResources));
     return resource;
@@ -1699,7 +1691,6 @@ async function postToFirebase(resource) {
   try {
     const { collection, addDoc } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
     const docRef = await addDoc(collection(db, 'submissions'), resource);
-    // onSnapshot will update submittedResources automatically
     return { ...resource, _docId: docRef.id };
   } catch (err) {
     console.warn('Firestore write failed — saving locally:', err);
@@ -1712,7 +1703,6 @@ async function postToFirebase(resource) {
 async function deleteFromFirebase(id) {
   const target = submittedResources.find(r => r.id === id);
   if (!db || !target || !target._docId) {
-    // Offline fallback
     submittedResources = submittedResources.filter(r => r.id !== id);
     localStorage.setItem('apex-submissions', JSON.stringify(submittedResources));
     return;
@@ -1720,7 +1710,6 @@ async function deleteFromFirebase(id) {
   try {
     const { doc, deleteDoc } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
     await deleteDoc(doc(db, 'submissions', target._docId));
-    // onSnapshot will remove it from submittedResources automatically
   } catch (err) {
     console.warn('Firestore delete failed — removing locally:', err);
     submittedResources = submittedResources.filter(r => r.id !== id);
@@ -1728,91 +1717,129 @@ async function deleteFromFirebase(id) {
   }
 }
 
-//     BACKGROUND CANVAS  
+
+// ============================================================
+// ANIMATED BACKGROUND CANVAS
+// Draws 6 slowly drifting color blobs at ~60fps using
+// requestAnimationFrame. Wrapped in an IIFE to keep all
+// variables out of global scope.
+// ============================================================
+
 (function() {
   const canvas = document.getElementById('bg-canvas');
-  const ctx = canvas.getContext('2d');
+  const ctx    = canvas.getContext('2d');
   let W, H;
-  const blobs = [];
+  const blobs  = [];
+
   function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
-  function mkBlob(i) { return { x:Math.random()*W, y:Math.random()*H, r:100+Math.random()*180, vx:(Math.random()-.5)*.4, vy:(Math.random()-.5)*.4, hue:[195,172,158,35,20][i%5], alpha:.05+Math.random()*.05 }; }
-  resize(); for(let i=0;i<6;i++) blobs.push(mkBlob(i));
+  function mkBlob(i) {
+    return { x:Math.random()*W, y:Math.random()*H, r:100+Math.random()*180,
+             vx:(Math.random()-.5)*.4, vy:(Math.random()-.5)*.4,
+             hue:[195,172,158,35,20][i%5], alpha:.05+Math.random()*.05 };
+  }
+
+  resize();
+  for (let i = 0; i < 6; i++) blobs.push(mkBlob(i));
   window.addEventListener('resize', resize);
+
   function draw() {
-    ctx.clearRect(0,0,W,H);
-    blobs.forEach(b=>{
-      b.x+=b.vx; b.y+=b.vy;
-      if(b.x<-b.r) b.x=W+b.r; if(b.x>W+b.r) b.x=-b.r;
-      if(b.y<-b.r) b.y=H+b.r; if(b.y>H+b.r) b.y=-b.r;
-      const g=ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,b.r);
-      g.addColorStop(0,`hsla(${b.hue},80%,65%,${b.alpha})`);
-      g.addColorStop(1,`hsla(${b.hue},80%,65%,0)`);
-      ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
+    ctx.clearRect(0, 0, W, H);
+    blobs.forEach(b => {
+      b.x += b.vx; b.y += b.vy;
+      if (b.x < -b.r) b.x = W+b.r; if (b.x > W+b.r) b.x = -b.r;
+      if (b.y < -b.r) b.y = H+b.r; if (b.y > H+b.r) b.y = -b.r;
+      const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r);
+      g.addColorStop(0, `hsla(${b.hue},80%,65%,${b.alpha})`);
+      g.addColorStop(1, `hsla(${b.hue},80%,65%,0)`);
+      ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI*2);
+      ctx.fillStyle = g; ctx.fill();
     });
     requestAnimationFrame(draw);
   }
   draw();
 })();
 
-//   NAV
+
+// ============================================================
+// PAGE NAVIGATION
+// goTo() plays the swoosh transition then calls switchPage().
+// switchPage() shows the target page, updates nav button states,
+// scrolls to top, and runs any page-specific setup.
+// The scroll listener adds .scrolled to the navbar at 10px.
+// ============================================================
+
 function goTo(page, noTransition) {
-  if(page === currentPage) return;
+  if (page === currentPage) return;
   const pt = document.getElementById('pt');
-  if(!noTransition) {
+  if (!noTransition) {
     pt.classList.add('in');
-    setTimeout(()=>{ switchPage(page); pt.classList.remove('in'); pt.classList.add('out'); setTimeout(()=>pt.classList.remove('out'),400); },340);
-  } else { switchPage(page); }
+    setTimeout(() => {
+      switchPage(page);
+      pt.classList.remove('in');
+      pt.classList.add('out');
+      setTimeout(() => pt.classList.remove('out'), 400);
+    }, 340);
+  } else {
+    switchPage(page);
+  }
 }
+
 function switchPage(page) {
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
-  document.querySelectorAll('.nav-links button').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.nav-links button').forEach(b => b.classList.remove('active'));
   const btn = document.getElementById('nav-'+page);
-  if(btn) btn.classList.add('active');
+  if (btn) btn.classList.add('active');
   currentPage = page;
-  window.scrollTo(0,0);
-  if(page==='hub') {
-    // Render cards first (no map dependency)
+  window.scrollTo(0, 0);
+  if (page === 'hub') {
     renderResources();
-    // Then init map separately, retries until Leaflet CDN is ready
     scheduleMapInit();
     if (pendingHubJump) {
       setTimeout(() => {
-        if (pendingHubJump.view) switchHubView(pendingHubJump.view);
+        if (pendingHubJump.view)     switchHubView(pendingHubJump.view);
         if (pendingHubJump.category) filterBy(pendingHubJump.category);
         pendingHubJump = null;
       }, 80);
     }
   }
-  if(page==='reference') renderExternalSources();
+  if (page === 'reference') renderExternalSources();
   setupReveal();
 }
-window.addEventListener('scroll',()=>{ document.getElementById('main-nav').classList.toggle('scrolled',window.scrollY>10); });
+
+window.addEventListener('scroll', () => {
+  document.getElementById('main-nav').classList.toggle('scrolled', window.scrollY > 10);
+});
+
+
+// ============================================================
+// HERO MAP SCENE
+// bindHeroMapScene() adds mouse tilt and keyboard support to
+// the 3D scene element. openHeroMapPanel() initializes the
+// mini Leaflet map inside the panel on first open.
+// heroMapNavigate() stores options in pendingHubJump so they
+// are applied after the page transition completes.
+// ============================================================
 
 function bindHeroMapScene() {
   const scene = document.getElementById('hero-map-scene');
-  const core = document.getElementById('hero-map-core');
+  const core  = document.getElementById('hero-map-core');
   if (!scene || !core) return;
 
   scene.addEventListener('mousemove', (e) => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const rect = scene.getBoundingClientRect();
-    const px = (e.clientX - rect.left) / rect.width - 0.5;
-    const py = (e.clientY - rect.top) / rect.height - 0.5;
+    const px = (e.clientX - rect.left)  / rect.width  - 0.5;
+    const py = (e.clientY - rect.top)   / rect.height - 0.5;
     scene.style.transform = `translateY(${-py * 8}px)`;
-    core.style.transform = `rotateX(${(-py * 16).toFixed(2)}deg) rotateY(${(px * 22).toFixed(2)}deg)`;
+    core.style.transform  = `rotateX(${(-py * 16).toFixed(2)}deg) rotateY(${(px * 22).toFixed(2)}deg)`;
   });
-
   scene.addEventListener('mouseleave', () => {
     scene.style.transform = '';
-    core.style.transform = '';
+    core.style.transform  = '';
   });
-
   scene.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      openHeroMapPanel();
-    }
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openHeroMapPanel(); }
   });
 }
 
@@ -1822,26 +1849,21 @@ function initHeroLaunchMap() {
   if (!mapEl) return;
 
   heroLaunchMap = L.map('hero-map-launch-map', {
-    zoomControl: false,
-    attributionControl: false,
-    scrollWheelZoom: false,
-    dragging: true,
-    doubleClickZoom: false
+    zoomControl: false, attributionControl: false,
+    scrollWheelZoom: false, dragging: true, doubleClickZoom: false
   }).setView([35.7290, -78.8520], 12.9);
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap contributors',
-    maxZoom: 18
+    attribution: '© OpenStreetMap contributors', maxZoom: 18
   }).addTo(heroLaunchMap);
 
   getAllResources().slice(0, 16).forEach(r => {
     if (!r.lat || !r.lng) return;
-    const c = CATS[r.category] || CATS['Volunteer'];
+    const c    = CATS[r.category] || CATS['Volunteer'];
     const icon = L.divIcon({
       className: '',
       html: `<div style="width:30px;height:30px;background:${c.hex};border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(0,0,0,.18);border:2px solid white;"><span style="transform:rotate(45deg);font-size:13px">${c.icon}</span></div>`,
-      iconSize: [30, 30],
-      iconAnchor: [15, 30]
+      iconSize: [30, 30], iconAnchor: [15, 30]
     });
     L.marker([r.lat, r.lng], { icon }).addTo(heroLaunchMap);
   });
@@ -1869,60 +1891,70 @@ function closeHeroMapPanel(e) {
 function heroMapNavigate(page, opts = {}) {
   pendingHubJump = page === 'hub' ? opts : null;
   closeHeroMapPanel();
-
   if (page === currentPage && page === 'hub') {
-    if (opts.view) switchHubView(opts.view);
+    if (opts.view)     switchHubView(opts.view);
     if (opts.category) setTimeout(() => filterBy(opts.category), 120);
     return;
   }
-
   goTo(page);
 }
 
-//   SCROLL REVEAL 
+
+// ============================================================
+// SCROLL REVEAL ANIMATIONS
+// IntersectionObserver watches all reveal elements on the
+// active page. Adds .visible on enter, .exit when scrolled
+// above the viewport top.
+// ============================================================
+
 function setupReveal() {
   const els = document.querySelectorAll('.page.active .reveal,.page.active .reveal-left,.page.active .reveal-scale');
-  const obs = new IntersectionObserver((entries)=>{
-    entries.forEach(e=>{
-      if(e.isIntersecting){ e.target.classList.add('visible'); e.target.classList.remove('exit'); }
-      else { if(e.target.getBoundingClientRect().top<0){ e.target.classList.add('exit'); e.target.classList.remove('visible'); } else { e.target.classList.remove('visible','exit'); } }
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        e.target.classList.remove('exit');
+      } else {
+        if (e.target.getBoundingClientRect().top < 0) {
+          e.target.classList.add('exit');
+          e.target.classList.remove('visible');
+        } else {
+          e.target.classList.remove('visible', 'exit');
+        }
+      }
     });
-  },{ threshold:.1 });
-  els.forEach(el=>obs.observe(el));
+  }, { threshold: .1 });
+  els.forEach(el => obs.observe(el));
 }
 
-//    SPOTLIGHT   
-// ══════════ DAILY RANDOMIZATION HELPER ══════════
+
+// ============================================================
+// DAILY RANDOMIZATION, FLOAT CARDS, AND SPOTLIGHT
+// getDailyPicks() is shared by both features. It checks
+// localStorage for saved picks with a timestamp and reuses
+// them if less than 24 hours old, otherwise picks fresh ones.
+// ============================================================
+
 function getDailyPicks(storageKey, pool, count) {
   const stored = JSON.parse(localStorage.getItem(storageKey) || 'null');
-  const now = Date.now();
+  const now    = Date.now();
   const oneDay = 24 * 60 * 60 * 1000;
 
-  // If we have saved picks and they're less than 24 hours old, reuse them
   if (stored && (now - stored.timestamp) < oneDay) {
-    // Map stored IDs back to actual objects, filter out any that no longer exist
     const resolved = stored.ids.map(id => pool.find(x => (x.id ?? x) === id)).filter(Boolean);
     if (resolved.length === count) return resolved;
   }
 
-  // Otherwise pick fresh random ones
   const shuffled = [...pool].sort(() => Math.random() - 0.5);
-  const picks = shuffled.slice(0, count);
-  localStorage.setItem(storageKey, JSON.stringify({
-    timestamp: now,
-    ids: picks.map(x => x.id ?? x)
-  }));
+  const picks    = shuffled.slice(0, count);
+  localStorage.setItem(storageKey, JSON.stringify({ timestamp: now, ids: picks.map(x => x.id ?? x) }));
   return picks;
 }
 
-// ══════════ FLOAT CARDS ══════════
 function renderFloatCards() {
   const container = document.getElementById('float-cards-container');
   if (!container) return;
-
-  const catKeys = Object.keys(CATS);
-  const picks = getDailyPicks('apex-float-cards', catKeys, 4);
-
+  const picks = getDailyPicks('apex-float-cards', Object.keys(CATS), 4);
   container.innerHTML = picks.map(name => {
     const c = CATS[name];
     return `<div class="float-card" onclick="goTo('hub');setTimeout(()=>filterBy('${name}'),420)" style="cursor:pointer">
@@ -1931,28 +1963,25 @@ function renderFloatCards() {
   }).join('');
 }
 
-// ══════════ SPOTLIGHT ══════════
 function renderSpotlight() {
-  const grid = document.getElementById('spotlight-grid');
-  const eligible = BASE_RESOURCES;
-  const spots = getDailyPicks('apex-spotlight', eligible, 3);
-
+  const grid  = document.getElementById('spotlight-grid');
+  const spots = getDailyPicks('apex-spotlight', BASE_RESOURCES, 3);
   grid.innerHTML = spots.map((r, i) => {
-    const c = CATS[r.category];
+    const c  = CATS[r.category];
     const bg = CAT_BG[r.category] || 'linear-gradient(135deg,#1d4e89,#00b2ca)';
     return `<div class="spotlight-card reveal" style="transition-delay:${i*.1}s;background:${c.bg}" onclick="openModal(${r.id})">
       <div class="sc-img-wrap">
         ${r.img
           ? `<img src="${r.img}" alt="${r.name}" style="width:100%;height:210px;object-fit:cover;display:block;transition:transform .5s"
                 onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-            <div class="card-img-banner" style="height:210px;background:${bg};display:none">
-              <div class="card-img-banner-icon">${c.icon}</div>
-              <div class="card-img-banner-label">${r.name}</div>
-            </div>`
+             <div class="card-img-banner" style="height:210px;background:${bg};display:none">
+               <div class="card-img-banner-icon">${c.icon}</div>
+               <div class="card-img-banner-label">${r.name}</div>
+             </div>`
           : `<div class="card-img-banner" style="height:210px;background:${bg}">
-              <div class="card-img-banner-icon">${c.icon}</div>
-              <div class="card-img-banner-label">${r.name}</div>
-            </div>`
+               <div class="card-img-banner-icon">${c.icon}</div>
+               <div class="card-img-banner-label">${r.name}</div>
+             </div>`
         }
         <div class="sc-cat-badge chip">${c.icon} ${r.category}</div>
       </div>
@@ -1966,11 +1995,18 @@ function renderSpotlight() {
   setupReveal();
 }
 
-//    CATEGORY QUICK NAV  
+
+// ============================================================
+// CATEGORY QUICK NAV
+// Builds the category button grid on the home page.
+// Counts are recalculated each call so they stay accurate
+// after new submissions come in from Firebase.
+// ============================================================
+
 function renderCatQuick() {
   const grid = document.getElementById('cat-quick-grid');
-  grid.innerHTML = Object.entries(CATS).map(([name,c],i)=>{
-    const count = getAllResources().filter(r=>r.category===name).length;
+  grid.innerHTML = Object.entries(CATS).map(([name, c], i) => {
+    const count = getAllResources().filter(r => r.category === name).length;
     return `<button onclick="goTo('hub');setTimeout(()=>filterBy('${name}'),420)"
       class="reveal" style="transition-delay:${i*.05}s;background:white;border:2px solid rgba(29,78,137,.08);
       border-radius:var(--radius-md);padding:18px 14px;cursor:pointer;transition:all .25s;text-align:center;font-family:'Lato',sans-serif"
@@ -1978,80 +2014,102 @@ function renderCatQuick() {
       onmouseout="this.style.borderColor='rgba(29,78,137,.08)';this.style.transform='';this.style.boxShadow=''">
       <div style="font-size:1.8rem;margin-bottom:7px">${c.icon}</div>
       <div style="font-weight:800;font-size:12px;color:var(--navy);margin-bottom:3px">${name}</div>
-      <div style="font-size:11px;font-weight:700;color:var(--muted)">${count} resource${count!==1?'s':''}</div>
+      <div style="font-size:11px;font-weight:700;color:var(--muted)">${count} resource${count !== 1 ? 's' : ''}</div>
     </button>`;
   }).join('');
   setupReveal();
 }
 
-//    RESOURCE HUB
+
+// ============================================================
+// RESOURCE HUB FILTERING AND RENDERING
+// setFilter() handles category chip clicks.
+// filterBy() is called programmatically from footer links,
+// category quick nav, and the hero panel shortcuts.
+// getFiltered() applies both category and search query.
+// renderResources() builds all cards and refreshes map markers.
+// ============================================================
+
 function setFilter(btn) {
-  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
   btn.classList.add('active');
   currentFilter = btn.dataset.cat;
   filterResources();
 }
+
 function filterBy(cat) {
   currentFilter = cat;
-  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.toggle('active', c.dataset.cat===cat||(cat==='All'&&c.dataset.cat==='All')));
+  document.querySelectorAll('.filter-chip').forEach(c =>
+    c.classList.toggle('active', c.dataset.cat === cat || (cat === 'All' && c.dataset.cat === 'All'))
+  );
   filterResources();
 }
+
 function filterResources() {
-  searchQuery = (document.getElementById('search-input')?.value||'').toLowerCase();
+  searchQuery = (document.getElementById('search-input')?.value || '').toLowerCase();
   renderResources();
   if (currentHubView === 'map' && mapFullpage) {
     updateFullpageMapMarkers(getFiltered());
   }
 }
+
 function getFiltered() {
-  const all = getAllResources();
-  return all.filter(r=>{
-    const matchCat = currentFilter==='All' || r.category===currentFilter;
+  return getAllResources().filter(r => {
+    const matchCat    = currentFilter === 'All' || r.category === currentFilter;
     const matchSearch = !searchQuery ||
-      r.name.toLowerCase().includes(searchQuery) ||
+      r.name.toLowerCase().includes(searchQuery)     ||
       r.category.toLowerCase().includes(searchQuery) ||
       r.address.toLowerCase().includes(searchQuery);
     return matchCat && matchSearch;
   });
 }
+
 function renderResources() {
   const filtered = getFiltered();
-  const grid = document.getElementById('resource-grid');
-  const badge = document.getElementById('filter-count');
-  if(badge && badge.textContent === '0') badge.textContent = getAllResources().length;
-  
-  const all = getAllResources();
-  const countMap = { 'Food & Hunger': 'Food', 'Housing': 'Housing', 'Health': 'Health', 'Education': 'Education', 'Arts & Culture': 'Arts', 'Youth': 'Youth', 'Seniors': 'Seniors', 'Environment': 'Environment', 'Immigration': 'Immigration', 'Recreation': 'Recreation', 'Volunteer': 'Volunteer' };
+  const grid     = document.getElementById('resource-grid');
+  const badge    = document.getElementById('filter-count');
+
+  if (badge && badge.textContent === '0') badge.textContent = getAllResources().length;
+
+  const all      = getAllResources();
+  const countMap = {
+    'Food & Hunger':'Food', 'Housing':'Housing', 'Health':'Health',
+    'Education':'Education', 'Arts & Culture':'Arts', 'Youth':'Youth',
+    'Seniors':'Seniors', 'Environment':'Environment', 'Immigration':'Immigration',
+    'Recreation':'Recreation', 'Volunteer':'Volunteer'
+  };
   Object.entries(countMap).forEach(([cat, id]) => {
     const el = document.getElementById('fc-' + id);
     if (el) el.textContent = all.filter(r => r.category === cat).length;
   });
-  if(!filtered.length) {
+
+  if (!filtered.length) {
     grid.innerHTML = `<div class="no-results"><div style="font-size:2.5rem;margin-bottom:10px">🔍</div><h3>No results found</h3><p>Try a different search term or filter.</p></div>`;
   } else {
-    grid.innerHTML = filtered.map(r=>{
-      const c = CATS[r.category] || CATS['Volunteer'];
-      const bg = CAT_BG[r.category] || 'linear-gradient(135deg,#1d4e89,#00b2ca)';
+    grid.innerHTML = filtered.map(r => {
+      const c    = CATS[r.category] || CATS['Volunteer'];
+      const bg   = CAT_BG[r.category] || 'linear-gradient(135deg,#1d4e89,#00b2ca)';
       const isNew = r.isUserSubmitted;
       return `<div class="resource-card" onclick="openModal(${r.id})" style="background:${c.bg}">
         <div class="rc-img-wrap">
           ${r.img
             ? `<img class="rc-img" src="${r.img}" alt="${r.name}"
-                  onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
-                  loading="lazy">
-              <div class="card-img-banner" style="height:170px;background:${bg};display:none">
-                <div class="card-img-banner-icon">${c.icon}</div>
-                <div class="card-img-banner-label">${r.name}</div>
-              </div>`
+                  onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" loading="lazy">
+               <div class="card-img-banner" style="height:170px;background:${bg};display:none">
+                 <div class="card-img-banner-icon">${c.icon}</div>
+                 <div class="card-img-banner-label">${r.name}</div>
+               </div>`
             : `<div class="card-img-banner" style="height:170px;background:${bg}">
-                <div class="card-img-banner-icon">${c.icon}</div>
-                <div class="card-img-banner-label">${r.name}</div>
-              </div>`
+                 <div class="card-img-banner-icon">${c.icon}</div>
+                 <div class="card-img-banner-label">${r.name}</div>
+               </div>`
           }
         </div>
-
         <div class="rc-body">
-          <div class="rc-cat"><span class="chip" style="background:${c.bg};color:${c.color}">${c.icon} ${r.category}</span>${isNew?'<span class="new-badge">USER SUBMITTED</span>':''}</div>
+          <div class="rc-cat">
+            <span class="chip" style="background:${c.bg};color:${c.color}">${c.icon} ${r.category}</span>
+            ${isNew ? '<span class="new-badge">USER SUBMITTED</span>' : ''}
+          </div>
           <div class="rc-title">${r.name}</div>
           <div class="rc-desc">${r.desc}</div>
           <div class="rc-addr">📍 ${r.address}</div>
@@ -2063,34 +2121,36 @@ function renderResources() {
       </div>`;
     }).join('');
   }
+
   updateMapMarkers(filtered);
-  // Reapply admin mode class if active
   if (isAdmin) {
-    const grid = document.getElementById('resource-grid');
-    if (grid) grid.classList.add('admin-mode-active');
+    const g = document.getElementById('resource-grid');
+    if (g) g.classList.add('admin-mode-active');
   }
 }
 
-//     HUB VIEW TOGGLE
-let currentHubView = 'list';
-let mapFullpage = null;
+
+// ============================================================
+// HUB VIEW TOGGLE (LIST vs MAP)
+// switchHubView() swaps between the card grid and fullpage map.
+// scheduleFullpageMapInit() retries until Leaflet is ready,
+// since the map container is hidden until the tab is clicked.
+// updateFullpageMapMarkers() wipes and redraws pins to match
+// the current filter whenever filterResources() runs.
+// ============================================================
 
 function switchHubView(view) {
   currentHubView = view;
   document.getElementById('tab-list').classList.toggle('active', view === 'list');
-  document.getElementById('tab-map').classList.toggle('active', view === 'map');
+  document.getElementById('tab-map').classList.toggle('active',  view === 'map');
   document.getElementById('hub-list-view').classList.toggle('hidden', view === 'map');
   document.getElementById('hub-filters').style.display = '';
-  const mapView = document.getElementById('hub-map-view');
-  mapView.classList.toggle('active', view === 'map');
-
-  if (view === 'map') {
-    scheduleFullpageMapInit();
-  }
+  document.getElementById('hub-map-view').classList.toggle('active', view === 'map');
+  if (view === 'map') scheduleFullpageMapInit();
 }
 
 function scheduleFullpageMapInit() {
-  if (mapFullpage) { setTimeout(() => mapFullpage.invalidateSize(), 100); return; }
+  if (mapFullpage)            { setTimeout(() => mapFullpage.invalidateSize(), 100); return; }
   if (typeof L === 'undefined') { setTimeout(scheduleFullpageMapInit, 150); return; }
   setTimeout(initFullpageMap, 50);
 }
@@ -2105,11 +2165,11 @@ function initFullpageMap() {
     }).addTo(mapFullpage);
     getFiltered().forEach(r => {
       if (!r.lat || !r.lng) return;
-      const c = CATS[r.category] || CATS['Volunteer'];
+      const c    = CATS[r.category] || CATS['Volunteer'];
       const icon = L.divIcon({
         className: '',
         html: `<div style="width:36px;height:36px;background:${c.hex};border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(0,0,0,.25);border:2px solid white;"><span style="transform:rotate(45deg);font-size:15px">${c.icon}</span></div>`,
-        iconSize: [36, 36], iconAnchor: [18, 36], popupAnchor: [0, -38]
+        iconSize: [36,36], iconAnchor: [18,36], popupAnchor: [0,-38]
       });
       L.marker([r.lat, r.lng], { icon }).addTo(mapFullpage)
         .bindPopup(`<div style="font-family:'Lato',sans-serif;min-width:190px">
@@ -2118,34 +2178,26 @@ function initFullpageMap() {
           <div style="font-size:11px;color:#5a7a99;margin-bottom:8px">${r.address}</div>
           <button onclick="openModal(${r.id})" style="font-family:'Lato',sans-serif;font-size:11px;font-weight:700;background:#00b2ca;color:white;border:none;padding:6px 13px;border-radius:14px;cursor:pointer">View Details</button>
         </div>`, { maxWidth: 230 })
-        .bindTooltip(r.name, {
-          permanent: false,
-          direction: 'top',
-          offset: [0, -40],
-          className: 'map-pin-tooltip'
-        });
+        .bindTooltip(r.name, { permanent:false, direction:'top', offset:[0,-40], className:'map-pin-tooltip' });
     });
   } catch(err) {
     mapFullpage = null;
     setTimeout(scheduleFullpageMapInit, 300);
   }
 }
-  
+
 function updateFullpageMapMarkers(filtered) {
   if (!mapFullpage || typeof L === 'undefined') return;
-  mapFullpage.eachLayer(layer => {
-    if (layer instanceof L.Marker) layer.remove();
-  });
+  mapFullpage.eachLayer(layer => { if (layer instanceof L.Marker) layer.remove(); });
   filtered.forEach(r => {
     if (!r.lat || !r.lng) return;
-    const c = CATS[r.category] || CATS['Volunteer'];
+    const c    = CATS[r.category] || CATS['Volunteer'];
     const icon = L.divIcon({
       className: '',
       html: `<div style="width:36px;height:36px;background:${c.hex};border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(0,0,0,.25);border:2px solid white;"><span style="transform:rotate(45deg);font-size:15px">${c.icon}</span></div>`,
       iconSize: [36,36], iconAnchor: [18,36], popupAnchor: [0,-38]
     });
-    L.marker([r.lat, r.lng], { icon })
-      .addTo(mapFullpage)
+    L.marker([r.lat, r.lng], { icon }).addTo(mapFullpage)
       .bindPopup(`<div style="font-family:'Lato',sans-serif;min-width:190px">
         <div style="font-weight:800;font-size:14px;color:#1d4e89;margin-bottom:4px">${r.name}</div>
         <div style="font-size:11px;color:#5a7a99;margin-bottom:8px">${r.address}</div>
@@ -2154,51 +2206,54 @@ function updateFullpageMapMarkers(filtered) {
       .bindTooltip(r.name, { permanent:false, direction:'top', offset:[0,-40], className:'map-pin-tooltip' });
   });
 }
-  
-//    MAP   
+
+
+// ============================================================
+// SIDEBAR MAP AND FULLSCREEN MAP
+// scheduleMapInit() retries until Leaflet is ready.
+// updateMapMarkers() wipes and redraws the sidebar map pins.
+// openFSMap() respects the current filter via updateFSMapMarkers().
+// ============================================================
+
 function scheduleMapInit() {
-  if(map) {
-    // Already initialized, just refresh markers
-    filterResources();
-    return;
-  }
-  if(typeof L === 'undefined') {
-    // Leaflet CDN not ready yet: retry in 150ms
-    setTimeout(scheduleMapInit, 150);
-    return;
-  }
-  // Leaflet is available and map div should be visible
+  if (map)                      { filterResources(); return; }
+  if (typeof L === 'undefined') { setTimeout(scheduleMapInit, 150); return; }
   setTimeout(initMap, 50);
 }
+
 function initMap() {
-  if(typeof L === 'undefined') { setTimeout(scheduleMapInit, 150); return; }
-  if(map) { filterResources(); return; }
+  if (typeof L === 'undefined') { setTimeout(scheduleMapInit, 150); return; }
+  if (map) { filterResources(); return; }
   try {
-    map = L.map('map').setView([35.7290,-78.8520],13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{ attribution:'© OpenStreetMap contributors', maxZoom:18 }).addTo(map);
-    filterResources(); // now safe to add markers
+    map = L.map('map').setView([35.7290, -78.8520], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors', maxZoom: 18
+    }).addTo(map);
+    filterResources();
   } catch(err) {
     console.warn('Map init failed, retrying…', err);
     map = null;
     setTimeout(scheduleMapInit, 300);
   }
 }
+
 function updateMapMarkers(filtered) {
-  if(!map || typeof L === 'undefined') return;
-  mapMarkers.forEach(m=>m.remove()); mapMarkers=[];
-  filtered.forEach(r=>{
-    if(!r.lat||!r.lng) return;
-    const c = CATS[r.category]||CATS['Volunteer'];
-    const icon = L.divIcon({ className:'',
-      html:`<div style="width:34px;height:34px;background:${c.hex};border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(0,0,0,.25);border:2px solid white;"><span style="transform:rotate(45deg);font-size:15px">${c.icon}</span></div>`,
-      iconSize:[34,34],iconAnchor:[17,34],popupAnchor:[0,-36]
+  if (!map || typeof L === 'undefined') return;
+  mapMarkers.forEach(m => m.remove()); mapMarkers = [];
+  filtered.forEach(r => {
+    if (!r.lat || !r.lng) return;
+    const c    = CATS[r.category] || CATS['Volunteer'];
+    const icon = L.divIcon({
+      className: '',
+      html: `<div style="width:34px;height:34px;background:${c.hex};border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(0,0,0,.25);border:2px solid white;"><span style="transform:rotate(45deg);font-size:15px">${c.icon}</span></div>`,
+      iconSize: [34,34], iconAnchor: [17,34], popupAnchor: [0,-36]
     });
-    const m = L.marker([r.lat,r.lng],{icon}).addTo(map)
+    const m = L.marker([r.lat, r.lng], { icon }).addTo(map)
       .bindPopup(`<div style="font-family:'Lato',sans-serif;min-width:170px">
         <div style="font-weight:800;font-size:13px;color:#1d4e89;margin-bottom:3px">${r.name}</div>
         <div style="font-size:11px;color:#5a7a99;margin-bottom:7px">${r.address}</div>
         <button onclick="openModal(${r.id})" style="font-family:'Lato',sans-serif;font-size:11px;font-weight:700;background:#00b2ca;color:white;border:none;padding:5px 12px;border-radius:14px;cursor:pointer">View Details</button>
-      </div>`,{maxWidth:210});
+      </div>`, { maxWidth: 210 });
     mapMarkers.push(m);
   });
 }
@@ -2208,8 +2263,10 @@ function openFSMap() {
   document.body.style.overflow = 'hidden';
   if (!mapFS) {
     setTimeout(() => {
-      mapFS = L.map('map-fs').setView([35.7290,-78.8520], 13);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution:'© OpenStreetMap contributors', maxZoom:18 }).addTo(mapFS);
+      mapFS = L.map('map-fs').setView([35.7290, -78.8520], 13);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors', maxZoom: 18
+      }).addTo(mapFS);
       updateFSMapMarkers();
     }, 150);
   } else {
@@ -2222,25 +2279,41 @@ function updateFSMapMarkers() {
   mapFS.eachLayer(layer => { if (layer instanceof L.Marker) layer.remove(); });
   getFiltered().forEach(r => {
     if (!r.lat || !r.lng) return;
-    const c = CATS[r.category] || CATS['Volunteer'];
-    const icon = L.divIcon({ className:'', html:`<div style="width:38px;height:38px;background:${c.hex};border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 14px rgba(0,0,0,.25);border:2px solid white;"><span style="transform:rotate(45deg);font-size:17px">${c.icon}</span></div>`, iconSize:[38,38], iconAnchor:[19,38], popupAnchor:[0,-40] });
-    L.marker([r.lat, r.lng], { icon })
-      .addTo(mapFS)
-      .bindPopup(`<div style="font-family:'Lato',sans-serif;min-width:190px"><div style="font-weight:800;font-size:14px;color:#1d4e89;margin-bottom:4px">${r.name}</div><div style="font-size:12px;color:#5a7a99;margin-bottom:8px">${r.address}</div><button onclick="closeFSMap();openModal(${r.id})" style="font-family:'Lato',sans-serif;font-size:11px;font-weight:700;background:#00b2ca;color:white;border:none;padding:6px 13px;border-radius:14px;cursor:pointer">View Details</button></div>`, { maxWidth:220 })
+    const c    = CATS[r.category] || CATS['Volunteer'];
+    const icon = L.divIcon({
+      className: '',
+      html: `<div style="width:38px;height:38px;background:${c.hex};border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 14px rgba(0,0,0,.25);border:2px solid white;"><span style="transform:rotate(45deg);font-size:17px">${c.icon}</span></div>`,
+      iconSize: [38,38], iconAnchor: [19,38], popupAnchor: [0,-40]
+    });
+    L.marker([r.lat, r.lng], { icon }).addTo(mapFS)
+      .bindPopup(`<div style="font-family:'Lato',sans-serif;min-width:190px">
+        <div style="font-weight:800;font-size:14px;color:#1d4e89;margin-bottom:4px">${r.name}</div>
+        <div style="font-size:12px;color:#5a7a99;margin-bottom:8px">${r.address}</div>
+        <button onclick="closeFSMap();openModal(${r.id})" style="font-family:'Lato',sans-serif;font-size:11px;font-weight:700;background:#00b2ca;color:white;border:none;padding:6px 13px;border-radius:14px;cursor:pointer">View Details</button>
+      </div>`, { maxWidth: 220 })
       .bindTooltip(r.name, { permanent:false, direction:'top', offset:[0,-40], className:'map-pin-tooltip' });
   });
 }
-  
+
 function closeFSMap(e) {
-  if(e && e.target!==document.getElementById('map-fs-overlay')) return;
+  if (e && e.target !== document.getElementById('map-fs-overlay')) return;
   document.getElementById('map-fs-overlay').classList.remove('open');
-  document.body.style.overflow='';
+  document.body.style.overflow = '';
 }
 
-//     ADMIN MODE 
+
+// ============================================================
+// ADMIN MODE
+// Password is hardcoded — fine for a school project.
+// activateAdminMode() adds .admin-mode-active to the grid,
+// which cascades delete button visibility via CSS.
+// exitAdmin() reverses every visual change.
+// confirmDelete() splits on built-in vs submitted resources:
+// built-ins are hidden in sessionStorage (restored on tab close),
+// submitted resources are permanently deleted from Firebase.
+// ============================================================
+
 const ADMIN_PASSWORD = 'ApexAdmin2026';
-let isAdmin = false;
-let pendingDeleteId = null;
 
 function openAdminLogin() {
   if (isAdmin) { exitAdmin(); return; }
@@ -2262,7 +2335,7 @@ function closeAdminLoginOuter(e) {
 
 function toggleAdminPw() {
   const inp = document.getElementById('admin-pw-input');
-  inp.type = inp.type === 'password' ? 'text' : 'password';
+  inp.type  = inp.type === 'password' ? 'text' : 'password';
 }
 
 function attemptAdminLogin() {
@@ -2282,14 +2355,12 @@ function attemptAdminLogin() {
 
 function activateAdminMode() {
   document.getElementById('admin-bar').classList.add('active');
-  document.getElementById('admin-nav-btn').textContent = '🔓 Admin ON';
-  document.getElementById('admin-nav-btn').style.borderColor = 'rgba(231,76,60,.6)';
-  document.getElementById('admin-nav-btn').style.color = '#e74c3c';
-  document.getElementById('admin-nav-btn').style.fontWeight = '800';
-  // Add admin-mode-active class to resource grid so delete buttons show
+  document.getElementById('admin-nav-btn').textContent              = '🔓 Admin ON';
+  document.getElementById('admin-nav-btn').style.borderColor        = 'rgba(231,76,60,.6)';
+  document.getElementById('admin-nav-btn').style.color              = '#e74c3c';
+  document.getElementById('admin-nav-btn').style.fontWeight         = '800';
   const grid = document.getElementById('resource-grid');
   if (grid) grid.classList.add('admin-mode-active');
-  // Re-render so del. buttons appear
   if (currentPage === 'hub') filterResources();
   showToast('🔓 Admin mode active — you can now delete resources');
   if (window.innerWidth <= 768) document.querySelectorAll('.page').forEach(p => p.style.paddingTop = '112px');
@@ -2298,10 +2369,10 @@ function activateAdminMode() {
 function exitAdmin() {
   isAdmin = false;
   document.getElementById('admin-bar').classList.remove('active');
-  document.getElementById('admin-nav-btn').textContent = '🔒 Admin';
-  document.getElementById('admin-nav-btn').style.borderColor = 'rgba(231,76,60,.25)';
-  document.getElementById('admin-nav-btn').style.color = '#c0392b';
-  document.getElementById('admin-nav-btn').style.fontWeight = '700';
+  document.getElementById('admin-nav-btn').textContent              = '🔒 Admin';
+  document.getElementById('admin-nav-btn').style.borderColor        = 'rgba(231,76,60,.25)';
+  document.getElementById('admin-nav-btn').style.color              = '#c0392b';
+  document.getElementById('admin-nav-btn').style.fontWeight         = '700';
   document.querySelectorAll('.page').forEach(p => p.style.paddingTop = '');
   const grid = document.getElementById('resource-grid');
   if (grid) grid.classList.remove('admin-mode-active');
@@ -2312,12 +2383,14 @@ function exitAdmin() {
 
 function adminDeleteResource(id) {
   pendingDeleteId = id;
-  const all = getAllResources();
-  const r = all.find(x => x.id === id);
+  const r      = getAllResources().find(x => x.id === id);
   if (!r) return;
   const isBase = BASE_RESOURCES.some(x => x.id === id);
   document.getElementById('delete-confirm-text').innerHTML =
-    `You are about to permanently remove <strong>"${r.name}"</strong> from the hub.${isBase ? '<br><br><span style="color:#e74c3c;font-weight:700">⚠️ This is a built-in resource. It will be hidden for this session only.</span>' : '<br><br>This resource was user-submitted and will be permanently removed.'}`;
+    `You are about to permanently remove <strong>"${r.name}"</strong> from the hub.
+    ${isBase
+      ? '<br><br><span style="color:#e74c3c;font-weight:700">⚠️ This is a built-in resource. It will be hidden for this session only.</span>'
+      : '<br><br>This resource was user-submitted and will be permanently removed.'}`;
   document.getElementById('delete-confirm-btn').onclick = () => confirmDelete();
   document.getElementById('delete-confirm-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -2325,7 +2398,7 @@ function adminDeleteResource(id) {
 
 async function confirmDelete() {
   if (!pendingDeleteId) return;
-  const id = pendingDeleteId;
+  const id     = pendingDeleteId;
   const isBase = BASE_RESOURCES.some(x => x.id === id);
 
   if (isBase) {
@@ -2354,70 +2427,98 @@ function closeDeleteConfirmOuter(e) {
   if (e.target === document.getElementById('delete-confirm-overlay')) closeDeleteConfirm();
 }
 
-// Override getAllResources to respect the hidden list
 function getAllResources() {
   const hidden = JSON.parse(sessionStorage.getItem('apex-hidden') || '[]');
   return [...BASE_RESOURCES, ...submittedResources].filter(r => !hidden.includes(r.id));
 }
 
-//     MODAL
+
+// ============================================================
+// RESOURCE DETAIL MODAL
+// openModal() fills all empty template elements from the
+// resource object then shows the overlay. Image uses real
+// photo if available, CSS banner as fallback. Delete button
+// only shown when isAdmin is true.
+// ============================================================
+
 function openModal(id) {
-  const all = getAllResources();
-  const r = all.find(x=>x.id===id); if(!r) return;
-  const c = CATS[r.category]||CATS['Volunteer'];
+  const r = getAllResources().find(x => x.id === id);
+  if (!r) return;
+  const c  = CATS[r.category] || CATS['Volunteer'];
   const bg = CAT_BG[r.category] || 'linear-gradient(135deg,#1d4e89,#00b2ca)';
+
   document.getElementById('m-img-wrap').innerHTML = r.img
     ? `<img class="modal-img" src="${r.img}" alt="${r.name}"
           onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-      <div class="card-img-banner" style="height:220px;background:${bg};display:none">
-        <div class="card-img-banner-icon" style="font-size:3.5rem">${c.icon}</div>
-        <div class="card-img-banner-label" style="font-size:16px">${r.name}</div>
-      </div>`
+       <div class="card-img-banner" style="height:220px;background:${bg};display:none">
+         <div class="card-img-banner-icon" style="font-size:3.5rem">${c.icon}</div>
+         <div class="card-img-banner-label" style="font-size:16px">${r.name}</div>
+       </div>`
     : `<div class="card-img-banner" style="height:220px;background:${bg}">
-        <div class="card-img-banner-icon" style="font-size:3.5rem">${c.icon}</div>
-        <div class="card-img-banner-label" style="font-size:16px">${r.name}</div>
-      </div>`;
-  document.getElementById('m-cat').innerHTML = `<span class="chip" style="background:${c.bg};color:${c.color}">${c.icon} ${r.category}</span>`;
+         <div class="card-img-banner-icon" style="font-size:3.5rem">${c.icon}</div>
+         <div class="card-img-banner-label" style="font-size:16px">${r.name}</div>
+       </div>`;
+
+  document.getElementById('m-cat').innerHTML   = `<span class="chip" style="background:${c.bg};color:${c.color}">${c.icon} ${r.category}</span>`;
   document.getElementById('m-title').textContent = r.name;
-  document.getElementById('m-desc').textContent = r.desc;
-  document.getElementById('m-addr').textContent = r.address;
+  document.getElementById('m-desc').textContent  = r.desc;
+  document.getElementById('m-addr').textContent  = r.address;
   document.getElementById('m-phone').textContent = r.phone || 'Not available';
-  document.getElementById('m-web').innerHTML = r.website ? `<a href="https://${r.website.replace('https://','')}" target="_blank" style="color:var(--sky)">${r.website}</a>` : 'Not available';
+  document.getElementById('m-web').innerHTML     = r.website
+    ? `<a href="https://${r.website.replace('https://','')}" target="_blank" style="color:var(--sky)">${r.website}</a>`
+    : 'Not available';
   document.getElementById('m-hours').textContent = formatHoursDisplay(r);
-  // Show engage type badge
-  const engageLabels = { 'in-person':'🏃 In-Person','online':'💻 Online','both':'🔄 Both','walkIn':'🚶 Walk-In' };
+
+  const engageLabels = { 'in-person':'🏃 In-Person', 'online':'💻 Online', 'both':'🔄 Both', 'walkIn':'🚶 Walk-In' };
   const engageEl = document.getElementById('m-engage');
   if (engageEl) {
-    engageEl.textContent = r.engageType ? engageLabels[r.engageType] || '' : '';
+    engageEl.textContent  = r.engageType ? engageLabels[r.engageType] || '' : '';
     engageEl.style.display = r.engageType ? 'inline-flex' : 'none';
   }
-  // Show del button only in admin mode
-  const delBtn = document.getElementById('m-delete-btn');
-  if (delBtn) delBtn.style.display = isAdmin ? 'inline-flex' : 'none';
-  if (delBtn) delBtn.onclick = () => adminDeleteResource(r.id);
-  document.getElementById('resource-modal').classList.add('open');
-  document.body.style.overflow='hidden';
-}
-function closeModal() { document.getElementById('resource-modal').classList.remove('open'); document.body.style.overflow=''; }
-function closeModalOuter(e) { if(e.target===document.getElementById('resource-modal')) closeModal(); }
 
-//    SURVEY    
+  const delBtn = document.getElementById('m-delete-btn');
+  if (delBtn) {
+    delBtn.style.display = isAdmin ? 'inline-flex' : 'none';
+    delBtn.onclick       = () => adminDeleteResource(r.id);
+  }
+
+  document.getElementById('resource-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal()      { document.getElementById('resource-modal').classList.remove('open'); document.body.style.overflow = ''; }
+function closeModalOuter(e){ if (e.target === document.getElementById('resource-modal')) closeModal(); }
+
+
+// ============================================================
+// SURVEY
+// selectOpt() handles single-select and multi-select steps.
+// nextStep() validates each step before advancing.
+// showResults() runs the scoring algorithm: builds a candidate
+// pool from selected categories, boosts based on who the user
+// is searching for, deduplicates with a Set, scores each
+// resource out of 4, and shows the top 6.
+// ============================================================
+
 function selectOpt(btn, key, multi) {
-  if(!multi) {
-    btn.closest('.survey-options').querySelectorAll('.survey-opt').forEach(b=>b.classList.remove('selected'));
-    btn.classList.add('selected'); surveyAnswers[key]=btn.dataset.val;
+  if (!multi) {
+    btn.closest('.survey-options').querySelectorAll('.survey-opt').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    surveyAnswers[key] = btn.dataset.val;
   } else {
     btn.classList.toggle('selected');
-    const v=btn.dataset.val, idx=surveyAnswers[key].indexOf(v);
-    if(idx===-1) surveyAnswers[key].push(v); else surveyAnswers[key].splice(idx,1);
+    const v   = btn.dataset.val;
+    const idx = surveyAnswers[key].indexOf(v);
+    if (idx === -1) surveyAnswers[key].push(v); else surveyAnswers[key].splice(idx, 1);
   }
 }
+
 function nextStep(from) {
-  const err = document.getElementById('err-'+from);
+  const err   = document.getElementById('err-'+from);
   const valid =
-    from === 1 ? surveyAnswers.who !== null :
-    from === 2 ? surveyAnswers.need.length > 0 :
-    from === 3 ? surveyAnswers.engage !== null :
+    from === 1 ? surveyAnswers.who    !== null  :
+    from === 2 ? surveyAnswers.need.length > 0  :
+    from === 3 ? surveyAnswers.engage !== null  :
     true;
   if (!valid) {
     err.classList.add('show');
@@ -2427,15 +2528,27 @@ function nextStep(from) {
   err.classList.remove('show');
   document.getElementById('step-'+from).classList.remove('active');
   document.getElementById('step-'+(from+1)).classList.add('active');
-  currentStep = from+1;
+  currentStep = from + 1;
   updateProg();
 }
+
 function prevStep(from) {
-  if(from>1){ document.getElementById('step-'+from).classList.remove('active'); document.getElementById('step-'+(from-1)).classList.add('active'); currentStep=from-1; updateProg(); }
+  if (from > 1) {
+    document.getElementById('step-'+from).classList.remove('active');
+    document.getElementById('step-'+(from-1)).classList.add('active');
+    currentStep = from - 1;
+    updateProg();
+  }
 }
+
 function updateProg() {
-  document.querySelectorAll('#survey-progress .progress-dot').forEach((d,i)=>{ d.classList.remove('done','current'); if(i<currentStep-1) d.classList.add('done'); else if(i===currentStep-1) d.classList.add('current'); });
+  document.querySelectorAll('#survey-progress .progress-dot').forEach((d, i) => {
+    d.classList.remove('done', 'current');
+    if      (i < currentStep - 1) d.classList.add('done');
+    else if (i === currentStep - 1) d.classList.add('current');
+  });
 }
+
 function showResults() {
   const err4 = document.getElementById('err-4');
   if (!surveyAnswers.time) {
@@ -2446,27 +2559,18 @@ function showResults() {
   err4.classList.remove('show');
   document.getElementById('step-4').classList.remove('active');
   document.getElementById('step-results').classList.add('active');
-  document.querySelectorAll('#survey-progress .progress-dot').forEach(d=>d.classList.add('done'));
-  if (!surveyAnswers.time) {
-    err4.classList.add('show');
-    setTimeout(() => err4.classList.remove('show'), 3000);
-    return;
-  }
-  err4.classList.remove('show');
-  const needs   = surveyAnswers.need.length ? surveyAnswers.need : Object.keys(CATS);
-  const engage  = surveyAnswers.engage;
-  const timeSlot= surveyAnswers.time;   
+  document.querySelectorAll('#survey-progress .progress-dot').forEach(d => d.classList.add('done'));
 
+  const needs    = surveyAnswers.need.length ? surveyAnswers.need : Object.keys(CATS);
+  const engage   = surveyAnswers.engage;
+  const timeSlot = surveyAnswers.time;
   const weekdays = ['Mon','Tue','Wed','Thu','Fri'];
   const weekends = ['Sat','Sun'];
 
   function engageMatch(r) {
-    if (!engage || !r.engageType) return true; 
-    if (engage === 'both') return true; 
-    if (r.engageType === 'both') return true; 
+    if (!engage || !r.engageType || engage === 'both' || r.engageType === 'both') return true;
     return r.engageType === engage;
   }
-
   function timeMatch(r) {
     if (!timeSlot || timeSlot === 'anytime' || !r.availDays) return true;
     if (timeSlot === 'weekend') return r.availDays.some(d => weekends.includes(d));
@@ -2476,21 +2580,19 @@ function showResults() {
       if (!r.openTime || !r.closeTime) return true;
       const open  = parseInt(r.openTime.split(':')[0]);
       const close = parseInt(r.closeTime.split(':')[0]);
-      if (timeSlot === 'weekday-morning') return open <= 12;
+      if (timeSlot === 'weekday-morning') return open  <= 12;
       if (timeSlot === 'weekday-evening') return close >= 17;
     }
     return true;
   }
 
   let pool = getAllResources().filter(r => needs.includes(r.category));
+  if (surveyAnswers.who === 'senior')                                pool = [...getAllResources().filter(r => ['Seniors','Health','Recreation'].includes(r.category)), ...pool];
+  if (surveyAnswers.who === 'child' || surveyAnswers.who === 'family') pool = [...getAllResources().filter(r => ['Youth','Education','Recreation'].includes(r.category)), ...pool];
+  if (surveyAnswers.who === 'immigrant')                             pool = [...getAllResources().filter(r => r.category === 'Immigration'), ...pool];
 
-  if (surveyAnswers.who === 'senior')    pool = [...getAllResources().filter(r=>['Seniors','Health','Recreation'].includes(r.category)), ...pool];
-  if (surveyAnswers.who === 'child' || surveyAnswers.who === 'family') pool = [...getAllResources().filter(r=>['Youth','Education','Recreation'].includes(r.category)), ...pool];
-  if (surveyAnswers.who === 'immigrant') pool = [...getAllResources().filter(r=>r.category==='Immigration'), ...pool];
-
-  const seen = new Set();
-  const unique = pool.filter(r => { if(seen.has(r.id)) return false; seen.add(r.id); return true; });
-
+  const seen   = new Set();
+  const unique = pool.filter(r => { if (seen.has(r.id)) return false; seen.add(r.id); return true; });
   const scored = unique.map(r => {
     let score = 0;
     if (engageMatch(r)) score += 2;
@@ -2498,21 +2600,23 @@ function showResults() {
     return { r, score };
   }).sort((a, b) => b.score - a.score);
 
+  const engageLabels = { 'in-person':'🏃 In-Person', 'online':'💻 Online', 'both':'🔄 Both', 'walkIn':'🚶 Walk-In' };
   document.getElementById('results-grid').innerHTML = scored.slice(0, 6).map(({ r }) => {
-    const c  = CATS[r.category] || CATS['Volunteer'];
-    const bg = CAT_BG[r.category] || 'linear-gradient(135deg,#1d4e89,#00b2ca)';
-    const engageLabels = { 'in-person':'🏃 In-Person','online':'💻 Online','both':'🔄 Both','walkIn':'🚶 Walk-In' };
-    const engagePill = r.engageType ? `<span style="font-size:10px;font-weight:700;color:var(--sky);background:rgba(0,178,202,.1);padding:2px 8px;border-radius:12px;display:inline-block;margin-top:4px">${engageLabels[r.engageType]||''}</span>` : '';
+    const c         = CATS[r.category] || CATS['Volunteer'];
+    const bg        = CAT_BG[r.category] || 'linear-gradient(135deg,#1d4e89,#00b2ca)';
+    const engagePill = r.engageType
+      ? `<span style="font-size:10px;font-weight:700;color:var(--sky);background:rgba(0,178,202,.1);padding:2px 8px;border-radius:12px;display:inline-block;margin-top:4px">${engageLabels[r.engageType] || ''}</span>`
+      : '';
     return `<div class="result-card" onclick="openModal(${r.id})" style="background:${c.bg}">
       ${r.img
         ? `<img src="${r.img}" alt="${r.name}" style="width:100%;height:110px;object-fit:cover;display:block"
               onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-          <div class="card-img-banner" style="height:110px;background:${bg};display:none">
-            <div class="card-img-banner-icon" style="font-size:2rem">${c.icon}</div>
-          </div>`
+           <div class="card-img-banner" style="height:110px;background:${bg};display:none">
+             <div class="card-img-banner-icon" style="font-size:2rem">${c.icon}</div>
+           </div>`
         : `<div class="card-img-banner" style="height:110px;background:${bg}">
-            <div class="card-img-banner-icon" style="font-size:2rem">${c.icon}</div>
-          </div>`
+             <div class="card-img-banner-icon" style="font-size:2rem">${c.icon}</div>
+           </div>`
       }
       <div class="result-card-body">
         <div class="result-card-cat">${c.icon} ${r.category}</div>
@@ -2523,21 +2627,32 @@ function showResults() {
     </div>`;
   }).join('');
 }
+
 function resetSurvey() {
-  surveyAnswers={who:null,need:[],engage:null,time:null}; currentStep=1;
-  document.querySelectorAll('.survey-step').forEach(s=>s.classList.remove('active'));
+  surveyAnswers = { who:null, need:[], engage:null, time:null };
+  currentStep   = 1;
+  document.querySelectorAll('.survey-step').forEach(s => s.classList.remove('active'));
   document.getElementById('step-1').classList.add('active');
-  document.querySelectorAll('.survey-opt').forEach(o=>o.classList.remove('selected'));
+  document.querySelectorAll('.survey-opt').forEach(o => o.classList.remove('selected'));
   updateProg();
 }
 
+
+// ============================================================
+// SUBMIT FORM
+// buildTimeOptions() populates the time dropdowns with 30min
+// intervals on page load. submitForm() validates all fields,
+// geocodes the address via Nominatim with a 9s hard deadline,
+// saves to Firebase, and immediately drops a pin on any open map.
+// ============================================================
+
 function buildTimeOptions() {
   const selects = [document.getElementById('f-open-time'), document.getElementById('f-close-time')];
-  const times = [];
+  const times   = [];
   for (let h = 6; h <= 23; h++) {
     ['00','30'].forEach(m => {
       const hour12 = h > 12 ? h - 12 : h === 0 ? 12 : h;
-      const ampm = h < 12 ? 'AM' : 'PM';
+      const ampm   = h < 12 ? 'AM' : 'PM';
       times.push({ val: `${String(h).padStart(2,'0')}:${m}`, label: `${hour12}:${m} ${ampm}` });
     });
   }
@@ -2561,51 +2676,40 @@ function toggleDay(btn) {
 
 function toggle24hrs(cb) {
   if (cb.checked) {
-    // select all days
     document.querySelectorAll('.day-btn').forEach(b => b.classList.add('selected'));
-    // set open time to 12:00 AM and close to 11:59 PM
-    document.getElementById('f-open-time').value  = '00:00';
-    document.getElementById('f-close-time').value = '23:59';
-    // uncheck conflicting options
+    document.getElementById('f-open-time').value    = '00:00';
+    document.getElementById('f-close-time').value   = '23:59';
     document.getElementById('f-hours-varies').checked = false;
     document.getElementById('f-hours-appt').checked   = false;
   }
 }
 
-function uncheck24() {
-  document.getElementById('f-hours-24').checked = false;
-}
+function uncheck24() { document.getElementById('f-hours-24').checked = false; }
 
-function getSelectedDays() {
-  return [...document.querySelectorAll('.day-btn.selected')].map(b => b.dataset.day);
-}
-
-function getSelectedEngage() {
-  const btn = document.querySelector('.engage-opt.selected');
-  return btn ? btn.dataset.val : null;
-}
+function getSelectedDays()   { return [...document.querySelectorAll('.day-btn.selected')].map(b => b.dataset.day); }
+function getSelectedEngage() { const btn = document.querySelector('.engage-opt.selected'); return btn ? btn.dataset.val : null; }
 
 function formatHoursDisplay(r) {
-  if (r.hoursSpecial) return r.hoursSpecial;
+  if (r.hoursSpecial)                      return r.hoursSpecial;
   if (!r.availDays || !r.availDays.length) return r.hours || 'See website for hours';
   const dayStr = r.availDays.length === 7 ? 'Daily' : r.availDays.join(', ');
-  if (!r.openTime || !r.closeTime) return dayStr;
+  if (!r.openTime || !r.closeTime)         return dayStr;
   const fmt = t => {
     const [h, m] = t.split(':').map(Number);
-    const h12 = h > 12 ? h - 12 : h === 0 ? 12 : h;
+    const h12    = h > 12 ? h - 12 : h === 0 ? 12 : h;
     return `${h12}:${String(m).padStart(2,'0')} ${h < 12 ? 'AM' : 'PM'}`;
   };
   return `${dayStr}, ${fmt(r.openTime)} – ${fmt(r.closeTime)}`;
 }
 
 function resetFormHours() {
-  document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('selected'));
+  document.querySelectorAll('.day-btn').forEach(b  => b.classList.remove('selected'));
   document.querySelectorAll('.engage-opt').forEach(b => b.classList.remove('selected'));
-  document.getElementById('f-open-time').value = '';
-  document.getElementById('f-close-time').value = '';
+  document.getElementById('f-open-time').value      = '';
+  document.getElementById('f-close-time').value     = '';
   document.getElementById('f-hours-varies').checked = false;
-  document.getElementById('f-hours-appt').checked = false;
-  document.getElementById('f-hours-24').checked = false;
+  document.getElementById('f-hours-appt').checked   = false;
+  document.getElementById('f-hours-24').checked     = false;
 }
 
 function validateAddress(input) {
@@ -2632,13 +2736,9 @@ function validateAddress(input) {
 
 function formatPhone(input) {
   let digits = input.value.replace(/\D/g, '').slice(0, 10);
-  if (digits.length <= 3) {
-    input.value = digits.length ? '(' + digits : '';
-  } else if (digits.length <= 6) {
-    input.value = '(' + digits.slice(0,3) + ') ' + digits.slice(3);
-  } else {
-    input.value = '(' + digits.slice(0,3) + ') ' + digits.slice(3,6) + '-' + digits.slice(6);
-  }
+  if      (digits.length <= 3) input.value = digits.length ? '(' + digits : '';
+  else if (digits.length <= 6) input.value = '(' + digits.slice(0,3) + ') ' + digits.slice(3);
+  else                         input.value = '(' + digits.slice(0,3) + ') ' + digits.slice(3,6) + '-' + digits.slice(6);
 }
 
 async function submitForm() {
@@ -2651,13 +2751,13 @@ async function submitForm() {
   const engageType = getSelectedEngage();
 
   if (!name||!cat||!addr||!desc||!sub||!email) { showToast('⚠️ Please fill in all required fields'); return; }
-  if (!engageType) { showToast('⚠️ Please select an engagement type'); return; }
+  if (!engageType)                              { showToast('⚠️ Please select an engagement type');  return; }
 
   const hasStreet = /\d+/.test(addr);
   const hasApex   = /apex/i.test(addr);
   const hasNC     = /\bNC\b|north carolina/i.test(addr);
   if (!hasStreet || !hasApex || !hasNC) {
-    const hint = document.getElementById('f-addr-hint');
+    const hint     = document.getElementById('f-addr-hint');
     hint.style.display = 'block'; hint.style.color = '#e74c3c';
     hint.innerHTML = '❌ Please enter a full address with a street number and <strong>Apex, NC</strong>';
     document.getElementById('f-addr').focus();
@@ -2671,27 +2771,25 @@ async function submitForm() {
   const appt       = document.getElementById('f-hours-appt').checked;
   const h24        = document.getElementById('f-hours-24').checked;
   let hoursSpecial = null;
-  if (h24)         hoursSpecial = 'Open 24/7';
+  if      (h24)    hoursSpecial = 'Open 24/7';
   else if (appt)   hoursSpecial = 'By appointment only';
   else if (varies) hoursSpecial = 'Hours vary by season';
 
-  // Lock submit button while geocoding
   const btn = document.getElementById('f-submit-btn');
   btn.disabled = true; btn.textContent = '🔍 Locating on map…'; btn.style.opacity = '0.75';
 
-  // Geocode — hard 9s deadline so the button ALWAYS restores no matter what
   let lat = null, lng = null;
   const geocodeWithTimeout = (url, opts = {}, ms = 4000) => {
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), ms);
-    return fetch(url, { ...opts, signal: controller.signal })
-      .finally(() => clearTimeout(timer));
+    const timer      = setTimeout(() => controller.abort(), ms);
+    return fetch(url, { ...opts, signal: controller.signal }).finally(() => clearTimeout(timer));
   };
+
   const hardDeadline = new Promise(resolve => setTimeout(resolve, 9000));
   await Promise.race([
     (async () => {
       try {
-        const q = encodeURIComponent(addr + ', USA');
+        const q            = encodeURIComponent(addr + ', USA');
         const nominatimUrl = `https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1`;
         let data;
         try {
@@ -2703,33 +2801,29 @@ async function submitForm() {
             `https://corsproxy.io/?url=${encodeURIComponent(nominatimUrl)}`, {}, 4000);
           data = await res.json();
         }
-        if (data && data.length > 0) {
-          lat = parseFloat(data[0].lat);
-          lng = parseFloat(data[0].lon);
-        }
-      } catch { /* if the geocoding can't be done, it saves w.o the map pin */ }
+        if (data && data.length > 0) { lat = parseFloat(data[0].lat); lng = parseFloat(data[0].lon); }
+      } catch { /* saves without a map pin if geocoding fails */ }
     })(),
     hardDeadline
   ]);
 
   btn.disabled = false; btn.textContent = 'Submit Resource'; btn.style.opacity = '';
 
-  const newId = Date.now();
+  const newId       = Date.now();
   const newResource = {
     id: newId, name, category: cat, desc, address: addr,
-    phone:    document.getElementById('f-phone').value.trim() || 'Not available',
-    website:  document.getElementById('f-web').value.trim() || '',
-    img: document.getElementById('f-img').value.trim() || null,
-    lat, lng,
-    engageType,
-    availDays:    days.length ? days : null,
-    openTime:     openTime  || null,
-    closeTime:    closeTime || null,
-    hoursSpecial: hoursSpecial,
+    phone:         document.getElementById('f-phone').value.trim() || 'Not available',
+    website:       document.getElementById('f-web').value.trim()   || '',
+    img:           document.getElementById('f-img').value.trim()   || null,
+    lat, lng, engageType,
+    availDays:     days.length ? days : null,
+    openTime:      openTime  || null,
+    closeTime:     closeTime || null,
+    hoursSpecial,
     isUserSubmitted: true,
-    submittedBy:  sub,
+    submittedBy:   sub,
     submittedEmail: email,
-    submittedDate: new Date().toLocaleDateString()
+    submittedDate:  new Date().toLocaleDateString()
   };
 
   const saved = await postToFirebase(newResource);
@@ -2741,23 +2835,30 @@ async function submitForm() {
   document.getElementById('form-success').style.display = 'block';
   document.getElementById('form-success').scrollIntoView({ behavior:'smooth', block:'nearest' });
 
-  if (map && lat) { filterResources(); }
+  if (map && lat) filterResources();
   if (mapFullpage && lat && lng && typeof L !== 'undefined') {
-    const c = CATS[cat] || CATS['Volunteer'];
-    const icon = L.divIcon({ className:'',
-      html:`<div style="width:36px;height:36px;background:${c.hex};border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(0,0,0,.25);border:2px solid white;"><span style="transform:rotate(45deg);font-size:15px">${c.icon}</span></div>`,
+    const c    = CATS[cat] || CATS['Volunteer'];
+    const icon = L.divIcon({
+      className: '',
+      html: `<div style="width:36px;height:36px;background:${c.hex};border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(0,0,0,.25);border:2px solid white;"><span style="transform:rotate(45deg);font-size:15px">${c.icon}</span></div>`,
       iconSize:[36,36], iconAnchor:[18,36], popupAnchor:[0,-38]
     });
-    L.marker([lat,lng],{icon}).addTo(mapFullpage)
-      .bindPopup(`<div style="font-family:'Lato',sans-serif;min-width:190px"><div style="font-weight:700;font-size:14px;color:#1d4e89;margin-bottom:4px">${name}</div><div style="font-size:11px;color:#5a7a99;margin-bottom:8px">${addr}</div><button onclick="openModal(${saved.id})" style="font-family:'Lato',sans-serif;font-size:11px;font-weight:700;background:#00b2ca;color:white;border:none;padding:6px 13px;border-radius:14px;cursor:pointer">View Details</button></div>`,{maxWidth:230});
+    L.marker([lat, lng], { icon }).addTo(mapFullpage)
+      .bindPopup(`<div style="font-family:'Lato',sans-serif;min-width:190px">
+        <div style="font-weight:700;font-size:14px;color:#1d4e89;margin-bottom:4px">${name}</div>
+        <div style="font-size:11px;color:#5a7a99;margin-bottom:8px">${addr}</div>
+        <button onclick="openModal(${saved.id})" style="font-family:'Lato',sans-serif;font-size:11px;font-weight:700;background:#00b2ca;color:white;border:none;padding:6px 13px;border-radius:14px;cursor:pointer">View Details</button>
+      </div>`, { maxWidth: 230 });
   }
 
-  ['f-name','f-addr','f-phone','f-web','f-img','f-desc','f-submitter','f-email'].forEach(id=>{ document.getElementById(id).value=''; });
-  document.getElementById('f-cat').value='';
+  ['f-name','f-addr','f-phone','f-web','f-img','f-desc','f-submitter','f-email'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('f-cat').value              = '';
   document.getElementById('f-addr-hint').style.display = 'none';
-  document.getElementById('f-addr').style.borderColor = '';
+  document.getElementById('f-addr').style.borderColor  = '';
   resetFormHours();
-  setTimeout(()=>{ document.getElementById('form-success').style.display='none'; }, 7000);
+  setTimeout(() => { document.getElementById('form-success').style.display = 'none'; }, 7000);
 
   renderCatQuick();
   renderExternalSources();
@@ -2783,21 +2884,11 @@ function renderExternalSources() {
       <span style="font-size:12px;font-weight:700;color:var(--muted)">${submitted.length} community-submitted source${submitted.length !== 1 ? 's' : ''}</span>
     </div>
     <table class="ref-table">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Organization Name</th>
-          <th>Category</th>
-          <th>Address</th>
-          <th>Website / Contact</th>
-          <th>Submitted By</th>
-          <th>Date</th>
-        </tr>
-      </thead>
+      <thead><tr><th>#</th><th>Organization Name</th><th>Category</th><th>Address</th><th>Website / Contact</th><th>Submitted By</th><th>Date</th></tr></thead>
       <tbody>
         ${submitted.map((r, i) => `
           <tr>
-            <td>${i + 1}</td>
+            <td>${i+1}</td>
             <td style="font-weight:700;color:var(--navy)">${r.name}</td>
             <td><span class="chip" style="background:${(CATS[r.category]||CATS['Volunteer']).bg};color:${(CATS[r.category]||CATS['Volunteer']).color};font-size:10px">${(CATS[r.category]||CATS['Volunteer']).icon} ${r.category}</span></td>
             <td>${r.address}</td>
@@ -2812,16 +2903,33 @@ function renderExternalSources() {
     </div>`;
 }
 
+
+// ============================================================
+// TOAST NOTIFICATION
+// Creates a temporary pill at the bottom center of the screen.
+// Each call creates a fresh element so multiple toasts stack.
+// First setTimeout fades it out, second removes it from the DOM.
+// ============================================================
+
 function showToast(msg) {
-  const t = document.createElement('div'); t.className='toast'; t.textContent=msg;
+  const t = document.createElement('div');
+  t.className   = 'toast';
+  t.textContent = msg;
   document.body.appendChild(t);
-  setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateX(-50%) translateY(10px)'; },2200);
-  setTimeout(()=>t.remove(),2600);
+  setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateX(-50%) translateY(10px)'; }, 2200);
+  setTimeout(() => t.remove(), 2600);
 }
+
+
+// ============================================================
+// STARTUP SEQUENCE
+// Runs once when the page finishes loading.
+// Firebase must resolve before rendering so submitted resources
+// are included in the initial render.
+// ============================================================
 
 document.addEventListener('DOMContentLoaded', async () => {
   await initFirebase();
-
   buildTimeOptions();
   bindHeroMapScene();
   renderSpotlight();
@@ -2829,18 +2937,27 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderCatQuick();
   renderExternalSources();
   setupReveal();
-  document.addEventListener('keydown',e=>{
-    if(e.key==='Escape'){
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
       closeModal();
       closeAdminLogin();
       closeDeleteConfirm();
       closeMobMenu();
       closeHeroMapPanel();
       document.getElementById('map-fs-overlay').classList.remove('open');
-      document.body.style.overflow='';
+      document.body.style.overflow = '';
     }
   });
 });
+
+
+// ============================================================
+// MOBILE NAVIGATION
+// toggleMobMenu() opens and closes the hamburger drawer.
+// The document click listener closes the drawer when tapping
+// outside it. The switchPage override also updates the bottom
+// tab bar and drawer active states on every page change.
+// ============================================================
 
 function toggleMobMenu() {
   const menu = document.getElementById('mob-menu');
@@ -2849,6 +2966,7 @@ function toggleMobMenu() {
   btn.classList.toggle('open', open);
   document.body.style.overflow = open ? 'hidden' : '';
 }
+
 function closeMobMenu() {
   document.getElementById('mob-menu').classList.remove('open');
   document.getElementById('mob-hamburger').classList.remove('open');
@@ -2863,17 +2981,18 @@ document.addEventListener('click', e => {
   }
 });
 
-const _origGoTo = goTo;
 const _origSwitchPage = switchPage;
 window.switchPage = function(page) {
   _origSwitchPage(page);
   document.querySelectorAll('.mob-tab').forEach(t => t.classList.remove('active'));
-  const activeTab = document.getElementById('mobtab-' + page);
+  const activeTab  = document.getElementById('mobtab-' + page);
   if (activeTab) activeTab.classList.add('active');
   document.querySelectorAll('.mob-menu-item').forEach(t => t.classList.remove('active'));
   const activeDraw = document.getElementById('mob-nav-' + page);
   if (activeDraw) activeDraw.classList.add('active');
 };
+
+
 </script>
 </body>
 </html>
