@@ -677,11 +677,24 @@
 </head>
 <body>
 
-<canvas id="bg-canvas"></canvas>
 
+
+<!--  ============================================================
+      GLOBAL ELEMENTS
+      Canvas background and page transition overlay.
+      These sit outside all pages so they render above everything.
+============================================================  -->
+
+<canvas id="bg-canvas"></canvas>
 <div class="page-transition" id="pt"><div class="pt-logo">The Apex Resource Hub</div></div>
 
-<!--   NAV   -->
+
+<!--  ============================================================
+      NAVBAR
+      Fixed top bar with logo, desktop nav links, and admin button.
+      The hamburger button is hidden on desktop via CSS.
+============================================================  -->
+
 <nav id="main-nav">
   <div class="nav-logo" onclick="goTo('home')">
     <img src="https://i.imgur.com/bseBbMM.png" alt="Apex Resource Hub Logo" style="width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0;">
@@ -691,72 +704,63 @@
     </div>
   </div>
   <ul class="nav-links">
-    <li><button onclick="goTo('home')" id="nav-home" class="active">Home</button></li>
-    <li><button onclick="goTo('hub')" id="nav-hub">Resource Hub</button></li>
-    <li><button onclick="goTo('survey')" id="nav-survey">Find My Match</button></li>
-    <li><button onclick="goTo('submit')" id="nav-submit">Add a Resource</button></li>
+    <li><button onclick="goTo('home')"      id="nav-home"      class="active">Home</button></li>
+    <li><button onclick="goTo('hub')"       id="nav-hub">Resource Hub</button></li>
+    <li><button onclick="goTo('survey')"    id="nav-survey">Find My Match</button></li>
+    <li><button onclick="goTo('submit')"    id="nav-submit">Add a Resource</button></li>
     <li><button onclick="goTo('reference')" id="nav-reference">References</button></li>
   </ul>
-  <button id="admin-nav-btn" onclick="openAdminLogin()" style="font-family:'Lato',sans-serif;font-weight:700;font-size:12px;padding:7px 16px;border-radius:24px;border:2px solid rgba(231,76,60,.25);background:transparent;color:#c0392b;cursor:pointer;transition:all .2s;white-space:nowrap" onmouseover="this.style.background='rgba(231,76,60,.08)'" onmouseout="this.style.background='transparent'">🔒 Admin</button>
-  <!-- Hamburger (mobile only) -->
+  <button id="admin-nav-btn" onclick="openAdminLogin()"
+    style="font-family:'Lato',sans-serif;font-weight:700;font-size:12px;padding:7px 16px;border-radius:24px;border:2px solid rgba(231,76,60,.25);background:transparent;color:#c0392b;cursor:pointer;transition:all .2s;white-space:nowrap"
+    onmouseover="this.style.background='rgba(231,76,60,.08)'"
+    onmouseout="this.style.background='transparent'">🔒 Admin</button>
   <button class="mob-hamburger" id="mob-hamburger" onclick="toggleMobMenu()" aria-label="Menu">
     <span></span><span></span><span></span>
   </button>
 </nav>
 
-<!-- MOBILE DRAWER MENU -->
+
+<!--  ============================================================
+      MOBILE NAVIGATION
+      Drawer menu slides down from navbar on hamburger click.
+      Bottom tab bar is permanently docked to the screen bottom.
+      Both are hidden on desktop via CSS.
+============================================================  -->
+
 <div class="mob-menu" id="mob-menu">
-  <button class="mob-menu-item" id="mob-nav-home" onclick="goTo('home');closeMobMenu()">
-    <span class="mmi-icon">🏠</span>Home
-  </button>
-  <button class="mob-menu-item" id="mob-nav-hub" onclick="goTo('hub');closeMobMenu()">
-    <span class="mmi-icon">📋</span>Resource Hub
-  </button>
-  <button class="mob-menu-item" id="mob-nav-survey" onclick="goTo('survey');closeMobMenu()">
-    <span class="mmi-icon">🔍</span>Find My Match
-  </button>
-  <button class="mob-menu-item" id="mob-nav-submit" onclick="goTo('submit');closeMobMenu()">
-    <span class="mmi-icon">➕</span>Add a Resource
-  </button>
-  <button class="mob-menu-item" id="mob-nav-reference" onclick="goTo('reference');closeMobMenu()">
-    <span class="mmi-icon">📖</span>References
-  </button>
+  <button class="mob-menu-item" id="mob-nav-home"      onclick="goTo('home');closeMobMenu()">      <span class="mmi-icon">🏠</span>Home</button>
+  <button class="mob-menu-item" id="mob-nav-hub"       onclick="goTo('hub');closeMobMenu()">       <span class="mmi-icon">📋</span>Resource Hub</button>
+  <button class="mob-menu-item" id="mob-nav-survey"    onclick="goTo('survey');closeMobMenu()">    <span class="mmi-icon">🔍</span>Find My Match</button>
+  <button class="mob-menu-item" id="mob-nav-submit"    onclick="goTo('submit');closeMobMenu()">    <span class="mmi-icon">➕</span>Add a Resource</button>
+  <button class="mob-menu-item" id="mob-nav-reference" onclick="goTo('reference');closeMobMenu()"><span class="mmi-icon">📖</span>References</button>
   <div class="mob-menu-divider"></div>
   <button class="mob-menu-admin" onclick="openAdminLogin();closeMobMenu()">🔒 Admin Access</button>
 </div>
 
-<!-- MOBILE BOTTOM TAB BAR -->
 <div class="mob-bottom-nav" id="mob-bottom-nav">
-  <button class="mob-tab active" id="mobtab-home" onclick="goTo('home')">
-    <span class="mob-tab-icon">🏠</span>
-    <span class="mob-tab-label">Home</span>
-  </button>
-  <button class="mob-tab" id="mobtab-hub" onclick="goTo('hub')">
-    <span class="mob-tab-icon">📋</span>
-    <span class="mob-tab-label">Resources</span>
-  </button>
-  <button class="mob-tab" id="mobtab-survey" onclick="goTo('survey')">
-    <span class="mob-tab-icon">🔍</span>
-    <span class="mob-tab-label">Match</span>
-  </button>
-  <button class="mob-tab" id="mobtab-submit" onclick="goTo('submit')">
-    <span class="mob-tab-icon">➕</span>
-    <span class="mob-tab-label">Add</span>
-  </button>
-  <button class="mob-tab" id="mobtab-reference" onclick="goTo('reference')">
-    <span class="mob-tab-icon">📖</span>
-    <span class="mob-tab-label">Refs</span>
-  </button>
+  <button class="mob-tab active" id="mobtab-home"      onclick="goTo('home')">     <span class="mob-tab-icon">🏠</span><span class="mob-tab-label">Home</span></button>
+  <button class="mob-tab"        id="mobtab-hub"       onclick="goTo('hub')">      <span class="mob-tab-icon">📋</span><span class="mob-tab-label">Resources</span></button>
+  <button class="mob-tab"        id="mobtab-survey"    onclick="goTo('survey')">   <span class="mob-tab-icon">🔍</span><span class="mob-tab-label">Match</span></button>
+  <button class="mob-tab"        id="mobtab-submit"    onclick="goTo('submit')">   <span class="mob-tab-icon">➕</span><span class="mob-tab-label">Add</span></button>
+  <button class="mob-tab"        id="mobtab-reference" onclick="goTo('reference')"><span class="mob-tab-icon">📖</span><span class="mob-tab-label">Refs</span></button>
 </div>
 
-<!--   ADMIN BAR   -->
+
+<!--  ============================================================
+      GLOBAL OVERLAYS
+      All modals, the admin bar, the fullscreen map, and the hero
+      map panel live here outside the pages so they can layer
+      above any page without z-index conflicts.
+============================================================  -->
+
+<!-- Admin bar — shown when admin mode is active -->
 <div class="admin-bar" id="admin-bar">
   <div class="admin-bar-dot"></div>
   <span>Admin Mode Active — click any resource card or open "More Info" to delete it</span>
   <button class="admin-exit-btn" onclick="exitAdmin()">✕ Exit Admin</button>
 </div>
 
-<!--   ADMIN LOGIN MODAL   -->
+<!-- Admin login modal -->
 <div class="modal-overlay" id="admin-login-overlay" onclick="closeAdminLoginOuter(event)">
   <div class="admin-login-modal">
     <div class="al-icon">🔐</div>
@@ -767,12 +771,12 @@
       <button class="pw-toggle" onclick="toggleAdminPw()" title="Show/hide">👁</button>
     </div>
     <div class="admin-error" id="admin-error">Incorrect password. Try again.</div>
-    <button class="btn-primary" style="width:100%;justify-content:center" onclick="attemptAdminLogin()">🔓 Enter Admin Mode</button>
-    <button class="btn-secondary" style="width:100%;justify-content:center;margin-top:10px" onclick="closeAdminLogin()">Cancel</button>
+    <button class="btn-primary"    style="width:100%;justify-content:center"              onclick="attemptAdminLogin()">🔓 Enter Admin Mode</button>
+    <button class="btn-secondary"  style="width:100%;justify-content:center;margin-top:10px" onclick="closeAdminLogin()">Cancel</button>
   </div>
 </div>
 
-<!--   DELETE CONFIRM MODAL   -->
+<!-- Delete confirmation modal -->
 <div class="modal-overlay" id="delete-confirm-overlay" onclick="closeDeleteConfirmOuter(event)">
   <div class="delete-confirm-modal">
     <div style="font-size:2.5rem;margin-bottom:12px">🗑</div>
@@ -785,23 +789,26 @@
   </div>
 </div>
 
-<!--   RESOURCE MODAL   -->
+<!-- Resource detail modal — all content filled by JS via openModal() -->
 <div class="modal-overlay" id="resource-modal" onclick="closeModalOuter(event)">
   <div class="modal">
     <div style="position:relative">
-      <div id="m-img-wrap"><!-- filled by JS --></div>
+      <div id="m-img-wrap"></div>
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
     <div class="modal-body">
       <div id="m-cat"></div>
       <h2 class="modal-title" id="m-title"></h2>
-      <p class="modal-desc" id="m-desc"></p>
+      <p class="modal-desc"  id="m-desc"></p>
       <div class="modal-info">
         <div class="modal-info-row"><span class="mii">📍</span><span id="m-addr"></span></div>
         <div class="modal-info-row"><span class="mii">📞</span><span id="m-phone"></span></div>
         <div class="modal-info-row"><span class="mii">🌐</span><span id="m-web"></span></div>
         <div class="modal-info-row"><span class="mii">🕐</span><span id="m-hours"></span></div>
-        <div class="modal-info-row" id="m-engage-row"><span class="mii"></span><span id="m-engage" style="display:none;background:rgba(0,178,202,.1);color:var(--sky);padding:2px 10px;border-radius:20px;font-size:11px;font-weight:800"></span></div>
+        <div class="modal-info-row" id="m-engage-row">
+          <span class="mii"></span>
+          <span id="m-engage" style="display:none;background:rgba(0,178,202,.1);color:var(--sky);padding:2px 10px;border-radius:20px;font-size:11px;font-weight:800"></span>
+        </div>
       </div>
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
         <button class="btn-secondary" onclick="closeModal()">Close</button>
@@ -811,7 +818,7 @@
   </div>
 </div>
 
-<!--   FULLSCREEN MAP   -->
+<!-- Fullscreen map overlay -->
 <div class="map-fs-overlay" id="map-fs-overlay" onclick="closeFSMap(event)">
   <div class="map-fs-inner">
     <div class="map-fs-header">
@@ -822,10 +829,10 @@
   </div>
 </div>
 
-<!--   HERO MAP LAUNCH PANEL   -->
+<!-- Hero map launch panel — opened when the 3D scene is clicked -->
 <div class="hero-map-panel" id="hero-map-panel" onclick="closeHeroMapPanel(event)">
   <div class="hero-map-panel-card">
-    <button class="hero-map-panel-close" aria-label="Close interactive map panel" onclick="closeHeroMapPanel()">✕</button>
+    <button class="hero-map-panel-close" aria-label="Close" onclick="closeHeroMapPanel()">✕</button>
     <div class="hero-map-panel-map-wrap">
       <div class="hero-map-panel-map-shell">
         <div id="hero-map-launch-map"></div>
@@ -865,16 +872,22 @@
   </div>
 </div>
 
-<!--        HOME PAGE        -->
+
+<!--  ============================================================
+      HOME PAGE
+      Hero, spotlight, about, category quick nav, and footer.
+============================================================  -->
+
 <div class="page active" id="page-home">
 
+  <!-- Hero -->
   <section class="hero">
     <div class="hero-content">
       <h1>Connect with<br><em>Your</em> Community</h1>
       <p class="hero-subtitle">Find what you need at the peak of good living</p>
       <p>Home to a variety of resources like non-profits, support services, events, and programs serving every Apex Resident.</p>
       <div class="hero-cta">
-        <button class="btn-primary" onclick="goTo('hub')">Explore Resources</button>
+        <button class="btn-primary"   onclick="goTo('hub')">Explore Resources</button>
         <button class="btn-secondary" onclick="goTo('survey')">🔍 Find My Match</button>
       </div>
     </div>
@@ -904,17 +917,17 @@
     <div class="hero-stats">
       <div class="stat-item reveal"><div class="stat-num">20<span>+</span></div><div class="stat-label">Community Resources</div></div>
       <div class="stat-item reveal" style="transition-delay:.1s"><div class="stat-num">11<span>+</span></div><div class="stat-label">Categories</div></div>
-      <div class="stat-item reveal" style="transition-delay:.2s"><div class="stat-num">All in <span>1</span></div><div class="stat-label">Community: Apex NC </div></div>
+      <div class="stat-item reveal" style="transition-delay:.2s"><div class="stat-num">All in <span>1</span></div><div class="stat-label">Community: Apex NC</div></div>
     </div>
   </section>
 
-  <!-- SPOTLIGHT -->
+  <!-- Spotlight — cards filled by JS via renderSpotlight() -->
   <section class="section" style="background:linear-gradient(180deg,var(--offwhite),rgba(0,178,202,.04))">
     <div class="spotlight-header">
       <div>
         <div class="section-label reveal">Featured Resources</div>
         <h2 class="section-title reveal" style="transition-delay:.1s">Spotlight on<br>Apex's Finest</h2>
-        <p class="section-sub reveal" style="transition-delay:.15s">These organizations make Apex a better place - every single day. Definitely worth checking out!:</p>
+        <p class="section-sub reveal" style="transition-delay:.15s">These organizations make Apex a better place — every single day.</p>
       </div>
       <button class="btn-secondary reveal" onclick="goTo('hub')" style="transition-delay:.2s">View All →</button>
     </div>
@@ -923,7 +936,7 @@
 
   <div class="divider"></div>
 
-  <!-- ABOUT -->
+  <!-- About -->
   <section class="section">
     <div class="about-grid">
       <div>
@@ -931,11 +944,11 @@
         <h2 class="section-title reveal-left" style="transition-delay:.1s">One Hub for the<br>Whole Community</h2>
         <p class="section-sub reveal-left" style="transition-delay:.15s">The Apex Resource Hub was designed to be a free directory helping all Apex residents — from young families to seniors — discover local nonprofits, events, and support services quickly and easily.</p>
         <div class="feature-chips">
-          <div class="feature-chip reveal-left" style="transition-delay:.2s" onclick="goTo('hub')">Search &amp; Filter</div>
+          <div class="feature-chip reveal-left" style="transition-delay:.2s"  onclick="goTo('hub')">Search &amp; Filter</div>
           <div class="feature-chip reveal-left" style="transition-delay:.25s" onclick="goTo('hub')">Interactive Map</div>
-          <div class="feature-chip reveal-left" style="transition-delay:.3s" onclick="goTo('survey')">Personalized Match</div>
+          <div class="feature-chip reveal-left" style="transition-delay:.3s"  onclick="goTo('survey')">Personalized Match</div>
           <div class="feature-chip reveal-left" style="transition-delay:.35s" onclick="goTo('submit')">Submit a Resource</div>
-          <div class="feature-chip reveal-left" style="transition-delay:.4s" onclick="goTo('reference')">Reference Page</div>
+          <div class="feature-chip reveal-left" style="transition-delay:.4s"  onclick="goTo('reference')">Reference Page</div>
         </div>
       </div>
       <div class="about-img-grid reveal-scale" style="transition-delay:.1s;width:100%;max-width:100%;box-sizing:border-box">
@@ -959,7 +972,7 @@
     </div>
   </section>
 
-  <!-- CATEGORY QUICK NAV -->
+  <!-- Category quick nav — buttons filled by JS via renderCatQuick() -->
   <section class="section" style="background:linear-gradient(180deg,transparent,rgba(29,78,137,.04))">
     <div style="text-align:center;margin-bottom:44px">
       <div class="section-label reveal">Browse by Category</div>
@@ -968,6 +981,7 @@
     <div id="cat-quick-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;max-width:980px;margin:0 auto"></div>
   </section>
 
+  <!-- Footer -->
   <footer>
     <div class="footer-grid">
       <div class="footer-brand">
@@ -999,9 +1013,16 @@
       <span>Made for the community, by the community.</span>
     </div>
   </footer>
+
 </div>
 
-<!--  RESOURCE HUB PAGE -->
+
+<!--  ============================================================
+      RESOURCE HUB PAGE
+      Search bar, category filters, list view grid, and map view.
+      Resource cards are built by JS via renderResources().
+============================================================  -->
+
 <div class="page" id="page-hub">
   <div class="hub-header">
     <h2>Resource Hub</h2>
@@ -1012,38 +1033,31 @@
     </div>
   </div>
   <div class="hub-body">
-    <!-- View Toggle -->
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:8px">
       <div class="hub-view-toggle">
         <button class="view-tab active" id="tab-list" onclick="switchHubView('list')">📋 List View</button>
-        <button class="view-tab" id="tab-map" onclick="switchHubView('map')">🗺️ Map View</button>
+        <button class="view-tab"        id="tab-map"  onclick="switchHubView('map')">🗺️ Map View</button>
       </div>
       <div id="hub-result-count" style="font-size:13px;font-weight:700;color:var(--muted)"></div>
     </div>
-
-    <!-- Filters (shown in list view) -->
     <div class="hub-filters" id="hub-filters">
       <span class="filter-label">Filter:</span>
-      <button class="filter-chip active" data-cat="All" onclick="setFilter(this)">All <span class="count-badge" id="filter-count">0</span></button>
-      <button class="filter-chip" data-cat="Food & Hunger" onclick="setFilter(this)">🥫 Food &amp; Hunger <span class="count-badge" id="fc-Food"></span></button>
-      <button class="filter-chip" data-cat="Housing" onclick="setFilter(this)">🏠 Housing <span class="count-badge" id="fc-Housing"></span></button>
-      <button class="filter-chip" data-cat="Health" onclick="setFilter(this)">❤️ Health <span class="count-badge" id="fc-Health"></span></button>
-      <button class="filter-chip" data-cat="Education" onclick="setFilter(this)">📚 Education <span class="count-badge" id="fc-Education"></span></button>
-      <button class="filter-chip" data-cat="Arts & Culture" onclick="setFilter(this)">🎨 Arts &amp; Culture <span class="count-badge" id="fc-Arts"></span></button>
-      <button class="filter-chip" data-cat="Youth" onclick="setFilter(this)">🌟 Youth <span class="count-badge" id="fc-Youth"></span></button>
-      <button class="filter-chip" data-cat="Seniors" onclick="setFilter(this)">👵 Seniors <span class="count-badge" id="fc-Seniors"></span></button>
-      <button class="filter-chip" data-cat="Environment" onclick="setFilter(this)">🌿 Environment <span class="count-badge" id="fc-Environment"></span></button>
-      <button class="filter-chip" data-cat="Immigration" onclick="setFilter(this)">🌎 Immigration <span class="count-badge" id="fc-Immigration"></span></button>
-      <button class="filter-chip" data-cat="Recreation" onclick="setFilter(this)">⚽ Recreation <span class="count-badge" id="fc-Recreation"></span></button>
-      <button class="filter-chip" data-cat="Volunteer" onclick="setFilter(this)">🤝 Volunteer <span class="count-badge" id="fc-Volunteer"></span></button>
+      <button class="filter-chip active" data-cat="All"           onclick="setFilter(this)">All <span class="count-badge" id="filter-count">0</span></button>
+      <button class="filter-chip"        data-cat="Food & Hunger" onclick="setFilter(this)">🥫 Food &amp; Hunger <span class="count-badge" id="fc-Food"></span></button>
+      <button class="filter-chip"        data-cat="Housing"       onclick="setFilter(this)">🏠 Housing <span class="count-badge" id="fc-Housing"></span></button>
+      <button class="filter-chip"        data-cat="Health"        onclick="setFilter(this)">❤️ Health <span class="count-badge" id="fc-Health"></span></button>
+      <button class="filter-chip"        data-cat="Education"     onclick="setFilter(this)">📚 Education <span class="count-badge" id="fc-Education"></span></button>
+      <button class="filter-chip"        data-cat="Arts & Culture" onclick="setFilter(this)">🎨 Arts &amp; Culture <span class="count-badge" id="fc-Arts"></span></button>
+      <button class="filter-chip"        data-cat="Youth"         onclick="setFilter(this)">🌟 Youth <span class="count-badge" id="fc-Youth"></span></button>
+      <button class="filter-chip"        data-cat="Seniors"       onclick="setFilter(this)">👵 Seniors <span class="count-badge" id="fc-Seniors"></span></button>
+      <button class="filter-chip"        data-cat="Environment"   onclick="setFilter(this)">🌿 Environment <span class="count-badge" id="fc-Environment"></span></button>
+      <button class="filter-chip"        data-cat="Immigration"   onclick="setFilter(this)">🌎 Immigration <span class="count-badge" id="fc-Immigration"></span></button>
+      <button class="filter-chip"        data-cat="Recreation"    onclick="setFilter(this)">⚽ Recreation <span class="count-badge" id="fc-Recreation"></span></button>
+      <button class="filter-chip"        data-cat="Volunteer"     onclick="setFilter(this)">🤝 Volunteer <span class="count-badge" id="fc-Volunteer"></span></button>
     </div>
-
-    <!-- LIST VIEW -->
     <div class="hub-list-view" id="hub-list-view">
       <div class="resource-grid" id="resource-grid"></div>
     </div>
-
-    <!-- MAP VIEW -->
     <div class="hub-map-view" id="hub-map-view">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">
         <span style="font-size:13px;font-weight:700;color:var(--muted)">📍 Click any pin to see details</span>
@@ -1056,7 +1070,13 @@
   </div>
 </div>
 
-<!--        SURVEY PAGE        -->
+
+<!--  ============================================================
+      SURVEY PAGE
+      Multi-step quiz, one step visible at a time via .active class.
+      Results grid is filled by JS via showResults().
+============================================================  -->
+
 <div class="page" id="page-survey">
   <div class="survey-page">
     <div class="section-label reveal" style="text-align:center">Personalized Recommendations</div>
@@ -1064,71 +1084,73 @@
     <p class="section-sub reveal" style="text-align:center;margin:0 auto 36px;transition-delay:.15s">Answer a few questions and we'll recommend the best resources for you.</p>
     <div class="survey-card reveal-scale" style="transition-delay:.2s">
       <div class="survey-progress" id="survey-progress">
-        <div class="progress-dot current"></div><div class="progress-dot"></div>
-        <div class="progress-dot"></div><div class="progress-dot"></div>
+        <div class="progress-dot current"></div>
+        <div class="progress-dot"></div>
+        <div class="progress-dot"></div>
+        <div class="progress-dot"></div>
       </div>
-      <!-- Step 1 -->
+      <!-- Step 1: Who -->
       <div class="survey-step active" id="step-1">
         <div class="survey-q">Who are you looking for resources for?</div>
         <div class="survey-sub">This helps personalize your recommendations.</div>
         <div class="survey-options">
-          <button class="survey-opt" data-val="myself" onclick="selectOpt(this,'who')"><span class="survey-opt-icon">🙋</span>Myself</button>
-          <button class="survey-opt" data-val="family" onclick="selectOpt(this,'who')"><span class="survey-opt-icon">👨‍👩‍👧</span>My Family</button>
-          <button class="survey-opt" data-val="child" onclick="selectOpt(this,'who')"><span class="survey-opt-icon">👦</span>A Child</button>
-          <button class="survey-opt" data-val="senior" onclick="selectOpt(this,'who')"><span class="survey-opt-icon">👵</span>A Senior</button>
+          <button class="survey-opt" data-val="myself"    onclick="selectOpt(this,'who')"><span class="survey-opt-icon">🙋</span>Myself</button>
+          <button class="survey-opt" data-val="family"    onclick="selectOpt(this,'who')"><span class="survey-opt-icon">👨‍👩‍👧</span>My Family</button>
+          <button class="survey-opt" data-val="child"     onclick="selectOpt(this,'who')"><span class="survey-opt-icon">👦</span>A Child</button>
+          <button class="survey-opt" data-val="senior"    onclick="selectOpt(this,'who')"><span class="survey-opt-icon">👵</span>A Senior</button>
           <button class="survey-opt" data-val="immigrant" onclick="selectOpt(this,'who')"><span class="survey-opt-icon">🌎</span>An Immigrant</button>
           <button class="survey-opt" data-val="volunteer" onclick="selectOpt(this,'who')"><span class="survey-opt-icon">🤝</span>To Volunteer</button>
         </div>
         <div class="survey-error" id="err-1">⚠️ Please select an option before continuing.</div>
         <div class="survey-nav"><span class="survey-step-label">Step 1 of 4</span><button class="btn-primary" onclick="nextStep(1)">Next →</button></div>
       </div>
-      <!-- Step 2 -->
+      <!-- Step 2: Needs (multi-select) -->
       <div class="survey-step" id="step-2">
         <div class="survey-q">What are your most pressing needs?</div>
         <div class="survey-sub">Select all that apply.</div>
         <div class="survey-options">
-          <button class="survey-opt" data-val="Food & Hunger" onclick="selectOpt(this,'need',true)"><span class="survey-opt-icon">🥫</span>Food &amp; Groceries</button>
-          <button class="survey-opt" data-val="Housing" onclick="selectOpt(this,'need',true)"><span class="survey-opt-icon">🏠</span>Housing Help</button>
-          <button class="survey-opt" data-val="Health" onclick="selectOpt(this,'need',true)"><span class="survey-opt-icon">❤️</span>Health Services</button>
-          <button class="survey-opt" data-val="Education" onclick="selectOpt(this,'need',true)"><span class="survey-opt-icon">📚</span>Education</button>
+          <button class="survey-opt" data-val="Food & Hunger"  onclick="selectOpt(this,'need',true)"><span class="survey-opt-icon">🥫</span>Food &amp; Groceries</button>
+          <button class="survey-opt" data-val="Housing"        onclick="selectOpt(this,'need',true)"><span class="survey-opt-icon">🏠</span>Housing Help</button>
+          <button class="survey-opt" data-val="Health"         onclick="selectOpt(this,'need',true)"><span class="survey-opt-icon">❤️</span>Health Services</button>
+          <button class="survey-opt" data-val="Education"      onclick="selectOpt(this,'need',true)"><span class="survey-opt-icon">📚</span>Education</button>
           <button class="survey-opt" data-val="Arts & Culture" onclick="selectOpt(this,'need',true)"><span class="survey-opt-icon">🎨</span>Arts &amp; Culture</button>
-          <button class="survey-opt" data-val="Recreation" onclick="selectOpt(this,'need',true)"><span class="survey-opt-icon">⚽</span>Recreation</button>
-          <button class="survey-opt" data-val="Youth" onclick="selectOpt(this,'need',true)"><span class="survey-opt-icon">🌟</span>Youth Programs</button>
-          <button class="survey-opt" data-val="Seniors" onclick="selectOpt(this,'need',true)"><span class="survey-opt-icon">👵</span>Senior Services</button>
-          <button class="survey-opt" data-val="Environment" onclick="selectOpt(this,'need',true)"><span class="survey-opt-icon">🌿</span>Environment</button>
-          <button class="survey-opt" data-val="Immigration" onclick="selectOpt(this,'need',true)"><span class="survey-opt-icon">🌎</span>Immigration Help</button>
-          <button class="survey-opt" data-val="Volunteer" onclick="selectOpt(this,'need',true)"><span class="survey-opt-icon">🤝</span>Volunteering</button>
+          <button class="survey-opt" data-val="Recreation"     onclick="selectOpt(this,'need',true)"><span class="survey-opt-icon">⚽</span>Recreation</button>
+          <button class="survey-opt" data-val="Youth"          onclick="selectOpt(this,'need',true)"><span class="survey-opt-icon">🌟</span>Youth Programs</button>
+          <button class="survey-opt" data-val="Seniors"        onclick="selectOpt(this,'need',true)"><span class="survey-opt-icon">👵</span>Senior Services</button>
+          <button class="survey-opt" data-val="Environment"    onclick="selectOpt(this,'need',true)"><span class="survey-opt-icon">🌿</span>Environment</button>
+          <button class="survey-opt" data-val="Immigration"    onclick="selectOpt(this,'need',true)"><span class="survey-opt-icon">🌎</span>Immigration Help</button>
+          <button class="survey-opt" data-val="Volunteer"      onclick="selectOpt(this,'need',true)"><span class="survey-opt-icon">🤝</span>Volunteering</button>
         </div>
         <div class="survey-error" id="err-2">⚠️ Please select an option before continuing.</div>
         <div class="survey-nav"><button class="btn-secondary" onclick="prevStep(2)">← Back</button><span class="survey-step-label">Step 2 of 4</span><button class="btn-primary" onclick="nextStep(2)">Next →</button></div>
       </div>
-      <!-- Step 3 -->
+      <!-- Step 3: Engagement preference -->
       <div class="survey-step" id="step-3">
         <div class="survey-q">How do you prefer to engage?</div>
         <div class="survey-sub">Choose what feels right for you.</div>
         <div class="survey-options">
           <button class="survey-opt" data-val="in-person" onclick="selectOpt(this,'engage')"><span class="survey-opt-icon">🏃</span>In-Person</button>
-          <button class="survey-opt" data-val="online" onclick="selectOpt(this,'engage')"><span class="survey-opt-icon">💻</span>Online</button>
-          <button class="survey-opt" data-val="both" onclick="selectOpt(this,'engage')"><span class="survey-opt-icon">🔄</span>Both Are Fine</button>
-          <button class="survey-opt" data-val="walkIn" onclick="selectOpt(this,'engage')"><span class="survey-opt-icon">🚶</span>Walk-In Services</button>
+          <button class="survey-opt" data-val="online"    onclick="selectOpt(this,'engage')"><span class="survey-opt-icon">💻</span>Online</button>
+          <button class="survey-opt" data-val="both"      onclick="selectOpt(this,'engage')"><span class="survey-opt-icon">🔄</span>Both Are Fine</button>
+          <button class="survey-opt" data-val="walkIn"    onclick="selectOpt(this,'engage')"><span class="survey-opt-icon">🚶</span>Walk-In Services</button>
         </div>
         <div class="survey-error" id="err-3">⚠️ Please select an option before continuing.</div>
         <div class="survey-nav"><button class="btn-secondary" onclick="prevStep(3)">← Back</button><span class="survey-step-label">Step 3 of 4</span><button class="btn-primary" onclick="nextStep(3)">Next →</button></div>
       </div>
-      <!-- Step 4 -->
+      <!-- Step 4: Availability -->
       <div class="survey-step" id="step-4">
         <div class="survey-q">When are you typically available?</div>
         <div class="survey-sub">So we can match events to your schedule.</div>
         <div class="survey-options">
           <button class="survey-opt" data-val="weekday-morning" onclick="selectOpt(this,'time')"><span class="survey-opt-icon">☀️</span>Weekday Mornings</button>
           <button class="survey-opt" data-val="weekday-evening" onclick="selectOpt(this,'time')"><span class="survey-opt-icon">🌆</span>Weekday Evenings</button>
-          <button class="survey-opt" data-val="weekend" onclick="selectOpt(this,'time')"><span class="survey-opt-icon">🎉</span>Weekends</button>
-          <button class="survey-opt" data-val="anytime" onclick="selectOpt(this,'time')"><span class="survey-opt-icon">⏰</span>Flexible</button>
+          <button class="survey-opt" data-val="weekend"         onclick="selectOpt(this,'time')"><span class="survey-opt-icon">🎉</span>Weekends</button>
+          <button class="survey-opt" data-val="anytime"         onclick="selectOpt(this,'time')"><span class="survey-opt-icon">⏰</span>Flexible</button>
         </div>
         <div class="survey-error" id="err-4">⚠️ Please select an option before continuing.</div>
         <div class="survey-nav"><button class="btn-secondary" onclick="prevStep(4)">← Back</button><span class="survey-step-label">Step 4 of 4</span><button class="btn-primary" onclick="showResults()">Show Results</button></div>
       </div>
-      <!-- Results -->
+      <!-- Results — grid filled by JS via showResults() -->
       <div class="survey-step" id="step-results">
         <div style="text-align:center;margin-bottom:26px">
           <div style="font-size:2.8rem;margin-bottom:8px">✨</div>
@@ -1137,15 +1159,21 @@
         </div>
         <div class="results-grid" id="results-grid"></div>
         <div style="display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;margin-top:28px">
-          <button class="btn-primary" onclick="goTo('hub')" style="width:100%">View All Resources →</button>
-          <button class="btn-secondary" onclick="resetSurvey()" style="width:100%">↺ Start Over</button>
+          <button class="btn-primary"   onclick="goTo('hub')"      style="width:100%">View All Resources →</button>
+          <button class="btn-secondary" onclick="resetSurvey()"    style="width:100%">↺ Start Over</button>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!--       SUBMIT / ADD RESOURCE PAGE       -->
+
+<!--  ============================================================
+      SUBMIT FORM PAGE
+      Community resource submission form.
+      Time dropdowns are populated by JS via buildTimeOptions().
+============================================================  -->
+
 <div class="page" id="page-submit">
   <div class="submit-page">
     <div style="text-align:center;margin-bottom:44px">
@@ -1172,9 +1200,7 @@
       </div>
       <div class="form-group">
         <label class="form-label">Street Address <span>*</span></label>
-        <input class="form-input" type="text" id="f-addr"
-          placeholder="e.g. 1600 Olive Chapel Rd, Apex, NC 27502"
-          oninput="validateAddress(this)">
+        <input class="form-input" type="text" id="f-addr" placeholder="e.g. 1600 Olive Chapel Rd, Apex, NC 27502" oninput="validateAddress(this)">
         <div id="f-addr-hint" style="margin-top:6px;font-size:12px;font-weight:600;display:none"></div>
       </div>
       <div class="form-row">
@@ -1190,28 +1216,17 @@
       <div class="form-group">
         <label class="form-label">Image URL <span style="color:var(--muted);font-weight:600">(optional)</span></label>
         <input class="form-input" type="url" id="f-img" placeholder="https://example.com/image.jpg">
-        <div style="margin-top:6px;font-size:11px;font-weight:600;color:var(--muted)">
-          Paste a direct link to an image. If left blank or address fails, a category image will be used instead.
-        </div>
+        <div style="margin-top:6px;font-size:11px;font-weight:600;color:var(--muted)">Paste a direct link to an image. If left blank, a category image will be used instead.</div>
       </div>
       <div class="form-group">
         <label class="form-label">Engagement Type <span>*</span></label>
         <div class="engage-opts" id="f-engage-opts">
-          <button type="button" class="engage-opt" data-val="in-person" onclick="selectEngage(this)">
-            <span class="eo-icon">🏃</span>In-Person
-          </button>
-          <button type="button" class="engage-opt" data-val="online" onclick="selectEngage(this)">
-            <span class="eo-icon">💻</span>Online
-          </button>
-          <button type="button" class="engage-opt" data-val="both" onclick="selectEngage(this)">
-            <span class="eo-icon">🔄</span>Both Are Fine
-          </button>
-          <button type="button" class="engage-opt" data-val="walkIn" onclick="selectEngage(this)">
-            <span class="eo-icon">🚶</span>Walk-In Services
-          </button>
+          <button type="button" class="engage-opt" data-val="in-person" onclick="selectEngage(this)"><span class="eo-icon">🏃</span>In-Person</button>
+          <button type="button" class="engage-opt" data-val="online"    onclick="selectEngage(this)"><span class="eo-icon">💻</span>Online</button>
+          <button type="button" class="engage-opt" data-val="both"      onclick="selectEngage(this)"><span class="eo-icon">🔄</span>Both Are Fine</button>
+          <button type="button" class="engage-opt" data-val="walkIn"    onclick="selectEngage(this)"><span class="eo-icon">🚶</span>Walk-In Services</button>
         </div>
       </div>
-
       <div class="form-group">
         <label class="form-label">Hours of Operation</label>
         <div class="days-picker" id="f-days-picker">
@@ -1224,18 +1239,14 @@
           <button type="button" class="day-btn" data-day="Sun" onclick="toggleDay(this)">Sun</button>
         </div>
         <div class="hours-range" id="f-hours-range">
-          <select class="form-select" id="f-open-time" onchange="uncheck24()">
-            <option value="">Open time…</option>
-          </select>
+          <select class="form-select" id="f-open-time"  onchange="uncheck24()"><option value="">Open time…</option></select>
           <div class="range-sep">to</div>
-          <select class="form-select" id="f-close-time" onchange="uncheck24()">
-            <option value="">Close time…</option>
-          </select>
+          <select class="form-select" id="f-close-time" onchange="uncheck24()"><option value="">Close time…</option></select>
         </div>
         <div class="hours-special">
           <label><input type="checkbox" id="f-hours-varies" onchange="uncheck24()"> Hours vary by season</label>
-          <label><input type="checkbox" id="f-hours-appt" onchange="uncheck24()"> By appointment only</label>
-          <label><input type="checkbox" id="f-hours-24" onchange="toggle24hrs(this)"> Open 24/7</label>
+          <label><input type="checkbox" id="f-hours-appt"   onchange="uncheck24()"> By appointment only</label>
+          <label><input type="checkbox" id="f-hours-24"     onchange="toggle24hrs(this)"> Open 24/7</label>
         </div>
       </div>
       <div class="form-group">
@@ -1255,13 +1266,20 @@
       <button id="f-submit-btn" class="btn-primary" style="width:100%;justify-content:center;font-size:15px;padding:15px" onclick="submitForm()">Submit Resource</button>
       <div class="form-success" id="form-success">
         <h3>Thank You!</h3>
-        <p>Your submission has been saved and added to the Resource Hub! You can see it there now.</p>
+        <p>Your submission has been saved and added to the Resource Hub!</p>
       </div>
     </div>
   </div>
 </div>
 
-<!--        REFERENCE PAGE       -->
+
+<!--  ============================================================
+      REFERENCE PAGE
+      Required TSA documents, content sources, tools table,
+      image citations, and community submissions table.
+      The external sources section is filled by JS via renderExternalSources().
+============================================================  -->
+
 <div class="page" id="page-reference">
   <div class="ref-header">
     <h2>Reference Page</h2>
@@ -1269,7 +1287,7 @@
   </div>
   <div class="ref-body">
 
-    <!-- REQUIRED DOCUMENTS -->
+    <!-- Required TSA documents -->
     <div class="ref-section">
       <h3>Required TSA Documents</h3>
       <p class="ref-intro">The following documents are required by TSA Webmaster event rules. Click to view each PDF.</p>
@@ -1293,7 +1311,7 @@
       </div>
     </div>
 
-    <!-- WEBSITE & CONTENT SOURCES -->
+    <!-- Website and content sources -->
     <div class="ref-section">
       <h3>Website &amp; Content Sources</h3>
       <p class="ref-intro">All written information about community organizations was sourced from official websites and public records.</p>
@@ -1305,7 +1323,7 @@
           <tr><td>3</td><td>Town of Apex — Volunteering</td><td><a href="https://www.apexnc.org/419/Volunteering" target="_blank">apexnc.org/419</a></td><td>March 2026</td><td>Volunteering opportunities, Think Apex Day, Connecting Community</td></tr>
           <tr><td>4</td><td>Town of Apex — Housing Services</td><td><a href="https://www.apexnc.org/1633/Housing-Services" target="_blank">apexnc.org/1633</a></td><td>March 2026</td><td>Affordable housing and housing assistance programs</td></tr>
           <tr><td>5</td><td>Think Apex Day — Apex Economic Development</td><td><a href="https://apexeconomicdevelopment.org/1554/Think-Apex-Day" target="_blank">apexeconomicdevelopment.org</a></td><td>March 2026</td><td>Think Apex Day event details and locations</td></tr>
-          <tr><td>6</td><td>Apex UMC — With Missions</td><td><a href="https://apexumc.org/serve/missions/" target="_blank">apexumc.org</a></td><td>March 2026</td><td>NeighborUp (Western Wake Crisis Ministry), Apex Immigration Services descriptions</td></tr>
+          <tr><td>6</td><td>Apex UMC — With Missions</td><td><a href="https://apexumc.org/serve/missions/" target="_blank">apexumc.org</a></td><td>March 2026</td><td>NeighborUp and Apex Immigration Services descriptions</td></tr>
           <tr><td>7</td><td>White Oak Foundation</td><td><a href="https://www.wofnc.org" target="_blank">wofnc.org</a></td><td>March 2026</td><td>White Oak Foundation description and mission</td></tr>
           <tr><td>8</td><td>Habitat for Humanity of Wake County</td><td><a href="https://habitatwake.org" target="_blank">habitatwake.org</a></td><td>March 2026</td><td>ReStore and Habitat for Humanity program information</td></tr>
           <tr><td>9</td><td>Note in the Pocket</td><td><a href="https://noteinthepocket.org" target="_blank">noteinthepocket.org</a></td><td>March 2026</td><td>Organization description and mission</td></tr>
@@ -1314,12 +1332,12 @@
           <tr><td>12</td><td>Apex Immigration Services</td><td><a href="https://www.apeximm.org" target="_blank">apeximm.org</a></td><td>March 2026</td><td>Organization description and services</td></tr>
           <tr><td>13</td><td>NeighborUp (formerly Western Wake Crisis Ministry)</td><td><a href="https://neighborup.org" target="_blank">neighborup.org</a></td><td>March 2026</td><td>Food and financial assistance program info</td></tr>
           <tr><td>14</td><td>Halle Cultural Arts Center</td><td><a href="https://www.apexnc.org/halle" target="_blank">apexnc.org/halle</a></td><td>March 2026</td><td>Arts programs and venue details</td></tr>
-          <tr><td>15</td><td>OpenStreetMap</td><td><a href="https://www.openstreetmap.org" target="_blank">openstreetmap.org</a></td><td>March 2026</td><td>Map tile layer used in the interactive resource map (Leaflet.js)</td></tr>
+          <tr><td>15</td><td>OpenStreetMap</td><td><a href="https://www.openstreetmap.org" target="_blank">openstreetmap.org</a></td><td>March 2026</td><td>Map tile layer used in the interactive resource map</td></tr>
         </tbody>
       </table>
     </div>
 
-    <!-- TOOLS & TECHNOLOGIES -->
+    <!-- Tools and technologies -->
     <div class="ref-section">
       <h3>Tools &amp; Technologies</h3>
       <p class="ref-intro">The following open-source libraries and tools were used to build this website. All are free and open-source.</p>
@@ -1331,9 +1349,9 @@
           <tr><td>Google Fonts — Lato</td><td>—</td><td><a href="https://fonts.google.com/specimen/Lato" target="_blank">fonts.google.com</a></td><td>SIL Open Font License (Free)</td><td>Body and UI typography</td></tr>
           <tr><td>Google Fonts — Lobster</td><td>—</td><td><a href="https://fonts.google.com/specimen/Lobster" target="_blank">fonts.google.com</a></td><td>SIL Open Font License (Free)</td><td>Heading typography</td></tr>
           <tr><td>HTML5 / CSS3 / JavaScript</td><td>—</td><td>W3C Standard</td><td>Open Standard</td><td>Core website structure, styling, and interactivity</td></tr>
-          <tr><td>Firebase Firestore</td><td>10.12.0</td><td><a href="https://firebase.google.com" target="_blank">firebase.google.com</a></td><td>Free (Spark Plan)</td><td>Real-time shared database — all users see the same submitted resources instantly across all devices</td></tr>
-          <tr><td>Nominatim Geocoding</td><td>—</td><td><a href="https://nominatim.openstreetmap.org" target="_blank">nominatim.openstreetmap.org</a></td><td>ODbL (Free)</td><td>Converts submitted resource addresses into map coordinates for pin placement</td></tr>
-          <tr><td>corsproxy.io</td><td>—</td><td><a href="https://corsproxy.io" target="_blank">corsproxy.io</a></td><td>Free</td><td>CORS proxy fallback used when direct geocoding requests are blocked by browser security rules</td></tr>
+          <tr><td>Firebase Firestore</td><td>10.12.0</td><td><a href="https://firebase.google.com" target="_blank">firebase.google.com</a></td><td>Free (Spark Plan)</td><td>Real-time shared database for community submissions</td></tr>
+          <tr><td>Nominatim Geocoding</td><td>—</td><td><a href="https://nominatim.openstreetmap.org" target="_blank">nominatim.openstreetmap.org</a></td><td>ODbL (Free)</td><td>Converts submitted addresses into map coordinates</td></tr>
+          <tr><td>corsproxy.io</td><td>—</td><td><a href="https://corsproxy.io" target="_blank">corsproxy.io</a></td><td>Free</td><td>CORS proxy fallback for geocoding requests</td></tr>
           <tr><td>Imgur</td><td>—</td><td><a href="https://imgur.com" target="_blank">imgur.com</a></td><td>Free</td><td>Hosts the site logo image</td></tr>
         </tbody>
       </table>
@@ -1367,17 +1385,16 @@
       </table>
     </div>
 
-    <!-- EXTERNAL SOURCES (community-submitted) -->
+    <!-- Community submitted sources — filled by JS via renderExternalSources() -->
     <div class="ref-section">
       <h3>External Sources</h3>
-      <p class="ref-intro">The following resources were submitted by members of the Apex community through the <strong>Add a Resource</strong> form on this website. All submissions are community-sourced and have not been independently verified by our team. Information is presented as provided by the submitter.</p>
-      <div id="external-sources-container">
-        <!-- filled dynamically by JS -->
-      </div>
+      <p class="ref-intro">The following resources were submitted by members of the Apex community through the <strong>Add a Resource</strong> form. All submissions are community-sourced and have not been independently verified. Information is presented as provided by the submitter.</p>
+      <div id="external-sources-container"></div>
     </div>
 
-  </div><!-- /ref-body -->
-</div><!-- /page-reference -->
+  </div>
+</div>
+
 
 <!--       JAVASCRIPT       -->
 <!-- Leaflet loaded here (bottom of body) so DOM exists and CDN has time to resolve -->
