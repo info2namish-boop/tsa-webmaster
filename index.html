@@ -3069,16 +3069,6 @@ window.switchPage = function(page) {
 };
 
 
-</script>
-<!-- ═══════════════════════════════════════════════════════════
-     APEX AI CHATBOT (Gemini Free API)
-     
-     SETUP — takes 2 minutes:
-     1. Go to https://aistudio.google.com/app/apikey
-     2. Sign in with a free Google account
-     3. Click "Create API Key"
-     ═══════════════════════════════════════════════════════════ -->
-
 <style>
 #apex-chat-fab {
   position: fixed; bottom: 24px; right: 24px; z-index: 8000;
@@ -3268,7 +3258,10 @@ window.switchPage = function(page) {
   const GEMINI_API_KEY = 'AIzaSyAvQ6QmU4scpaFeXwV3CGaRBQcRxjFi2y0';
   // ══════════════════════════════════════════════════
 
-  const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+  // URL is built lazily inside getBotReply so it always uses the current key value
+  function getGeminiURL() {
+    return `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+  }
 
   // Build resource list string dynamically from the site's own data
   function buildResourceContext() {
@@ -3279,7 +3272,7 @@ window.switchPage = function(page) {
   }
 
   function buildSystemPrompt() {
-    return `You are Summit, a warm and knowledgeable community guide for The Apex Resource Hub — a free directory of local nonprofits, services, and events in Apex, North Carolina.
+    return `You are Summit, a warm and knowledgeable community guide for The Apex Resource Hub - a free directory of local nonprofits, services, and events in Apex, North Carolina.
 
 Your goals:
 1. Answer questions about Apex community resources helpfully and accurately.
@@ -3294,7 +3287,7 @@ ${buildResourceContext()}
 Rules:
 - Only reference Apex, NC. If asked about elsewhere, gently redirect.
 - Never invent resources not in the list above.
-- For urgent needs (food emergency, housing crisis) prioritise the most immediately helpful resource.`;
+- For urgent needs (food emergency, housing crisis) prioritize the most immediately helpful resource.`;
   }
 
   // ── State ──
@@ -3309,7 +3302,7 @@ Rules:
     document.getElementById('apex-chat-panel').classList.toggle('open', chatOpen);
     if (chatOpen && chatHistory.length === 0) {
       setTimeout(() => addBotMessage(
-        "👋 Hi! I'm your Apex community assistant. I can help you find local resources for food, housing, health, youth programs, senior services, and more.\n\nWhat do you need today?", []
+        "👋 Hi! I'm Summit, your Apex community assistant. I can help you find local resources for food, housing, health, youth programs, senior services, and more.\n\nWhat do you need today?", []
       ), 300);
     }
     if (chatOpen) setTimeout(() => document.getElementById('chat-input').focus(), 350);
@@ -3322,8 +3315,11 @@ Rules:
   };
 
   window.chipAsk = function (text) {
-    document.getElementById('chat-input').value = text;
-    sendChat();
+    const input = document.getElementById('chat-input');
+    input.value = text;
+    autoGrow(input);
+    // Small delay so any in-flight state settles before sending
+    setTimeout(() => sendChat(), 30);
   };
 
   window.sendChat = async function () {
@@ -3360,7 +3356,7 @@ Rules:
     scrollBottom();
   }
 
-  function addBotMessage(text, resourceIds) {
+  function addBotMessage(text, resourceIds = []) {
     const msgs = document.getElementById('chat-messages');
     const div  = document.createElement('div');
     div.className = 'msg bot';
@@ -3431,17 +3427,18 @@ Rules:
     };
 
     try {
-      const res  = await fetch(GEMINI_URL, {
+      const res  = await fetch(getGeminiURL(), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
       });
 
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        // Handle quota / auth errors clearly
-        if (res.status === 400) throw new Error('invalid_key');
+        const errBody = await res.json().catch(() => ({}));
+        // 403 = invalid/missing API key, 429 = quota exceeded, 400 = bad request body
+        if (res.status === 403) throw new Error('invalid_key');
         if (res.status === 429) throw new Error('quota');
+        if (res.status === 400) throw new Error('bad_request');
         throw new Error('api_error');
       }
 
@@ -3468,13 +3465,15 @@ Rules:
         addBotMessage("⚠️ Your API key doesn't seem to be valid. Double-check the key you pasted from https://aistudio.google.com/app/apikey", []);
       } else if (err.message === 'quota') {
         addBotMessage("⚠️ Daily request limit reached. The free Gemini tier allows 1,500 requests/day — try again tomorrow, or check your Google AI Studio quota.", []);
+      } else if (err.message === 'bad_request') {
+        addBotMessage("⚠️ There was a problem with the request format. Please refresh the page and try again.", []);
       } else {
         addBotMessage("I'm having trouble connecting right now. Check your internet connection and try again. You can also browse resources directly in the Resource Hub!", []);
       }
+    } finally {
+      isTyping = false;
+      document.getElementById('chat-send-btn').disabled = false;
     }
-
-    isTyping = false;
-    document.getElementById('chat-send-btn').disabled = false;
   }
 
   // ── Helpers ──
@@ -3483,17 +3482,22 @@ Rules:
   }
   function formatText(s) {
     return escHtml(s)
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*([^*]+)\*/g, '<em>$1</em>')
       .replace(/\n/g, '<br>');
   }
 
-  // Close on Escape
+  // Close on Escape — only if no other modal is currently open
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && chatOpen) toggleChat();
+    if (e.key === 'Escape' && chatOpen) {
+      const anyModalOpen = document.querySelector('.modal-overlay.open, .hero-map-panel.open');
+      if (!anyModalOpen) toggleChat();
+    }
   });
 
 })();
 </script>
 <!-- ═════════════════════════════════════ END CHATBOT ══ -->
+
 </body>
 </html>
