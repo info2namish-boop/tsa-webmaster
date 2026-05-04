@@ -817,6 +817,7 @@
       </div>
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
         <button class="btn-secondary" onclick="closeModal()">Close</button>
+        <button id="m-spotlight-btn" class="btn-primary" style="display:none;box-shadow:0 6px 20px rgba(224,145,10,.3)">⭐ Spotlight</button>
         <button id="m-delete-btn" class="btn-primary" style="display:none;background:linear-gradient(135deg,#e74c3c,#c0392b);box-shadow:0 6px 20px rgba(231,76,60,.3)">🗑 Delete Resource</button>
       </div>
     </div>
@@ -1454,146 +1455,146 @@ const CAT_BG = {
 // ============================================================
 // RESOURCE DATA
 // Hardcoded base resources that ship with the site.
-// spotlight:true makes a resource eligible for the daily
+// spotlightEligible:true makes a resource eligible for the daily
 // spotlight rotation. img URLs fall back to the CSS gradient
 // banner if they fail or are left null.
 // ============================================================
 
 const BASE_RESOURCES = [
-  { id:1,  spotlight:true,
+  { id:1,  spotlightEligible:true,
     name:"NeighborUp (Western Wake Crisis Ministry)",   category:"Food & Hunger",
     desc:"NeighborUp provides financial and food assistance to Apex, Holly Springs, Fuquay-Varina, Cary and surrounding residents. Walk-ins welcome. Information, advocacy, and referral services also available.",
     address:"1600 Olive Chapel Rd, Suite 408, Apex, NC 27502", phone:"(919) 362-6282", website:"neighborup.org",
     hours:"Mon–Fri 9am–12pm, 1pm–4pm", img:"https://neighborup.org/wp-content/uploads/Banner-1-1.png",
     lat:35.7281, lng:-78.8632, engageType:"walkIn", availDays:["Mon","Tue","Wed","Thu","Fri"], openTime:"09:00", closeTime:"16:00" },
 
-  { id:2,  spotlight:true,
+  { id:2,  spotlightEligible:true,
     name:"Halle Cultural Arts Center",                  category:"Arts & Culture",
     desc:"Apex's premier arts venue hosting live performances, art galleries, community exhibits, and creative programs for all ages. The Halle brings culture and creativity to the heart of downtown Apex.",
     address:"237 N Salem St, Apex, NC 27502", phone:"(919) 249-3703", website:"apexnc.org/halle",
     hours:"Tue–Sat 10am–5pm, Sun 1pm–5pm", img:"https://apexnc.org/ImageRepository/Document?documentID=31774",
     lat:35.7321, lng:-78.8502, engageType:"in-person", availDays:["Tue","Wed","Thu","Fri","Sat","Sun"], openTime:"10:00", closeTime:"17:00" },
 
-  { id:3,  spotlight:true,
+  { id:3,  spotlightEligible:true,
     name:"Apex Community Park",                         category:"Recreation",
     desc:"A 162-acre community park featuring athletic fields, trails, a lake, playgrounds, and picnic shelters. Host to countless community events including Peakfest and summer concerts.",
     address:"2200 Laura Duncan Rd, Apex, NC 27502", phone:"(919) 249-3300", website:"apexnc.org/parks",
     hours:"Daily dawn–dusk", img:"https://www.apexnc.org/ImageRepository/Document?documentID=1290",
     lat:35.7204, lng:-78.8419, engageType:"in-person", availDays:["Mon","Tue","Wed","Thu","Fri","Sat","Sun"], openTime:"07:00", closeTime:"21:00" },
 
-  { id:4,
+  { id:4,  spotlightEligible:true,
     name:"White Oak Foundation",                        category:"Housing",
     desc:"Dedicated to preventing foreclosures, promoting education, ensuring food security, providing scholarships, and offering crisis assistance to families across the community.",
     address:"1624 White Oak Church Rd, Apex, NC 27502", phone:"(919) 888-2100", website:"wofnc.org",
     hours:"Mon–Fri 9am–5pm", img:"https://static.wixstatic.com/media/899dd5_239d675329d14618b692cfce3270e6e9~mv2.jpg/v1/fill/w_2193,h_886,al_c,q_85,enc_avif,quality_auto/899dd5_239d675329d14618b692cfce3270e6e9~mv2.jpg",
     lat:35.7095, lng:-78.8705, engageType:"walkIn", availDays:["Mon","Tue","Wed","Thu","Fri"], openTime:"09:00", closeTime:"17:00" },
 
-  { id:5,
+  { id:5,  spotlightEligible:true,
     name:"Apex Immigration Services",                   category:"Immigration",
     desc:"Helping immigrants and refugees build better lives by providing low-cost immigration legal services, immigrant rights information, and a comprehensive referral network.",
     address:"203 E Moore St, Apex, NC 27502", phone:"(919) 367-9014", website:"apeximm.org",
     hours:"Mon–Thu 9am–4pm", img:"https://www.apeximm.org/wp-content/uploads/2018/05/1.jpg",
     lat:35.7315, lng:-78.8480, engageType:"in-person", availDays:["Mon","Tue","Wed","Thu"], openTime:"09:00", closeTime:"16:00" },
 
-  { id:6,
+  { id:6,  spotlightEligible:true,
     name:"Habitat for Humanity ReStore",                category:"Housing",
     desc:"Sells donated furniture, appliances, and building materials at a fraction of retail cost. Proceeds support Habitat's mission of building affordable housing in Wake County.",
     address:"826 E Williams St, Apex, NC 27502", phone:"(919) 803-4040", website:"habitatwake.org",
     hours:"Mon–Sat 10am–5pm", img:"https://www.trianglerestores.org/sites/default/files/styles/tile/public/2017-11/HuthPhoto-Apex-KAH_2047.jpg?h=2e3eca71&itok=-GKcuZzu",
     lat:35.7284, lng:-78.8439, engageType:"in-person", availDays:["Mon","Tue","Wed","Thu","Fri","Sat"], openTime:"10:00", closeTime:"17:00" },
 
-  { id:7,
+  { id:7,  spotlightEligible:true,
     name:"Meals on Wheels of Wake County",              category:"Seniors",
     desc:"Delivers nutritious noon-time meals every weekday to elderly, homebound, and disabled Wake County residents. Volunteers always welcome.",
     address:"Wake County Service Area (Apex pickup available)", phone:"(919) 833-1999", website:"meals-on-wheelswake.org",
     hours:"Mon–Fri delivery 10:30am–1:30pm", img:"https://www.wakemow.org/sites/wakemow/files/styles/internal_page_header/public/2025-09/Meals%20on%20Wheels%20-%20Client%20or%20Volunteer%201_0.jpg?h=2e5fd910&itok=cGLsi4fn",
     lat:35.7300, lng:-78.8580, engageType:"in-person", availDays:["Mon","Tue","Wed","Thu","Fri"], openTime:"10:30", closeTime:"13:30" },
 
-  { id:8,
+  { id:8,  spotlightEligible:true,
     name:"Camp G.R.A.C.E.",                            category:"Youth",
     desc:"A developmentally appropriate summer day camp for children with autism, providing a safe, nurturing environment where campers learn, play, and thrive with specialized support.",
     address:"Apex, NC 27502", phone:"(919) 249-3300", website:"apexnc.org/campgrace",
     hours:"Summer sessions (June–August)", img:"https://thecampgrace.com/images/2017/12/lakes-1.jpg",
     lat:35.7265, lng:-78.8560, engageType:"in-person", availDays:["Mon","Tue","Wed","Thu","Fri"], openTime:"08:00", closeTime:"17:00" },
 
-  { id:9,
+  { id:9,  spotlightEligible:true,
     name:"American Red Cross — Triangle",               category:"Health",
     desc:"Provides disaster relief, emergency blood supply, and health and safety training. Blood drives held regularly at locations throughout Apex and Wake County.",
     address:"Multiple Apex & Triangle locations", phone:"(919) 231-1602", website:"redcross.org",
     hours:"Blood drives vary; 24/7 disaster hotline", img:"https://www.redcross.org/content/dam/redcross/imported-images/714x410-MO-TXGC-Tropical-Storm-Harvey.jpg.transform/1288/q82/feature/image.jpeg",
     lat:35.7330, lng:-78.8510, engageType:"both", availDays:["Mon","Tue","Wed","Thu","Fri","Sat"], openTime:"08:00", closeTime:"17:00" },
 
-  { id:10,
+  { id:10,  spotlightEligible:true,
     name:"Note in the Pocket",                          category:"Education",
     desc:"Provides new clothing to children in need across North Carolina, ensuring every child feels confident and ready to learn — removing a key barrier to thriving in school.",
     address:"Wake County Service Area", phone:"(919) 371-1882", website:"noteinthepocket.org",
     hours:"Mon–Fri 9am–5pm", img:"https://noteinthepocket.org/wp-content/uploads/2023/04/kids-clothing-min.jpg",
     lat:35.7250, lng:-78.8600, engageType:"both", availDays:["Mon","Tue","Wed","Thu","Fri"], openTime:"09:00", closeTime:"17:00" },
 
-  { id:11,
+  { id:11,  spotlightEligible:true,
     name:"Apex Youth Council",                          category:"Youth",
     desc:"A student-run organization for local middle and high schoolers that enhances the community through leadership, service, and event planning. Applications open each August.",
     address:"Apex, NC 27502", phone:"(919) 249-3300", website:"apexnc.org/youthcouncil",
     hours:"Meets monthly; programs vary", img:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRHH4ExZQ0_BU5ItF44b4VounI9woj0oBrEmw&s",
     lat:35.7305, lng:-78.8495, engageType:"both", availDays:["Mon","Tue","Wed","Thu","Fri","Sat"], openTime:"09:00", closeTime:"18:00" },
 
-  { id:12,
+  { id:12,  spotlightEligible:true,
     name:"Connecting Community",                        category:"Volunteer",
     desc:"Hosts engaging events connecting underserved community members with local agencies and resources. Volunteers help at multiple events throughout the year.",
     address:"Apex, NC (multiple event locations)", phone:"(919) 249-3300", website:"apexnc.org/volunteering",
     hours:"Events throughout the year", img:"https://i0.wp.com/connectingcommunitync.org/wp-content/uploads/2023/11/cconecting.png?fit=354%2C292",
     lat:35.7275, lng:-78.8555, engageType:"in-person", availDays:["Mon","Tue","Wed","Thu","Fri","Sat"], openTime:"09:00", closeTime:"17:00" },
 
-  { id:13,
+  { id:13,  spotlightEligible:true,
     name:"EarthFest Apex",                              category:"Environment",
     desc:"Annual Earth Day celebration featuring environmental education, live music, food, and family activities. Promotes sustainability and conservation in the Apex community.",
     address:"Apex Community Park, 2200 Laura Duncan Rd", phone:"(919) 249-3300", website:"apexnc.org/earthfest",
     hours:"Annual event (April)", img:"https://apexnc.org/ImageRepository/Document?documentID=53970",
     lat:35.7204, lng:-78.8419, engageType:"in-person", availDays:["Mon","Tue","Wed","Thu","Fri","Sat","Sun"], openTime:"07:00", closeTime:"21:00" },
 
-  { id:14,
+  { id:14,  spotlightEligible:true,
     name:"Olde Fashioned 4th of July",                 category:"Recreation",
     desc:"Apex's beloved Independence Day celebration with live entertainment, food vendors, family activities, and a fireworks show over Apex Community Park. A town tradition since the 1980s.",
     address:"Apex Community Park, 2200 Laura Duncan Rd", phone:"(919) 249-3300", website:"apexnc.org/4thofjuly",
     hours:"Annual event (July 4th)", img:"https://apexnc.org/ImageRepository/Document?documentID=53880",
     lat:35.7204, lng:-78.8419, engageType:"in-person", availDays:["Mon","Tue","Wed","Thu","Fri","Sat","Sun"], openTime:"07:00", closeTime:"21:00" },
 
-  { id:15,
+  { id:15,  spotlightEligible:true,
     name:"Guardian Angel Thrift Store",                 category:"Food & Hunger",
     desc:"A nonprofit thrift store raising funds to support local families. Accepts gently used donations and offers affordable clothing, household items, and furniture.",
     address:"Apex, NC 27502", phone:"(919) 303-1000", website:"guardianangelnc.org",
     hours:"Mon–Sat 10am–6pm", img:"https://images.squarespace-cdn.com/content/v1/65fdac0e3515ee09ce0b8194/7b3f209a-dee1-4e9d-9b17-c6312034911b/test.jpg?format=1500w",
     lat:35.7268, lng:-78.8590, engageType:"in-person", availDays:["Mon","Tue","Wed","Thu","Fri","Sat"], openTime:"10:00", closeTime:"18:00" },
 
-  { id:16,
+  { id:16,  spotlightEligible:true,
     name:"Give the Gift of Swim",                       category:"Youth",
     desc:"Provides free or reduced-cost swim lessons to underserved children in Apex, building life-saving aquatic skills and breaking down financial barriers.",
     address:"Apex Area Aquatic Centers", phone:"(919) 249-3300", website:"apexnc.org/swim",
     hours:"Summer sessions; apply in spring", img:"https://cdn1.sportngin.com/attachments/text_block/155f-153847675/thumbnail_IMG_4456_large.jpg",
     lat:35.7260, lng:-78.8480, engageType:"in-person", availDays:["Mon","Tue","Wed","Thu","Fri"], openTime:"09:00", closeTime:"17:00" },
 
-  { id:17,
+  { id:17,  spotlightEligible:true,
     name:"Apex Turkey Trot 5K",                         category:"Recreation",
     desc:"Annual Thanksgiving morning run/walk through scenic Apex streets benefiting local charities. Open to all ages and fitness levels — a beloved community tradition.",
     address:"Downtown Apex, NC 27502", phone:"(919) 249-3300", website:"apexnc.org/turkeytrot",
     hours:"Annual event (Thanksgiving morning)", img:"https://exploreapexnc.com/wp-content/uploads/2024/05/IMG_7253-scaled.jpg",
     lat:35.7320, lng:-78.8500, engageType:"in-person", availDays:["Thu"], openTime:"07:00", closeTime:"12:00" },
 
-  { id:18,
+  { id:18,  spotlightEligible:true,
     name:"Peakfest",                                    category:"Arts & Culture",
     desc:"Apex's signature downtown street festival celebrating the Piedmont region with live music, local art, food vendors, and family activities each spring in historic downtown Apex.",
     address:"Downtown Apex, Salem St, Apex, NC 27502", phone:"(919) 249-3300", website:"apexnc.org/peakfest",
     hours:"Annual (Spring Saturday, 9am–5pm)", img:"https://static.wixstatic.com/media/9e159c_2becbfd6ddbe4e97ac95d7c7e93a1994~mv2.jpg/v1/fill/w_1004,h_1108,al_c,q_85,enc_avif,quality_auto/9e159c_2becbfd6ddbe4e97ac95d7c7e93a1994~mv2.jpg",
     lat:35.7325, lng:-78.8495, engageType:"in-person", availDays:["Sat"], openTime:"09:00", closeTime:"17:00" },
 
-  { id:19,
+  { id:19,  spotlightEligible:true,
     name:"Apex Senior Center",                          category:"Seniors",
     desc:"Offers fitness classes, social programs, day trips, health screenings, and enrichment for adults 55+. A welcoming hub for older adults to connect and stay active.",
     address:"68 Hunter St, Apex, NC 27502", phone:"(919) 249-3494", website:"apexnc.org/seniors",
     hours:"Mon–Fri 8am–5pm", img:"https://www.apexnc.org/ImageRepository/Document?documentID=37233",
     lat:35.7335, lng:-78.8485, engageType:"in-person", availDays:["Mon","Tue","Wed","Thu","Fri"], openTime:"08:00", closeTime:"17:00" },
 
-  { id:20,
+  { id:20,  spotlightEligible:true,
     name:"Think Apex Day",                              category:"Volunteer",
     desc:"Annual community service day (last Saturday in April) where Apex residents volunteer together at parks, nonprofits, and neighborhoods. Everyone welcome — individual or group sign-ups.",
     address:"Multiple Apex locations", phone:"(919) 249-1122", website:"apexnc.org/thinkapex",
@@ -1623,6 +1624,10 @@ let heroLaunchMap = null;
 let pendingHubJump  = null;
 let isAdmin         = false;
 let pendingDeleteId = null;
+let spotlightOverrides = (() => {
+  try { return JSON.parse(localStorage.getItem('apex-spotlight-overrides') || '{}'); }
+  catch { return {}; }
+})();
 
 let surveyAnswers = { who:null, need:[], engage:null, time:null };
 let currentStep   = 1;
@@ -1971,7 +1976,11 @@ function renderFloatCards() {
 
 function renderSpotlight() {
   const grid  = document.getElementById('spotlight-grid');
-  const spots = getDailyPicks('apex-spotlight', BASE_RESOURCES, 3);
+  const pool  = BASE_RESOURCES.filter(r => {
+    const overridden = spotlightOverrides.hasOwnProperty(r.id) ? spotlightOverrides[r.id] : r.spotlightEligible;
+    return overridden !== false;
+  });
+  const spots = getDailyPicks('apex-spotlight', pool, Math.min(3, pool.length));
   grid.innerHTML = spots.map((r, i) => {
     const c  = CATS[r.category];
     const bg = CAT_BG[r.category] || 'linear-gradient(135deg,#1d4e89,#00b2ca)';
@@ -2000,7 +2009,6 @@ function renderSpotlight() {
   }).join('');
   setupReveal();
 }
-
 
 // ============================================================
 // CATEGORY QUICK NAV
@@ -2546,6 +2554,29 @@ function openModal(id) {
   if (delBtn) {
     delBtn.style.display = isAdmin ? 'inline-flex' : 'none';
     delBtn.onclick       = () => adminDeleteResource(r.id);
+  }
+
+  const spotBtn = document.getElementById('m-spotlight-btn');
+  if (spotBtn) {
+    const isBase = BASE_RESOURCES.some(x => x.id === r.id);
+    if (isAdmin && isBase) {
+      const current = spotlightOverrides.hasOwnProperty(r.id) ? spotlightOverrides[r.id] : r.spotlightEligible;
+      spotBtn.style.display  = 'inline-flex';
+      spotBtn.textContent    = current ? '⭐ Remove from Spotlight' : '⭐ Add to Spotlight';
+      spotBtn.style.background = current
+        ? 'linear-gradient(135deg,#e0910a,#f0a820)'
+        : 'linear-gradient(135deg,#27ae60,#2ecc71)';
+      spotBtn.onclick = () => {
+        spotlightOverrides[r.id] = !current;
+        localStorage.setItem('apex-spotlight-overrides', JSON.stringify(spotlightOverrides));
+        localStorage.removeItem('apex-spotlight'); // force spotlight to re-pick
+        renderSpotlight();
+        closeModal();
+        showToast(spotlightOverrides[r.id] ? '⭐ Added to spotlight pool' : '⭐ Removed from spotlight pool');
+      };
+    } else {
+      spotBtn.style.display = 'none';
+    }
   }
 
   document.getElementById('resource-modal').classList.add('open');
