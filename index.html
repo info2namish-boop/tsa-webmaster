@@ -3067,8 +3067,18 @@ window.switchPage = function(page) {
   const activeDraw = document.getElementById('mob-nav-' + page);
   if (activeDraw) activeDraw.classList.add('active');
 };
+  const activeDraw = document.getElementById('mob-nav-' + page);
+  if (activeDraw) activeDraw.classList.add('active');
+};
 
-<script>
+
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SUMMIT CHATBOT (Gemini Free API)
+     Get a free key at: https://aistudio.google.com/app/apikey
+═══════════════════════════════════════════════════════════ -->
+
 <style>
 #apex-chat-fab {
   position: fixed; bottom: 24px; right: 24px; z-index: 8000;
@@ -3088,7 +3098,6 @@ window.switchPage = function(page) {
   0%,100% { box-shadow: 0 8px 32px rgba(29,78,137,.35), 0 0 0 0 rgba(0,178,202,.3); }
   50%      { box-shadow: 0 8px 32px rgba(29,78,137,.35), 0 0 0 10px rgba(0,178,202,0); }
 }
-
 #apex-chat-panel {
   position: fixed; bottom: 96px; right: 24px; z-index: 7999;
   width: min(390px, calc(100vw - 32px));
@@ -3101,7 +3110,6 @@ window.switchPage = function(page) {
   border: 1.5px solid rgba(0,178,202,.15);
 }
 #apex-chat-panel.open { opacity: 1; transform: translateY(0) scale(1); pointer-events: all; }
-
 .chat-header {
   background: linear-gradient(135deg, var(--navy) 0%, #2a6db5 100%);
   padding: 16px 18px 14px; flex-shrink: 0;
@@ -3114,7 +3122,7 @@ window.switchPage = function(page) {
   border: 1.5px solid rgba(255,255,255,.3);
 }
 .chat-header-info { flex: 1; min-width: 0; }
-.chat-header-name  { font-weight: 800; font-size: 14px; color: white; }
+.chat-header-name   { font-weight: 800; font-size: 14px; color: white; }
 .chat-header-status { font-size: 11px; color: rgba(255,255,255,.7); display: flex; align-items: center; gap: 5px; margin-top: 2px; }
 .status-dot { width: 7px; height: 7px; background: #2ecc71; border-radius: 50%; flex-shrink: 0; animation: blink 2s ease-in-out infinite; }
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.4} }
@@ -3125,7 +3133,6 @@ window.switchPage = function(page) {
   transition: background .2s;
 }
 .chat-clear-btn:hover { background: rgba(255,255,255,.22); }
-
 .chat-chips {
   padding: 10px 14px 6px; display: flex; gap: 7px; flex-wrap: wrap;
   border-bottom: 1px solid rgba(29,78,137,.07); flex-shrink: 0;
@@ -3138,7 +3145,6 @@ window.switchPage = function(page) {
   color: var(--navy); cursor: pointer; transition: all .18s; white-space: nowrap;
 }
 .chat-chip:hover { background: rgba(0,178,202,.08); border-color: var(--sky); color: var(--sky); transform: translateY(-1px); }
-
 #chat-messages {
   flex: 1; overflow-y: auto; padding: 14px 14px 8px;
   display: flex; flex-direction: column; gap: 10px;
@@ -3155,7 +3161,6 @@ window.switchPage = function(page) {
 .msg.bot  .msg-bubble { background: var(--offwhite); color: var(--text); border-bottom-left-radius: 4px; border: 1px solid rgba(29,78,137,.07); }
 .msg.user .msg-bubble { background: linear-gradient(135deg,var(--sky),var(--navy)); color: white; border-bottom-right-radius: 4px; }
 .msg-avatar { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg,var(--sky),var(--navy)); display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
-
 .chat-resource-cards { display: flex; flex-direction: column; gap: 7px; margin-top: 6px; }
 .chat-rc {
   background: white; border-radius: 12px; padding: 10px 12px;
@@ -3167,7 +3172,6 @@ window.switchPage = function(page) {
 .chat-rc-info { min-width: 0; }
 .chat-rc-name { font-weight: 800; font-size: 12px; color: var(--navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .chat-rc-cat  { font-size: 11px; color: var(--sky); font-weight: 700; margin-top: 1px; }
-
 .typing-indicator {
   display: flex; gap: 4px; align-items: center; padding: 10px 14px;
   background: var(--offwhite); border-radius: 18px; border-bottom-left-radius: 4px;
@@ -3177,7 +3181,6 @@ window.switchPage = function(page) {
 .typing-dot:nth-child(2) { animation-delay: .2s; }
 .typing-dot:nth-child(3) { animation-delay: .4s; }
 @keyframes typingBounce { 0%,100%{transform:translateY(0);opacity:.4} 50%{transform:translateY(-5px);opacity:1} }
-
 .chat-input-wrap {
   padding: 10px 12px 12px; border-top: 1px solid rgba(29,78,137,.08);
   background: white; flex-shrink: 0; display: flex; gap: 8px; align-items: flex-end;
@@ -3201,14 +3204,13 @@ window.switchPage = function(page) {
 #chat-send-btn:active { transform: scale(.95); }
 #chat-send-btn svg { width: 16px; height: 16px; fill: white; }
 #chat-send-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
-
 @media (max-width: 768px) {
   #apex-chat-fab   { bottom: 80px; right: 16px; }
   #apex-chat-panel { bottom: 152px; right: 12px; width: calc(100vw - 24px); height: calc(100vh - 200px); }
 }
 </style>
 
-<!-- FAB -->
+<!-- FAB button -->
 <button id="apex-chat-fab" onclick="toggleChat()" aria-label="Open community assistant">
   <span class="fab-open">
     <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 10H6V10h12v2zm0-3H6V7h12v2z"/></svg>
@@ -3216,17 +3218,16 @@ window.switchPage = function(page) {
   <span class="fab-close">✕</span>
 </button>
 
-<!-- Panel -->
+<!-- Chat panel -->
 <div id="apex-chat-panel">
   <div class="chat-header">
     <div class="chat-avatar">🤖</div>
     <div class="chat-header-info">
       <div class="chat-header-name">Summit, your Apex Assistant</div>
-      <div class="chat-header-status"><span class="status-dot"></span>Online - ask me anything</div>
+      <div class="chat-header-status"><span class="status-dot"></span>Online — ask me anything</div>
     </div>
     <button class="chat-clear-btn" onclick="clearChat()" title="Clear chat">🗑</button>
   </div>
-
   <div class="chat-chips">
     <button class="chat-chip" onclick="chipAsk('I need food assistance')">🥫 Food help</button>
     <button class="chat-chip" onclick="chipAsk('Housing resources near Apex')">🏠 Housing</button>
@@ -3236,9 +3237,7 @@ window.switchPage = function(page) {
     <button class="chat-chip" onclick="chipAsk('Senior services in Apex')">👵 Seniors</button>
     <button class="chat-chip" onclick="chipAsk('What resources are available on weekends?')">📅 Weekends</button>
   </div>
-
   <div id="chat-messages"></div>
-
   <div class="chat-input-wrap">
     <textarea id="chat-input" placeholder="Ask about Apex resources…" rows="1"
       onkeydown="chatKeydown(event)" oninput="autoGrow(this)"></textarea>
@@ -3251,19 +3250,12 @@ window.switchPage = function(page) {
 <script>
 (function () {
 
-  // ══════════════════════════════════════════════════
-  //  🔑  PASTE YOUR GEMINI API KEY HERE
-  //  Get one free at: https://aistudio.google.com/app/apikey
-  // ══════════════════════════════════════════════════
   const GEMINI_API_KEY = 'AIzaSyAvQ6QmU4scpaFeXwV3CGaRBQcRxjFi2y0';
-  // ══════════════════════════════════════════════════
 
-  // URL is built lazily inside getBotReply so it always uses the current key value
   function getGeminiURL() {
     return `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
   }
 
-  // Build resource list string dynamically from the site's own data
   function buildResourceContext() {
     const all = typeof getAllResources === 'function' ? getAllResources() : [];
     return all.map(r =>
@@ -3272,7 +3264,7 @@ window.switchPage = function(page) {
   }
 
   function buildSystemPrompt() {
-    return `You are Summit, a warm and knowledgeable community guide for The Apex Resource Hub - a free directory of local nonprofits, services, and events in Apex, North Carolina.
+    return `You are Summit, a warm and knowledgeable community guide for The Apex Resource Hub — a free directory of local nonprofits, services, and events in Apex, North Carolina.
 
 Your goals:
 1. Answer questions about Apex community resources helpfully and accurately.
@@ -3290,12 +3282,10 @@ Rules:
 - For urgent needs (food emergency, housing crisis) prioritize the most immediately helpful resource.`;
   }
 
-  // ── State ──
-  let chatHistory = []; // [{role:'user'|'model', parts:[{text:'...'}]}]
+  let chatHistory = [];
   let chatOpen    = false;
   let isTyping    = false;
 
-  // ── Toggle ──
   window.toggleChat = function () {
     chatOpen = !chatOpen;
     document.getElementById('apex-chat-fab').classList.toggle('open', chatOpen);
@@ -3318,13 +3308,12 @@ Rules:
     const input = document.getElementById('chat-input');
     input.value = text;
     autoGrow(input);
-    // Small delay so any in-flight state settles before sending
     setTimeout(() => sendChat(), 30);
   };
 
   window.sendChat = async function () {
     if (GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY_HERE') {
-      addBotMessage("⚠️ No API key set yet! Open the HTML file, find GEMINI_API_KEY near the bottom, and paste in your free key from https://aistudio.google.com/app/apikey", []);
+      addBotMessage("⚠️ No API key set yet! Open the HTML file, find GEMINI_API_KEY, and paste in your free key from https://aistudio.google.com/app/apikey", []);
       return;
     }
     const input = document.getElementById('chat-input');
@@ -3346,7 +3335,6 @@ Rules:
     el.style.height = Math.min(el.scrollHeight, 90) + 'px';
   };
 
-  // ── Render ──
   function addUserMessage(text) {
     const msgs = document.getElementById('chat-messages');
     const div  = document.createElement('div');
@@ -3408,34 +3396,25 @@ Rules:
     requestAnimationFrame(() => { msgs.scrollTop = msgs.scrollHeight; });
   }
 
-  // ── Gemini API call ──
   async function getBotReply() {
     isTyping = true;
     document.getElementById('chat-send-btn').disabled = true;
     showTyping();
 
-    // Keep last 10 turns to stay within context limits
-    const recentHistory = chatHistory.slice(-10);
-
     const body = {
       system_instruction: { parts: [{ text: buildSystemPrompt() }] },
-      contents: recentHistory,
-      generationConfig: {
-        temperature: 0.7,
-        maxOutputTokens: 600
-      }
+      contents: chatHistory.slice(-10),
+      generationConfig: { temperature: 0.7, maxOutputTokens: 600 }
     };
 
     try {
-      const res  = await fetch(getGeminiURL(), {
+      const res = await fetch(getGeminiURL(), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
       });
 
       if (!res.ok) {
-        const errBody = await res.json().catch(() => ({}));
-        // 403 = invalid/missing API key, 429 = quota exceeded, 400 = bad request body
         if (res.status === 403) throw new Error('invalid_key');
         if (res.status === 429) throw new Error('quota');
         if (res.status === 400) throw new Error('bad_request');
@@ -3446,7 +3425,6 @@ Rules:
       const raw  = data.candidates?.[0]?.content?.parts?.[0]?.text
                    || "I couldn't get a response — please try again!";
 
-      // Extract resource IDs
       let replyText   = raw;
       let resourceIds = [];
       const match = raw.match(/RESOURCES_JSON:\[([^\]]*)\]/);
@@ -3461,25 +3439,20 @@ Rules:
 
     } catch (err) {
       removeTyping();
-      if (err.message === 'invalid_key') {
-        addBotMessage("⚠️ Your API key doesn't seem to be valid. Double-check the key you pasted from https://aistudio.google.com/app/apikey", []);
-      } else if (err.message === 'quota') {
-        addBotMessage("⚠️ Daily request limit reached. The free Gemini tier allows 1,500 requests/day — try again tomorrow, or check your Google AI Studio quota.", []);
-      } else if (err.message === 'bad_request') {
-        addBotMessage("⚠️ There was a problem with the request format. Please refresh the page and try again.", []);
-      } else {
-        addBotMessage("I'm having trouble connecting right now. Check your internet connection and try again. You can also browse resources directly in the Resource Hub!", []);
-      }
+      if      (err.message === 'invalid_key') addBotMessage("⚠️ Your API key doesn't seem valid. Double-check the key from https://aistudio.google.com/app/apikey", []);
+      else if (err.message === 'quota')       addBotMessage("⚠️ Daily request limit reached. The free Gemini tier allows 1,500 requests/day — try again tomorrow.", []);
+      else if (err.message === 'bad_request') addBotMessage("⚠️ There was a problem with the request format. Please refresh the page and try again.", []);
+      else                                    addBotMessage("I'm having trouble connecting right now. Check your internet connection and try again!", []);
     } finally {
       isTyping = false;
       document.getElementById('chat-send-btn').disabled = false;
     }
   }
 
-  // ── Helpers ──
   function escHtml(s) {
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
+
   function formatText(s) {
     return escHtml(s)
       .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
@@ -3487,7 +3460,6 @@ Rules:
       .replace(/\n/g, '<br>');
   }
 
-  // Close on Escape — only if no other modal is currently open
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && chatOpen) {
       const anyModalOpen = document.querySelector('.modal-overlay.open, .hero-map-panel.open');
@@ -3497,7 +3469,8 @@ Rules:
 
 })();
 </script>
-<!-- ═════════════════════════════════════ END CHATBOT ══ -->
+<!-- ═════════════════════════════════════ END SUMMIT ══ -->
 
 </body>
 </html>
+
