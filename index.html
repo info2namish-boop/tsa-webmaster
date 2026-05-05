@@ -3253,7 +3253,7 @@ window.switchPage = function(page) {
   <div class="chat-header">
     <div class="chat-avatar">🤖</div>
     <div class="chat-header-info">
-      <div class="chat-header-name">Summit, your Apex Assistant</div>
+      <div class="chat-header-name">Summit, A.R.H's Assistant</div>
       <div class="chat-header-status"><span class="status-dot"></span>Online - ask me anything</div>
     </div>
     <button class="chat-clear-btn" onclick="clearChat()" title="Clear chat">🗑</button>
@@ -3286,7 +3286,7 @@ window.switchPage = function(page) {
   // ══════════════════════════════════════════════════
   //  GEMINI API KEY
   // ══════════════════════════════════════════════════
-  const GEMINI_API_KEY = 'AIzaSyAvQ6QmU4scpaFeXwV3CGaRBQcRxjFi2y0';
+  const GEMINI_API_KEY = 'AIzaSyCRayKY6bIA8LQijK5A1DoV80TmlIrxQr8';
   // ══════════════════════════════════════════════════
 
   // URL is built lazily inside getBotReply so it always uses the current key value
@@ -3333,7 +3333,7 @@ Rules:
     document.getElementById('apex-chat-panel').classList.toggle('open', chatOpen);
     if (chatOpen && chatHistory.length === 0) {
       setTimeout(() => addBotMessage(
-        "👋 Hi! I'm your Apex community assistant. I can help you find local resources for food, housing, health, youth programs, senior services, and more.\n\nWhat do you need today?", []
+        "👋 Hi! I'm Summit, your Apex assistant. I can help you find local resources for food, housing, health, youth programs, senior services, and more.\n\nWhat do you need today?", []
       ), 300);
     }
     if (chatOpen) setTimeout(() => document.getElementById('chat-input').focus(), 350);
