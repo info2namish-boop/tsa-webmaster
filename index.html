@@ -182,7 +182,7 @@
   
   .hero-map-panel { position:fixed; inset:0; z-index:2600; display:none; align-items:center; justify-content:center; background:rgba(13,33,56,.35); backdrop-filter:blur(10px); padding:22px; }
   .hero-map-panel.open { display:flex; animation:fadeIn .28s ease; }
-  .hero-map-panel-card { width:min(1100px,100%); max-height:88vh; overflow:hidden; background:linear-gradient(135deg,rgba(255,255,255,.98),rgba(248,251,255,.98)); border-radius:36px; box-shadow:0 42px 110px rgba(12,32,56,.28); display:grid; grid-template-columns:1.1fr .9fr; position:relative; animation:panelUp .38s cubic-bezier(.4,0,.2,1); }
+  .hero-map-panel-card { width:min(1100px,100%); max-height:88vh; overflow:hidden; background:linear-gradient(135deg,rgba(255,255,255,.98),rgba(248,251,255,.98)); border-radius:36px; box-shadow:0 42px 110px rgba(13,33,56,.28); display:grid; grid-template-columns:1.1fr .9fr; position:relative; animation:panelUp .38s cubic-bezier(.4,0,.2,1); }
   .hero-map-panel-close { position:absolute; top:18px; right:18px; width:40px; height:40px; border:none; border-radius:50%; background:rgba(29,78,137,.08); color:var(--navy); cursor:pointer; font-size:16px; z-index:2; }
   .hero-map-panel-map-wrap { padding:26px; background:linear-gradient(180deg,#eff8ff,#f8fbff); border-right:1px solid rgba(29,78,137,.08); }
   .hero-map-panel-map-shell { height:100%; min-height:500px; border-radius:28px; overflow:hidden; background:linear-gradient(135deg,rgba(0,178,202,.08),rgba(29,78,137,.12)); border:1px solid rgba(0,178,202,.14); box-shadow:inset 0 1px 0 rgba(255,255,255,.7); position:relative; }
@@ -2923,12 +2923,6 @@ window.switchPage = function(page) {
 <script>
 (function () {
 
-  const GEMINI_API_KEY = 'AIzaSyCRayKY6bIA8LQijK5A1DoV80TmlIrxQr8';
-
-  function getGeminiURL() {
-    return `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
-  }
-
   function buildResourceContext() {
     const all = typeof getAllResources === 'function' ? getAllResources() : [];
     return all.map(r =>
@@ -2981,22 +2975,17 @@ Rules:
     const input = document.getElementById('chat-input');
     input.value = text;
     autoGrow(input);
-
     setTimeout(() => sendChat(), 30);
   };
 
   window.sendChat = async function () {
-    if (GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY_HERE') {
-      addBotMessage("⚠️ No API key set yet! Open the HTML file, find GEMINI_API_KEY near the bottom, and paste in your free key from https://aistudio.google.com/app/apikey", []);
-      return;
-    }
     const input = document.getElementById('chat-input');
     const text  = input.value.trim();
     if (!text || isTyping) return;
     input.value = '';
     autoGrow(input);
     addUserMessage(text);
-    chatHistory.push({ role: 'user', parts: [{ text }] });
+    chatHistory.push({ role: 'user', content: text });
     await getBotReply();
   };
 
@@ -3075,36 +3064,33 @@ Rules:
     document.getElementById('chat-send-btn').disabled = true;
     showTyping();
 
-    const recentHistory = chatHistory.slice(-10);
-
-    const body = {
-      system_instruction: { parts: [{ text: buildSystemPrompt() }] },
-      contents: recentHistory,
-      generationConfig: {
-        temperature: 0.7,
-        maxOutputTokens: 600
-      }
-    };
+    const messages = chatHistory.slice(-20).map(m => ({
+      role: m.role === 'assistant' ? 'assistant' : 'user',
+      content: m.content
+    }));
 
     try {
-      const res  = await fetch(getGeminiURL(), {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1000,
+          system: buildSystemPrompt(),
+          messages
+        })
       });
 
-      if (!res.ok) {
-        const errBody = await res.json().catch(() => ({}));
+      const data = await res.json();
 
-        if (res.status === 403) throw new Error('invalid_key');
+      if (!res.ok) {
         if (res.status === 429) throw new Error('quota');
-        if (res.status === 400) throw new Error('bad_request');
+        if (res.status === 401) throw new Error('invalid_key');
         throw new Error('api_error');
       }
 
-      const data = await res.json();
-      const raw  = data.candidates?.[0]?.content?.parts?.[0]?.text
-                   || "I couldn't get a response — please try again!";
+      const raw = data.content?.find(b => b.type === 'text')?.text
+                  || "I couldn't get a response — please try again!";
 
       let replyText   = raw;
       let resourceIds = [];
@@ -3114,20 +3100,18 @@ Rules:
         replyText = raw.replace(/RESOURCES_JSON:\[[^\]]*\]/, '').trim();
       }
 
-      chatHistory.push({ role: 'model', parts: [{ text: raw }] });
+      chatHistory.push({ role: 'assistant', content: raw });
       removeTyping();
       addBotMessage(replyText, resourceIds);
 
     } catch (err) {
       removeTyping();
-      if (err.message === 'invalid_key') {
-        addBotMessage("⚠️ Your API key doesn't seem to be valid. Double-check the key you pasted from https://aistudio.google.com/app/apikey", []);
-      } else if (err.message === 'quota') {
-        addBotMessage("⚠️ Daily request limit reached. The free Gemini tier allows 1,500 requests/day — try again tomorrow, or check your Google AI Studio quota.", []);
-      } else if (err.message === 'bad_request') {
-        addBotMessage("⚠️ There was a problem with the request format. Please refresh the page and try again.", []);
+      if (err.message === 'quota') {
+        addBotMessage("⚠️ Rate limit reached — please wait a moment and try again.", []);
+      } else if (err.message === 'invalid_key') {
+        addBotMessage("⚠️ Authentication error. Please refresh the page and try again.", []);
       } else {
-        addBotMessage("I'm having trouble connecting right now. Check your internet connection and try again. You can also browse resources directly in the Resource Hub!", []);
+        addBotMessage("I'm having trouble connecting right now. Try again in a moment, or browse resources directly in the Resource Hub!", []);
       }
     } finally {
       isTyping = false;
