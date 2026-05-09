@@ -3059,37 +3059,42 @@ Rules:
     requestAnimationFrame(() => { msgs.scrollTop = msgs.scrollHeight; });
   }
 
+  const GEMINI_KEY = 'AIzaSyCRayKY6bIA8LQijK5A1DoV80TmlIrxQr8';
+
   async function getBotReply() {
     isTyping = true;
     document.getElementById('chat-send-btn').disabled = true;
     showTyping();
 
-    const messages = chatHistory.slice(-20).map(m => ({
-      role: m.role === 'assistant' ? 'assistant' : 'user',
-      content: m.content
+    const contents = chatHistory.slice(-20).map(m => ({
+      role: m.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: m.content }]
     }));
 
     try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 1000,
-          system: buildSystemPrompt(),
-          messages
-        })
-      });
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            system_instruction: { parts: [{ text: buildSystemPrompt() }] },
+            contents,
+            generationConfig: { temperature: 0.7, maxOutputTokens: 600 }
+          })
+        }
+      );
 
       const data = await res.json();
 
       if (!res.ok) {
+        if (res.status === 400) throw new Error('bad_request');
         if (res.status === 429) throw new Error('quota');
-        if (res.status === 401) throw new Error('invalid_key');
+        if (res.status === 403) throw new Error('invalid_key');
         throw new Error('api_error');
       }
 
-      const raw = data.content?.find(b => b.type === 'text')?.text
+      const raw = data.candidates?.[0]?.content?.parts?.[0]?.text
                   || "I couldn't get a response — please try again!";
 
       let replyText   = raw;
@@ -3109,7 +3114,9 @@ Rules:
       if (err.message === 'quota') {
         addBotMessage("⚠️ Rate limit reached — please wait a moment and try again.", []);
       } else if (err.message === 'invalid_key') {
-        addBotMessage("⚠️ Authentication error. Please refresh the page and try again.", []);
+        addBotMessage("⚠️ Authentication error. Please refresh and try again.", []);
+      } else if (err.message === 'bad_request') {
+        addBotMessage("⚠️ There was a problem with the request. Please refresh and try again.", []);
       } else {
         addBotMessage("I'm having trouble connecting right now. Try again in a moment, or browse resources directly in the Resource Hub!", []);
       }
