@@ -8,9 +8,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&family=Lobster&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
-  /* ============================================================
-     VARIABLES AND RESETS
-  ============================================================ */
 
   :root {
     --navy:     #1d4e89;
@@ -32,17 +29,7 @@
   html { scroll-behavior: smooth; }
   body { font-family: 'Lato', sans-serif; background: var(--offwhite); color: var(--text); overflow-x: hidden; }
 
-
-  /* ============================================================
-     ANIMATED BACKGROUND CANVAS
-  ============================================================ */
-
   #bg-canvas { position: fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; opacity:.3; }
-
-
-  /* ============================================================
-     NAVBAR
-  ============================================================ */
 
   nav {
     position: fixed; top:0; left:0; right:0; z-index:1000;
@@ -71,10 +58,6 @@
   .nav-links li button:hover,
   .nav-links li button.active { color:var(--navy); background:rgba(0,178,202,.1); }
 
-  /* ============================================================
-     PAGE SYSTEM AND TRANSITIONS
-  ============================================================ */
-
   .page { display:none; min-height:100vh; padding-top:66px; position:relative; z-index:1; }
   .page.active { display:block; animation:pageFadeIn .32s ease; }
   @keyframes pageFadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
@@ -83,18 +66,13 @@
     position:fixed; top:0; left:0; right:0; bottom:0;
     background:linear-gradient(135deg,var(--navy),var(--sky));
     z-index:9999; display:flex; align-items:center; justify-content:center;
-    pointer-events:none; opacity:0;
-    transition:opacity .28s cubic-bezier(.4,0,.2,1);
+    pointer-events:none; opacity:0; transform:scaleX(0); transform-origin:left;
+    transition:opacity .1s, transform .35s cubic-bezier(.77,0,.175,1);
   }
-  .page-transition.in  { opacity:1; pointer-events:all; }
-  .page-transition.out { opacity:0; }
-  .pt-logo { color:white; font-family:'Lobster',serif; font-size:1.8rem; font-weight:900; opacity:0; transition:opacity .2s .12s; transform:translateY(6px); transition:opacity .22s .12s, transform .22s .12s; }
-  .page-transition.in .pt-logo { opacity:1; transform:translateY(0); }
-
-
-  /* ============================================================
-     BUTTONS AND SECTION HELPERS
-  ============================================================ */
+  .page-transition.in  { opacity:1; transform:scaleX(1); }
+  .page-transition.out { opacity:1; transform:scaleX(0); transform-origin:right; }
+  .pt-logo { color:white; font-family:'Lobster',serif; font-size:1.8rem; font-weight:900; opacity:0; transition:opacity .2s .15s; }
+  .page-transition.in .pt-logo { opacity:1; }
 
   .btn-primary {
     font-family:'Lato',sans-serif; font-weight:800; font-size:14px;
@@ -119,11 +97,6 @@
   .section-sub { font-size:15px; color:var(--muted); font-weight:500; max-width:500px; line-height:1.75; }
   .divider { height:1px; background:linear-gradient(90deg,transparent,rgba(0,178,202,.2),transparent); margin:0 48px; }
   .chip { display:inline-flex; align-items:center; gap:4px; padding:4px 11px; border-radius:20px; font-size:11px; font-weight:800; }
-
-
-  /* ============================================================
-     HERO SECTION
-  ============================================================ */
 
   .hero {
     min-height:calc(100vh - 66px); display:flex; align-items:center;
@@ -157,7 +130,7 @@
   .fc-icon { width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0; }
   @keyframes floatUp { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
 
-  /* 3D map scene sitting behind the float cards in the hero visual */
+  
   .hero-map-scene {
     position:absolute; inset:52px; z-index:1; cursor:pointer;
     display:flex; align-items:center; justify-content:center;
@@ -206,7 +179,7 @@
   @keyframes heroMapFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
   @keyframes spinSlow { from{transform:rotate(0)} to{transform:rotate(360deg)} }
 
-  /* Hero map panel (opens when the 3D scene is clicked) */
+  
   .hero-map-panel { position:fixed; inset:0; z-index:2600; display:none; align-items:center; justify-content:center; background:rgba(13,33,56,.35); backdrop-filter:blur(10px); padding:22px; }
   .hero-map-panel.open { display:flex; animation:fadeIn .28s ease; }
   .hero-map-panel-card { width:min(1100px,100%); max-height:88vh; overflow:hidden; background:linear-gradient(135deg,rgba(255,255,255,.98),rgba(248,251,255,.98)); border-radius:36px; box-shadow:0 42px 110px rgba(12,32,56,.28); display:grid; grid-template-columns:1.1fr .9fr; position:relative; animation:panelUp .38s cubic-bezier(.4,0,.2,1); }
@@ -228,11 +201,6 @@
   .hero-map-quick-btn:hover { background:rgba(0,178,202,.16); transform:translateY(-2px); }
   @keyframes panelUp { from{opacity:0; transform:translateY(16px) scale(.97)} to{opacity:1; transform:translateY(0) scale(1)} }
   @keyframes fadeIn  { from{opacity:0} to{opacity:1} }
-
-
-  /* ============================================================
-     HOME PAGE SECTIONS (SPOTLIGHT, ABOUT, CATEGORY QUICK NAV)
-  ============================================================ */
 
   .spotlight-header { display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:48px; flex-wrap:wrap; gap:16px; }
   .spotlight-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:24px; }
@@ -258,21 +226,11 @@
   .feature-chip:hover { border-color:var(--sky); color:var(--sky); transform:translateY(-2px); }
   .feature-chip span { font-size:16px; }
 
-
-  /* ============================================================
-     CARD IMAGE BANNER (CSS-ONLY FALLBACK, NO EXTERNAL IMAGES)
-  ============================================================ */
-
   .card-img-banner { width:100%; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:6px; position:relative; overflow:hidden; flex-shrink:0; }
   .card-img-banner::before { content:''; position:absolute; top:-30%; right:-20%; width:70%; height:140%; border-radius:50%; background:rgba(255,255,255,0.1); }
   .card-img-banner::after  { content:''; position:absolute; bottom:-40%; left:-15%; width:60%; height:130%; border-radius:50%; background:rgba(0,0,0,0.08); }
   .card-img-banner-icon  { font-size:2.6rem; position:relative; z-index:1; filter:drop-shadow(0 2px 8px rgba(0,0,0,0.2)); }
   .card-img-banner-label { font-family:'Lato',sans-serif; font-weight:800; font-size:13px; color:rgba(255,255,255,0.9); text-align:center; position:relative; z-index:1; max-width:80%; line-height:1.3; text-shadow:0 1px 4px rgba(0,0,0,0.2); }
-
-
-  /* ============================================================
-     RESOURCE HUB
-  ============================================================ */
 
   .hub-header { background:linear-gradient(135deg,var(--navy) 0%,#2a6db5 100%); padding:56px 48px 38px; color:white; position:relative; overflow:hidden; }
   .hub-header::before { content:''; position:absolute; width:380px;height:380px;border-radius:50%;background:rgba(255,255,255,.04);top:-100px;right:-80px; }
@@ -321,11 +279,6 @@
   .no-results { grid-column:1/-1; text-align:center; padding:60px 20px; color:var(--muted); }
   .no-results h3 { font-size:1.3rem; font-weight:800; color:var(--navy); margin-bottom:8px; }
 
-
-  /* ============================================================
-     MAP (SIDEBAR, FULLPAGE, FULLSCREEN, TOOLTIP)
-  ============================================================ */
-
   .map-panel { position:sticky; top:82px; }
   .map-wrap  { border-radius:var(--radius-md); overflow:hidden; box-shadow:var(--shadow); border:2px solid rgba(0,178,202,.1); }
   #map { height:500px; width:100%; }
@@ -350,14 +303,9 @@
   .map-fs-legend-btn:hover { border-color:var(--sky); color:var(--sky); }
   .map-fs-legend-btn.active { background:var(--sky); color:white; border-color:var(--sky); }
   
-  /* Tooltip shown on pin hover, separate from the click popup */
+  
   .map-pin-tooltip { background:rgba(29,78,137,0.92); color:white; border:none; border-radius:8px; padding:5px 10px; font-family:'Lato',sans-serif; font-size:12px; font-weight:700; box-shadow:0 4px 12px rgba(0,0,0,0.2); }
   .map-pin-tooltip::before { border-top-color:rgba(29,78,137,0.92) !important; }
-
-
-  /* ============================================================
-     MODAL
-  ============================================================ */
 
   .modal-overlay { display:none; position:fixed; top:0;left:0;right:0;bottom:0; background:rgba(10,30,60,.5); backdrop-filter:blur(8px); z-index:2000; align-items:center; justify-content:center; padding:20px; }
   #delete-confirm-overlay { z-index:2500; }
@@ -375,11 +323,6 @@
   .modal-info-row { display:flex; gap:8px; font-size:12px; font-weight:700; color:var(--navy); margin-bottom:7px; align-items:flex-start; }
   .modal-info-row:last-child { margin-bottom:0; }
   .mii { color:var(--sky); flex-shrink:0; margin-top:1px; }
-
-
-  /* ============================================================
-     SURVEY
-  ============================================================ */
 
   .survey-page { max-width:780px; margin:0 auto; padding:72px 48px; }
   .survey-card { background:white; border-radius:var(--radius-lg); padding:44px; box-shadow:var(--shadow-lg); }
@@ -409,11 +352,6 @@
   .result-card-title { font-weight:800; font-size:13px; color:var(--navy); margin-bottom:4px; }
   .result-card-cat   { font-size:11px; font-weight:700; color:var(--sky); }
 
-
-  /* ============================================================
-     SUBMIT FORM
-  ============================================================ */
-
   .submit-page { max-width:700px; margin:0 auto; padding:72px 48px; }
   .form-card   { background:white; border-radius:var(--radius-lg); padding:44px; box-shadow:var(--shadow-lg); }
   .form-group  { margin-bottom:22px; }
@@ -427,11 +365,6 @@
   .form-success { display:none; background:rgba(125,207,182,.15); border:2px solid var(--mint); border-radius:var(--radius-md); padding:22px 26px; margin-top:18px; text-align:center; }
   .form-success h3 { font-weight:800; color:#2a8a6a; margin-bottom:6px; font-size:17px; }
   .form-success p  { font-size:13px; color:#3a9a7a; font-weight:600; }
-
-
-  /* ============================================================
-     REFERENCE PAGE AND FOOTER
-  ============================================================ */
 
   .ref-header { background:linear-gradient(135deg,#2a3a2a 0%,#1a4a2a 100%); padding:56px 48px 38px; color:white; position:relative; overflow:hidden; }
   .ref-header::before { content:''; position:absolute; width:300px;height:300px;border-radius:50%;background:rgba(125,207,182,.1);top:-60px;right:-60px; }
@@ -468,11 +401,6 @@
   .footer-bottom { border-top:1px solid rgba(255,255,255,.1); padding-top:22px; display:flex; justify-content:space-between; align-items:center; font-size:12px; font-weight:600; flex-wrap:wrap; gap:8px; }
   .footer-bottom a { color:var(--sky); text-decoration:none; }
 
-
-  /* ============================================================
-     FORM WIDGETS (ENGAGEMENT TYPE, DAY PICKER, HOURS RANGE)
-  ============================================================ */
-
   .engage-opts { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:4px; }
   .engage-opt { display:flex; flex-direction:column; align-items:center; gap:5px; padding:12px 8px; border-radius:var(--radius-md); border:2px solid rgba(29,78,137,.12); background:var(--offwhite); cursor:pointer; transition:all .2s; font-family:'Lato',sans-serif; font-size:12px; font-weight:700; color:var(--muted); text-align:center; line-height:1.3; }
   .engage-opt:hover    { border-color:var(--sky); color:var(--sky); background:rgba(0,178,202,.05); }
@@ -489,11 +417,6 @@
   .hours-special { display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; }
   .hours-special label { display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:var(--muted); cursor:pointer; }
   .hours-special input[type=checkbox] { accent-color:var(--sky); width:14px; height:14px; cursor:pointer; }
-
-
-  /* ============================================================
-     ADMIN (BAR, LOGIN MODAL, DELETE MODAL, CARD OVERLAY)
-  ============================================================ */
 
   .admin-bar { display:none; background:linear-gradient(135deg,#c0392b,#e74c3c); color:white; padding:10px 32px; font-family:'Lato',sans-serif; font-size:13px; font-weight:700; align-items:center; gap:12px; position:sticky; top:66px; z-index:900; box-shadow:0 4px 16px rgba(231,76,60,.3); }
   .admin-bar.active { display:flex; }
@@ -523,11 +446,6 @@
   .rc-delete-btn:hover { background:rgba(231,76,60,.18); }
   .admin-mode-active .rc-delete-btn { display:inline-flex; align-items:center; gap:4px; }
 
-
-  /* ============================================================
-     REVEAL ANIMATIONS AND TOAST
-  ============================================================ */
-
   .reveal       { opacity:0; transform:translateY(18px); transition:opacity .6s cubic-bezier(.4,0,.2,1),transform .6s cubic-bezier(.4,0,.2,1); }
   .reveal.visible { opacity:1; transform:translateY(0); }
   .reveal.exit  { opacity:0; transform:translateY(-8px); transition:opacity .4s ease,transform .4s ease; }
@@ -538,18 +456,8 @@
 
   .toast { position:fixed; bottom:26px; left:50%; transform:translateX(-50%); background:var(--navy); color:white; padding:11px 22px; border-radius:48px; font-family:'Lato',sans-serif; font-weight:700; font-size:13px; z-index:9999; box-shadow:var(--shadow); transition:all .3s; white-space:nowrap; pointer-events:none; }
 
-
-  /* ============================================================
-     CUSTOM SCROLLBAR
-  ============================================================ */
-
   ::-webkit-scrollbar { width:5px; }
   ::-webkit-scrollbar-thumb { background:rgba(0,178,202,.3); border-radius:3px; }
-
-
-  /* ============================================================
-     MOBILE COMPONENTS (HAMBURGER, DRAWER, BOTTOM NAV)
-  ============================================================ */
 
   .mob-hamburger { display:none; flex-direction:column; justify-content:center; align-items:center; gap:5px; width:40px; height:40px; background:none; border:none; cursor:pointer; padding:6px; border-radius:10px; transition:background .2s; flex-shrink:0; }
   .mob-hamburger:hover { background:rgba(0,178,202,.1); }
@@ -576,11 +484,6 @@
   .mob-tab.active .mob-tab-icon { transform:translateY(-1px); }
   .mob-tab-label { font-family:'Lato',sans-serif; font-size:9px; font-weight:800; color:var(--muted); letter-spacing:.3px; text-transform:uppercase; transition:color .2s; }
   .mob-tab.active .mob-tab-label { color:var(--sky); }
-
-
-  /* ============================================================
-     RESPONSIVE BREAKPOINTS
-  ============================================================ */
 
   @media(max-width:1100px) { .hub-layout { grid-template-columns:1fr; } }
   @media(max-width:900px)  { .spotlight-grid { grid-template-columns:1fr; } .footer-grid { grid-template-columns:1fr 1fr; } }
@@ -682,23 +585,8 @@
 </head>
 <body>
 
-
-
-<!--  ============================================================
-      GLOBAL ELEMENTS
-      Canvas background and page transition overlay.
-      These sit outside all pages so they render above everything.
-============================================================  -->
-
 <canvas id="bg-canvas"></canvas>
 <div class="page-transition" id="pt"><div class="pt-logo">The Apex Resource Hub</div></div>
-
-
-<!--  ============================================================
-      NAVBAR
-      Fixed top bar with logo, desktop nav links, and admin button.
-      The hamburger button is hidden on desktop via CSS.
-============================================================  -->
 
 <nav id="main-nav">
   <div class="nav-logo" onclick="goTo('home')">
@@ -724,14 +612,6 @@
   </button>
 </nav>
 
-
-<!--  ============================================================
-      MOBILE NAVIGATION
-      Drawer menu slides down from navbar on hamburger click.
-      Bottom tab bar is permanently docked to the screen bottom.
-      Both are hidden on desktop via CSS.
-============================================================  -->
-
 <div class="mob-menu" id="mob-menu">
   <button class="mob-menu-item" id="mob-nav-home"      onclick="goTo('home');closeMobMenu()">      <span class="mmi-icon">🏠</span>Home</button>
   <button class="mob-menu-item" id="mob-nav-hub"       onclick="goTo('hub');closeMobMenu()">       <span class="mmi-icon">📋</span>Resource Hub</button>
@@ -750,22 +630,12 @@
   <button class="mob-tab"        id="mobtab-reference" onclick="goTo('reference')"><span class="mob-tab-icon">📖</span><span class="mob-tab-label">Refs</span></button>
 </div>
 
-
-<!--  ============================================================
-      GLOBAL OVERLAYS
-      All modals, the admin bar, the fullscreen map, and the hero
-      map panel live here outside the pages so they can layer
-      above any page without z-index conflicts.
-============================================================  -->
-
-<!-- Admin bar — shown when admin mode is active -->
 <div class="admin-bar" id="admin-bar">
   <div class="admin-bar-dot"></div>
   <span>Admin Mode Active — click any resource card or open "More Info" to delete it</span>
   <button class="admin-exit-btn" onclick="exitAdmin()">✕ Exit Admin</button>
 </div>
 
-<!-- Admin login modal -->
 <div class="modal-overlay" id="admin-login-overlay" onclick="closeAdminLoginOuter(event)">
   <div class="admin-login-modal">
     <div class="al-icon">🔐</div>
@@ -781,7 +651,6 @@
   </div>
 </div>
 
-<!-- Delete confirmation modal -->
 <div class="modal-overlay" id="delete-confirm-overlay" onclick="closeDeleteConfirmOuter(event)">
   <div class="delete-confirm-modal">
     <div style="font-size:2.5rem;margin-bottom:12px">🗑</div>
@@ -794,7 +663,6 @@
   </div>
 </div>
 
-<!-- Resource detail modal — all content filled by JS via openModal() -->
 <div class="modal-overlay" id="resource-modal" onclick="closeModalOuter(event)">
   <div class="modal">
     <div style="position:relative">
@@ -824,7 +692,6 @@
   </div>
 </div>
 
-<!-- Fullscreen map overlay -->
 <div class="map-fs-overlay" id="map-fs-overlay" onclick="closeFSMap(event)">
   <div class="map-fs-inner">
     <div class="map-fs-header">
@@ -836,7 +703,6 @@
   </div>
 </div>
 
-<!-- Hero map launch panel — opened when the 3D scene is clicked -->
 <div class="hero-map-panel" id="hero-map-panel" onclick="closeHeroMapPanel(event)">
   <div class="hero-map-panel-card">
     <button class="hero-map-panel-close" aria-label="Close" onclick="closeHeroMapPanel()">✕</button>
@@ -879,15 +745,9 @@
   </div>
 </div>
 
-
-<!--  ============================================================
-      HOME PAGE
-      Hero, spotlight, about, category quick nav, and footer.
-============================================================  -->
-
 <div class="page active" id="page-home">
 
-  <!-- Hero -->
+  
   <section class="hero">
     <div class="hero-content">
       <h1>Connect with<br><em>Your</em> Community</h1>
@@ -928,7 +788,7 @@
     </div>
   </section>
 
-  <!-- Spotlight — cards filled by JS via renderSpotlight() -->
+  
   <section class="section" style="background:linear-gradient(180deg,var(--offwhite),rgba(0,178,202,.04))">
     <div class="spotlight-header">
       <div>
@@ -943,7 +803,7 @@
 
   <div class="divider"></div>
 
-  <!-- About -->
+  
   <section class="section">
     <div class="about-grid">
       <div>
@@ -979,7 +839,7 @@
     </div>
   </section>
 
-  <!-- Category quick nav — buttons filled by JS via renderCatQuick() -->
+  
   <section class="section" style="background:linear-gradient(180deg,transparent,rgba(29,78,137,.04))">
     <div style="text-align:center;margin-bottom:44px">
       <div class="section-label reveal">Browse by Category</div>
@@ -988,7 +848,7 @@
     <div id="cat-quick-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;max-width:980px;margin:0 auto"></div>
   </section>
 
-  <!-- Footer -->
+  
   <footer>
     <div class="footer-grid">
       <div class="footer-brand">
@@ -1022,13 +882,6 @@
   </footer>
 
 </div>
-
-
-<!--  ============================================================
-      RESOURCE HUB PAGE
-      Search bar, category filters, list view grid, and map view.
-      Resource cards are built by JS via renderResources().
-============================================================  -->
 
 <div class="page" id="page-hub">
   <div class="hub-header">
@@ -1077,13 +930,6 @@
   </div>
 </div>
 
-
-<!--  ============================================================
-      SURVEY PAGE
-      Multi-step quiz, one step visible at a time via .active class.
-      Results grid is filled by JS via showResults().
-============================================================  -->
-
 <div class="page" id="page-survey">
   <div class="survey-page">
     <div class="section-label reveal" style="text-align:center">Personalized Recommendations</div>
@@ -1096,7 +942,7 @@
         <div class="progress-dot"></div>
         <div class="progress-dot"></div>
       </div>
-      <!-- Step 1: Who -->
+      
       <div class="survey-step active" id="step-1">
         <div class="survey-q">Who are you looking for resources for?</div>
         <div class="survey-sub">This helps personalize your recommendations.</div>
@@ -1111,7 +957,7 @@
         <div class="survey-error" id="err-1">⚠️ Please select an option before continuing.</div>
         <div class="survey-nav"><span class="survey-step-label">Step 1 of 4</span><button class="btn-primary" onclick="nextStep(1)">Next →</button></div>
       </div>
-      <!-- Step 2: Needs (multi-select) -->
+      
       <div class="survey-step" id="step-2">
         <div class="survey-q">What are your most pressing needs?</div>
         <div class="survey-sub">Select all that apply.</div>
@@ -1131,7 +977,7 @@
         <div class="survey-error" id="err-2">⚠️ Please select an option before continuing.</div>
         <div class="survey-nav"><button class="btn-secondary" onclick="prevStep(2)">← Back</button><span class="survey-step-label">Step 2 of 4</span><button class="btn-primary" onclick="nextStep(2)">Next →</button></div>
       </div>
-      <!-- Step 3: Engagement preference -->
+      
       <div class="survey-step" id="step-3">
         <div class="survey-q">How do you prefer to engage?</div>
         <div class="survey-sub">Choose what feels right for you.</div>
@@ -1144,7 +990,7 @@
         <div class="survey-error" id="err-3">⚠️ Please select an option before continuing.</div>
         <div class="survey-nav"><button class="btn-secondary" onclick="prevStep(3)">← Back</button><span class="survey-step-label">Step 3 of 4</span><button class="btn-primary" onclick="nextStep(3)">Next →</button></div>
       </div>
-      <!-- Step 4: Availability -->
+      
       <div class="survey-step" id="step-4">
         <div class="survey-q">When are you typically available?</div>
         <div class="survey-sub">So we can match events to your schedule.</div>
@@ -1157,7 +1003,7 @@
         <div class="survey-error" id="err-4">⚠️ Please select an option before continuing.</div>
         <div class="survey-nav"><button class="btn-secondary" onclick="prevStep(4)">← Back</button><span class="survey-step-label">Step 4 of 4</span><button class="btn-primary" onclick="showResults()">Show Results</button></div>
       </div>
-      <!-- Results — grid filled by JS via showResults() -->
+      
       <div class="survey-step" id="step-results">
         <div style="text-align:center;margin-bottom:26px">
           <div style="font-size:2.8rem;margin-bottom:8px">✨</div>
@@ -1173,13 +1019,6 @@
     </div>
   </div>
 </div>
-
-
-<!--  ============================================================
-      SUBMIT FORM PAGE
-      Community resource submission form.
-      Time dropdowns are populated by JS via buildTimeOptions().
-============================================================  -->
 
 <div class="page" id="page-submit">
   <div class="submit-page">
@@ -1279,14 +1118,6 @@
   </div>
 </div>
 
-
-<!--  ============================================================
-      REFERENCE PAGE
-      Required TSA documents, content sources, tools table,
-      image citations, and community submissions table.
-      The external sources section is filled by JS via renderExternalSources().
-============================================================  -->
-
 <div class="page" id="page-reference">
   <div class="ref-header">
     <h2>Reference Page</h2>
@@ -1294,7 +1125,7 @@
   </div>
   <div class="ref-body">
 
-    <!-- Required TSA documents -->
+    
     <div class="ref-section">
       <h3>Required TSA Documents</h3>
       <p class="ref-intro">The following documents are required by TSA Webmaster event rules. Click to view each PDF.</p>
@@ -1318,7 +1149,7 @@
       </div>
     </div>
 
-    <!-- Website and content sources -->
+    
     <div class="ref-section">
       <h3>Website &amp; Content Sources</h3>
       <p class="ref-intro">All written information about community organizations was sourced from official websites and public records.</p>
@@ -1344,7 +1175,7 @@
       </table>
     </div>
 
-    <!-- Tools and technologies -->
+    
     <div class="ref-section">
       <h3>Tools &amp; Technologies</h3>
       <p class="ref-intro">The following open-source libraries and tools were used to build this website. All are free and open-source.</p>
@@ -1392,7 +1223,7 @@
       </table>
     </div>
 
-    <!-- Community submitted sources — filled by JS via renderExternalSources() -->
+    
     <div class="ref-section">
       <h3>External Sources</h3>
       <p class="ref-intro">The following resources were submitted by members of the Apex community through the <strong>Add a Resource</strong> form. All submissions are community-sourced and have not been independently verified. Information is presented as provided by the submitter.</p>
@@ -1402,24 +1233,8 @@
   </div>
 </div>
 
-
-<!--  ============================================================
-      JAVASCRIPT
-      Leaflet loads at the bottom of the body so the DOM exists
-      and the CDN has time to resolve before map init runs.
-============================================================  -->
-
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-
-
-// ============================================================
-// CATEGORY DATA
-// CATS is the single source of truth for all category visuals.
-// Changing an entry here updates cards, filters, map pins,
-// the survey, and the category quick nav all at once.
-// CAT_BG provides gradient fallback banners when no photo exists.
-// ============================================================
 
 const CATS = {
   'Food & Hunger':  { icon:'🥫', bg:'rgba(125,207,182,.15)', color:'#2a8a6a', hex:'#7dcfb6' },
@@ -1450,15 +1265,6 @@ const CAT_BG = {
   'Volunteer':      'linear-gradient(135deg,#a06808,#e0910a)',
   'Other':          'linear-gradient(135deg,#4a6070,#6a8099)',
 };
-
-
-// ============================================================
-// RESOURCE DATA
-// Hardcoded base resources that ship with the site.
-// spotlightEligible:true makes a resource eligible for the daily
-// spotlight rotation. img URLs fall back to the CSS gradient
-// banner if they fail or are left null.
-// ============================================================
 
 const BASE_RESOURCES = [
   { id:1,  spotlightEligible:true,
@@ -1602,15 +1408,6 @@ const BASE_RESOURCES = [
     lat:35.7290, lng:-78.8520, engageType:"in-person", availDays:["Sat"], openTime:"09:00", closeTime:"14:00" },
 ];
 
-
-// ============================================================
-// GLOBAL STATE
-// These variables persist for the entire session and are shared
-// across all functions. map/mapFullpage/mapFS are Leaflet
-// instances. pendingHubJump stores nav options applied after
-// a page transition completes.
-// ============================================================
-
 let currentFilter  = 'All';
 let searchQuery    = '';
 let currentPage    = 'home';
@@ -1631,15 +1428,6 @@ let spotlightOverrides = (() => {
 
 let surveyAnswers = { who:null, need:[], engage:null, time:null };
 let currentStep   = 1;
-
-
-// ============================================================
-// FIREBASE
-// Replace FIREBASE_CONFIG values from your Firebase console.
-// If apiKey is blank, the app falls back to localStorage.
-// db is null until initFirebase() resolves.
-// submittedResources is kept in sync by the real-time listener.
-// ============================================================
 
 const FIREBASE_CONFIG = {
   apiKey:            "AIzaSyBiFYClJfPUeFclCb8GoavChrO4aid2dFg",
@@ -1728,14 +1516,6 @@ async function deleteFromFirebase(id) {
   }
 }
 
-
-// ============================================================
-// ANIMATED BACKGROUND CANVAS
-// Draws 6 slowly drifting color blobs at ~60fps using
-// requestAnimationFrame. Wrapped in an IIFE to keep all
-// variables out of global scope.
-// ============================================================
-
 (function() {
   const canvas = document.getElementById('bg-canvas');
   const ctx    = canvas.getContext('2d');
@@ -1770,15 +1550,6 @@ async function deleteFromFirebase(id) {
   draw();
 })();
 
-
-// ============================================================
-// PAGE NAVIGATION
-// goTo() plays the swoosh transition then calls switchPage().
-// switchPage() shows the target page, updates nav button states,
-// scrolls to top, and runs any page-specific setup.
-// The scroll listener adds .scrolled to the navbar at 10px.
-// ============================================================
-
 function goTo(page, noTransition) {
   if (page === currentPage) return;
   const pt = document.getElementById('pt');
@@ -1788,8 +1559,8 @@ function goTo(page, noTransition) {
       switchPage(page);
       pt.classList.remove('in');
       pt.classList.add('out');
-      setTimeout(() => pt.classList.remove('out'), 320);
-    }, 280);
+      setTimeout(() => pt.classList.remove('out'), 400);
+    }, 340);
   } else {
     switchPage(page);
   }
@@ -1821,16 +1592,6 @@ function switchPage(page) {
 window.addEventListener('scroll', () => {
   document.getElementById('main-nav').classList.toggle('scrolled', window.scrollY > 10);
 });
-
-
-// ============================================================
-// HERO MAP SCENE
-// bindHeroMapScene() adds mouse tilt and keyboard support to
-// the 3D scene element. openHeroMapPanel() initializes the
-// mini Leaflet map inside the panel on first open.
-// heroMapNavigate() stores options in pendingHubJump so they
-// are applied after the page transition completes.
-// ============================================================
 
 function bindHeroMapScene() {
   const scene = document.getElementById('hero-map-scene');
@@ -1916,14 +1677,6 @@ function heroMapNavigate(page, opts = {}) {
   goTo(page);
 }
 
-
-// ============================================================
-// SCROLL REVEAL ANIMATIONS
-// IntersectionObserver watches all reveal elements on the
-// active page. Adds .visible on enter, .exit when scrolled
-// above the viewport top.
-// ============================================================
-
 function setupReveal() {
   const els = document.querySelectorAll('.page.active .reveal,.page.active .reveal-left,.page.active .reveal-scale');
   const obs = new IntersectionObserver((entries) => {
@@ -1937,14 +1690,6 @@ function setupReveal() {
   }, { threshold: .08 });
   els.forEach(el => obs.observe(el));
 }
-
-
-// ============================================================
-// DAILY RANDOMIZATION, FLOAT CARDS, AND SPOTLIGHT
-// getDailyPicks() is shared by both features. It checks
-// localStorage for saved picks with a timestamp and reuses
-// them if less than 24 hours old, otherwise picks fresh ones.
-// ============================================================
 
 function getDailyPicks(storageKey, pool, count) {
   const stored = JSON.parse(localStorage.getItem(storageKey) || 'null');
@@ -2010,13 +1755,6 @@ function renderSpotlight() {
   setupReveal();
 }
 
-// ============================================================
-// CATEGORY QUICK NAV
-// Builds the category button grid on the home page.
-// Counts are recalculated each call so they stay accurate
-// after new submissions come in from Firebase.
-// ============================================================
-
 function renderCatQuick() {
   const grid = document.getElementById('cat-quick-grid');
   grid.innerHTML = Object.entries(CATS).map(([name, c], i) => {
@@ -2033,16 +1771,6 @@ function renderCatQuick() {
   }).join('');
   setupReveal();
 }
-
-
-// ============================================================
-// RESOURCE HUB FILTERING AND RENDERING
-// setFilter() handles category chip clicks.
-// filterBy() is called programmatically from footer links,
-// category quick nav, and the hero panel shortcuts.
-// getFiltered() applies both category and search query.
-// renderResources() builds all cards and refreshes map markers.
-// ============================================================
 
 function setFilter(btn) {
   document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
@@ -2143,16 +1871,6 @@ function renderResources() {
   }
 }
 
-
-// ============================================================
-// HUB VIEW TOGGLE (LIST vs MAP)
-// switchHubView() swaps between the card grid and fullpage map.
-// scheduleFullpageMapInit() retries until Leaflet is ready,
-// since the map container is hidden until the tab is clicked.
-// updateFullpageMapMarkers() wipes and redraws pins to match
-// the current filter whenever filterResources() runs.
-// ============================================================
-
 function switchHubView(view) {
   currentHubView = view;
   document.getElementById('tab-list').classList.toggle('active', view === 'list');
@@ -2220,14 +1938,6 @@ function updateFullpageMapMarkers(filtered) {
       .bindTooltip(r.name, { permanent:false, direction:'top', offset:[0,-40], className:'map-pin-tooltip' });
   });
 }
-
-
-// ============================================================
-// SIDEBAR MAP AND FULLSCREEN MAP
-// scheduleMapInit() retries until Leaflet is ready.
-// updateMapMarkers() wipes and redraws the sidebar map pins.
-// openFSMap() respects the current filter via updateFSMapMarkers().
-// ============================================================
 
 function scheduleMapInit() {
   if (map)                      { filterResources(); return; }
@@ -2319,7 +2029,6 @@ function buildFSLegend() {
       `<button class="map-fs-legend-btn${currentFilter === name ? ' active' : ''}" data-cat="${name}" onclick="setFSFilter(this)">${c.icon} ${name}</button>`
     ).join('');
 
-  // redraw pins to match current hub filter
   if (currentFilter !== 'All') {
     const filtered = getAllResources().filter(r => r.category === currentFilter);
     mapFS.eachLayer(layer => { if (layer instanceof L.Marker) layer.remove(); });
@@ -2374,18 +2083,6 @@ function closeFSMap(e) {
   document.getElementById('map-fs-overlay').classList.remove('open');
   document.body.style.overflow = '';
 }
-
-
-// ============================================================
-// ADMIN MODE
-// Password is hardcoded — fine for a school project.
-// activateAdminMode() adds .admin-mode-active to the grid,
-// which cascades delete button visibility via CSS.
-// exitAdmin() reverses every visual change.
-// confirmDelete() splits on built-in vs submitted resources:
-// built-ins are hidden in sessionStorage (restored on tab close),
-// submitted resources are permanently deleted from Firebase.
-// ============================================================
 
 const ADMIN_PASSWORD = 'ApexAdmin2026';
 
@@ -2506,15 +2203,6 @@ function getAllResources() {
   return [...BASE_RESOURCES, ...submittedResources].filter(r => !hidden.includes(r.id));
 }
 
-
-// ============================================================
-// RESOURCE DETAIL MODAL
-// openModal() fills all empty template elements from the
-// resource object then shows the overlay. Image uses real
-// photo if available, CSS banner as fallback. Delete button
-// only shown when isAdmin is true.
-// ============================================================
-
 function openModal(id) {
   const r = getAllResources().find(x => x.id === id);
   if (!r) return;
@@ -2569,7 +2257,7 @@ function openModal(id) {
       spotBtn.onclick = () => {
         spotlightOverrides[r.id] = !current;
         localStorage.setItem('apex-spotlight-overrides', JSON.stringify(spotlightOverrides));
-        localStorage.removeItem('apex-spotlight'); // force spotlight to re-pick
+        localStorage.removeItem('apex-spotlight');
         renderSpotlight();
         closeModal();
         showToast(spotlightOverrides[r.id] ? '⭐ Added to spotlight pool' : '⭐ Removed from spotlight pool');
@@ -2585,17 +2273,6 @@ function openModal(id) {
 
 function closeModal()      { document.getElementById('resource-modal').classList.remove('open'); document.body.style.overflow = ''; }
 function closeModalOuter(e){ if (e.target === document.getElementById('resource-modal')) closeModal(); }
-
-
-// ============================================================
-// SURVEY
-// selectOpt() handles single-select and multi-select steps.
-// nextStep() validates each step before advancing.
-// showResults() runs the scoring algorithm: builds a candidate
-// pool from selected categories, boosts based on who the user
-// is searching for, deduplicates with a Set, scores each
-// resource out of 4, and shows the top 6.
-// ============================================================
 
 function selectOpt(btn, key, multi) {
   if (!multi) {
@@ -2733,15 +2410,6 @@ function resetSurvey() {
   document.querySelectorAll('.survey-opt').forEach(o => o.classList.remove('selected'));
   updateProg();
 }
-
-
-// ============================================================
-// SUBMIT FORM
-// buildTimeOptions() populates the time dropdowns with 30min
-// intervals on page load. submitForm() validates all fields,
-// geocodes the address via Nominatim with a 9s hard deadline,
-// saves to Firebase, and immediately drops a pin on any open map.
-// ============================================================
 
 function buildTimeOptions() {
   const selects = [document.getElementById('f-open-time'), document.getElementById('f-close-time')];
@@ -2909,7 +2577,7 @@ async function submitForm() {
           data = await res.json();
         }
         if (data && data.length > 0) { lat = parseFloat(data[0].lat); lng = parseFloat(data[0].lon); }
-      } catch { /* saves without a map pin if geocoding fails */ }
+      } catch {  }
     })(),
     hardDeadline
   ]);
@@ -3010,14 +2678,6 @@ function renderExternalSources() {
     </div>`;
 }
 
-
-// ============================================================
-// TOAST NOTIFICATION
-// Creates a temporary pill at the bottom center of the screen.
-// Each call creates a fresh element so multiple toasts stack.
-// First setTimeout fades it out, second removes it from the DOM.
-// ============================================================
-
 function showToast(msg) {
   const t = document.createElement('div');
   t.className   = 'toast';
@@ -3026,14 +2686,6 @@ function showToast(msg) {
   setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateX(-50%) translateY(10px)'; }, 2200);
   setTimeout(() => t.remove(), 2600);
 }
-
-
-// ============================================================
-// STARTUP SEQUENCE
-// Runs once when the page finishes loading.
-// Firebase must resolve before rendering so submitted resources
-// are included in the initial render.
-// ============================================================
 
 document.addEventListener('DOMContentLoaded', async () => {
   await initFirebase();
@@ -3056,15 +2708,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 });
-
-
-// ============================================================
-// MOBILE NAVIGATION
-// toggleMobMenu() opens and closes the hamburger drawer.
-// The document click listener closes the drawer when tapping
-// outside it. The switchPage override also updates the bottom
-// tab bar and drawer active states on every page change.
-// ============================================================
 
 function toggleMobMenu() {
   const menu = document.getElementById('mob-menu');
@@ -3098,7 +2741,6 @@ window.switchPage = function(page) {
   const activeDraw = document.getElementById('mob-nav-' + page);
   if (activeDraw) activeDraw.classList.add('active');
 };
-
 
 </script>
 <style>
@@ -3240,7 +2882,6 @@ window.switchPage = function(page) {
 }
 </style>
 
-<!-- FAB -->
 <button id="apex-chat-fab" onclick="toggleChat()" aria-label="Open community assistant">
   <span class="fab-open">
     <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 10H6V10h12v2zm0-3H6V7h12v2z"/></svg>
@@ -3248,7 +2889,6 @@ window.switchPage = function(page) {
   <span class="fab-close">✕</span>
 </button>
 
-<!-- Panel -->
 <div id="apex-chat-panel">
   <div class="chat-header">
     <div class="chat-avatar">🤖</div>
@@ -3283,18 +2923,12 @@ window.switchPage = function(page) {
 <script>
 (function () {
 
-  // ══════════════════════════════════════════════════
-  //  GEMINI API KEY
-  // ══════════════════════════════════════════════════
   const GEMINI_API_KEY = 'AIzaSyCRayKY6bIA8LQijK5A1DoV80TmlIrxQr8';
-  // ══════════════════════════════════════════════════
 
-  // URL is built lazily inside getBotReply so it always uses the current key value
   function getGeminiURL() {
     return `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
   }
 
-  // Build resource list string dynamically from the site's own data
   function buildResourceContext() {
     const all = typeof getAllResources === 'function' ? getAllResources() : [];
     return all.map(r =>
@@ -3321,12 +2955,10 @@ Rules:
 - For urgent needs (food emergency, housing crisis) prioritise the most immediately helpful resource.`;
   }
 
-  // ─ State ─
-  let chatHistory = []; // [{role:'user'|'model', parts:[{text:'...'}]}]
+  let chatHistory = [];
   let chatOpen    = false;
   let isTyping    = false;
 
-  // ─ Toggle ─
   window.toggleChat = function () {
     chatOpen = !chatOpen;
     document.getElementById('apex-chat-fab').classList.toggle('open', chatOpen);
@@ -3349,7 +2981,7 @@ Rules:
     const input = document.getElementById('chat-input');
     input.value = text;
     autoGrow(input);
-    // Small delay so any in-flight state settles before sending
+
     setTimeout(() => sendChat(), 30);
   };
 
@@ -3377,7 +3009,6 @@ Rules:
     el.style.height = Math.min(el.scrollHeight, 90) + 'px';
   };
 
-  // ─ Render ─
   function addUserMessage(text) {
     const msgs = document.getElementById('chat-messages');
     const div  = document.createElement('div');
@@ -3439,13 +3070,11 @@ Rules:
     requestAnimationFrame(() => { msgs.scrollTop = msgs.scrollHeight; });
   }
 
-  // ─ Gemini API call ─
   async function getBotReply() {
     isTyping = true;
     document.getElementById('chat-send-btn').disabled = true;
     showTyping();
 
-    // Keep last 10 turns to stay within context limits
     const recentHistory = chatHistory.slice(-10);
 
     const body = {
@@ -3466,7 +3095,7 @@ Rules:
 
       if (!res.ok) {
         const errBody = await res.json().catch(() => ({}));
-        // 403 = invalid/missing API key, 429 = quota exceeded, 400 = bad request body
+
         if (res.status === 403) throw new Error('invalid_key');
         if (res.status === 429) throw new Error('quota');
         if (res.status === 400) throw new Error('bad_request');
@@ -3477,7 +3106,6 @@ Rules:
       const raw  = data.candidates?.[0]?.content?.parts?.[0]?.text
                    || "I couldn't get a response — please try again!";
 
-      // Extract resource IDs
       let replyText   = raw;
       let resourceIds = [];
       const match = raw.match(/RESOURCES_JSON:\[([^\]]*)\]/);
@@ -3507,7 +3135,6 @@ Rules:
     }
   }
 
-  // - Helpers -
   function escHtml(s) {
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
@@ -3518,7 +3145,6 @@ Rules:
       .replace(/\n/g, '<br>');
   }
 
-  // Close on Escape — only if no other modal is currently open
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && chatOpen) {
       const anyModalOpen = document.querySelector('.modal-overlay.open, .hero-map-panel.open');
@@ -3528,6 +3154,6 @@ Rules:
 
 })();
 </script>
-<!-- ═════════════════════════════════════ END CHATBOT ══ -->
+
 </body>
 </html>
